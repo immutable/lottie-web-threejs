@@ -34,6 +34,7 @@ FrameElement.prototype = {
   prepareProperties: function (num, isVisible) {
     var i;
     var len = this.dynamicProperties.length;
+    console.log('FrameElement::prepareProperties()', len);
     for (i = 0; i < len; i += 1) {
       if (isVisible || (this._isParent && this.dynamicProperties[i].propType === 'transform')) {
         this.dynamicProperties[i].getValue();

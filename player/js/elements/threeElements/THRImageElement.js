@@ -1,0 +1,68 @@
+import {
+  DoubleSide,
+  Mesh, MeshBasicMaterial, PlaneGeometry, TextureLoader,
+} from 'three';
+import {
+  extendPrototype,
+} from '../../utils/functionExtensions';
+import BaseElement from '../BaseElement';
+import TransformElement from '../helpers/TransformElement';
+import HierarchyElement from '../helpers/HierarchyElement';
+import FrameElement from '../helpers/FrameElement';
+import THRBaseElement from './THRBaseElement';
+import RenderableObjectElement from '../helpers/RenderableObjectElement';
+
+function THRImageElement(data, globalData, comp) {
+  this.assetData = globalData.getAssetData(data.refId);
+  this.initElement(data, globalData, comp);
+}
+
+extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRImageElement);
+
+// THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
+
+THRImageElement.prototype.createContent = function () {
+  var assetPath = this.globalData.getAssetsPath(this.assetData);
+
+  // Create a plane geometry
+  var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h);
+
+  // Load the PNG image as a texture
+  var textureLoader = new TextureLoader();
+  console.log('LOAD texture', `/demo/threejs/${assetPath}`);
+  var texture = textureLoader.load(`/demo/threejs/${assetPath}`);
+  var material = new MeshBasicMaterial({
+    map: texture,
+    side: DoubleSide,
+    transparent: true,
+  });
+  var plane = new Mesh(geometry, material);
+
+  // if (assetPath.indexOf('img_4.png') > 0) {
+  //   plane.z = -200;
+  // } else if (assetPath.indexOf('img_3.png') > 0) {
+  //   plane.z = -400;
+  // } else if (assetPath.indexOf('img_2.png') > 0) {
+  //   plane.z = -600;
+  // } else if (assetPath.indexOf('img_1.png') > 0) {
+  //   plane.z = -800;
+  // }
+
+  console.log('THRImageElement::Assets loading >>>', `/demo/threejs/${assetPath}`, texture, this.layerElement, this.assetData);
+  // if (this.data.hasMask) {
+  //   this.imageElem = createNS('image');
+  //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
+  //   this.imageElem.setAttribute('height', this.assetData.h + 'px');
+  //   this.imageElem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetPath);
+  //   this.layerElement.appendChild(this.imageElem);
+  //   this.baseElement.setAttribute('width', this.assetData.w);
+  //   this.baseElement.setAttribute('height', this.assetData.h);
+  // } else {
+  this.layerElement.add(plane);
+
+  if (this.data.ln) {
+    this.baseElement.name = this.data.ln;
+  }
+};
+
+export default THRImageElement;

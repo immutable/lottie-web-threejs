@@ -30,11 +30,13 @@ import SVGProLevelsFilter from '../elements/svgElements/effects/SVGProLevelsFilt
 import SVGDropShadowEffect from '../elements/svgElements/effects/SVGDropShadowEffect';
 import SVGMatte3Effect from '../elements/svgElements/effects/SVGMatte3Effect';
 import SVGGaussianBlurEffect from '../elements/svgElements/effects/SVGGaussianBlurEffect';
+import ThreeRenderer from '../renderers/ThreeRenderer';
 
 // Registering renderers
 registerRenderer('canvas', CanvasRenderer);
 registerRenderer('html', HybridRenderer);
 registerRenderer('svg', SVGRenderer);
+registerRenderer('three', ThreeRenderer);
 
 // Registering shape modifiers
 ShapeModifiers.registerModifier('tm', TrimModifier);

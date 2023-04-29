@@ -1,7 +1,8 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import babel from '@rollup/plugin-babel';
-import {version} from './package.json'
+import { version } from './package.json'
+// import commonjs from '@rollup/plugin-commonjs';
 
 const injectVersion = (options = {}) => {
   return {
@@ -33,6 +34,9 @@ const noTreeShakingForStandalonePlugin = () => {
 }
 
 const destinationBuildFolder = 'build/player/';
+const globals = {
+  'three': 'THREE',
+};
 
 const builds = [
   {
@@ -126,10 +130,47 @@ const builds = [
     esm: false,
     skipTerser: true,
   },
+  {
+    input: 'player/js/modules/three_light.js',
+    dest: `${destinationBuildFolder}`,
+    file: 'lottie_light_three.min.js',
+    esm: true,
+  },
+  {
+    input: 'player/js/modules/three_light.js',
+    dest: `${destinationBuildFolder}`,
+    file: 'lottie_light_three.js',
+    esm: false,
+    skipTerser: true,
+  },
+  {
+    input: 'player/js/modules/three.js',
+    dest: `${destinationBuildFolder}`,
+    file: 'lottie_three.min.js',
+    esm: true,
+  },
+  {
+    input: 'player/js/modules/three.js',
+    dest: `${destinationBuildFolder}`,
+    file: 'lottie_three.js',
+    esm: false,
+    skipTerser: true,
+  },
 ];
+// /build/three.js
+const commonOptions = {
+  namedExports: {
+    'three': [
+      'Scene',
+      'PerspectiveCamera',
+      'WebGLRenderer',
+    ]
+  }
+}
 
 const plugins = [
-  nodeResolve(),
+  nodeResolve({ preferBuiltins: false }),
+  // commonjs(commonOptions),
   babel({
     babelHelpers: 'runtime',
     skipPreflightCheck: true,
@@ -145,6 +186,7 @@ const pluginsWithTerser = [
 
 const UMDModule = {
   output: {
+    globals,
     format: 'umd',
     name: 'lottie', // this is the name of the global object
     esModule: false,
@@ -153,11 +195,20 @@ const UMDModule = {
     compact: false,
   },
   treeshake: false,
+  external: [
+    'three', // /three\/.*/
+  ],
 };
 
 const ESMModule = {
-  plugins: [nodeResolve()],
+  plugins: [
+    nodeResolve({ preferBuiltins: false }),
+    // commonjs(commonOptions)
+  ],
   treeshake: false,
+  external: [
+    'three',// /three\/.*/
+  ],
   output: [
     {
       format: 'esm',
@@ -188,7 +239,7 @@ const exports = builds.reduce((acc, build) => {
       output: [
         {
           ...ESMModule.output[0],
-          file: 'dist/esm/' + build.file,
+          // file: 'dist/esm/' + build.file,
           file: `${destinationBuildFolder}esm/${build.file}`,
         },
         {
@@ -198,7 +249,7 @@ const exports = builds.reduce((acc, build) => {
       ]
     });
   }
-  
+
   acc = acc.concat(builds);
   return acc;
 }, []);

@@ -4,7 +4,7 @@ const UglifyJS = require("uglify-js");
 const rootFolder = 'player/';
 const bm_version = '5.8.1';
 const buildReducedVersion = process.argv[2] === 'reduced'
-const defaultBuilds = ['full','svg_light','svg','canvas','html', 'canvas_light', 'html_light', 'canvas_worker', 'lottie_worker']
+const defaultBuilds = ['full','svg_light','svg', 'three', 'three_light', 'canvas', 'canvas_light', 'html', 'html_light', 'canvas_worker', 'lottie_worker']
 
 const scripts = [
 	{
@@ -214,6 +214,10 @@ const scripts = [
 	{
 		src: 'js/renderers/HybridRenderer.js',
 		builds: ['full','html','html_light']
+	},
+	{
+		src: 'js/renderers/ThreeRenderer.js',
+		builds: ['full','three','three_light']
 	},
 	{
 		src: 'js/mask.js',
@@ -448,6 +452,22 @@ const scripts = [
 		builds: ['full','html','html_light']
 	},
 	{
+		src: 'js/elements/threeElements/THRBaseElement.js',
+		builds: ['full','three','three_light']
+	},
+	{
+		src: 'js/elements/threeElements/THRCompElement.js',
+		builds: ['full','three','three_light']
+	},
+	{
+		src: 'js/elements/threeElements/THRImageElement.js',
+		builds: ['full','three','three_light']
+	},
+	{
+		src: 'js/elements/threeElements/THRSolidElement.js',
+		builds: ['full','three','three_light']
+	},
+	{
 		src: 'js/animation/AnimationManager.js',
 		builds: defaultBuilds
 	},
@@ -582,7 +602,7 @@ function uglifyCode(code) {
 	return new Promise((resolve, reject)=>{
 		try {
 			const result = UglifyJS.minify(code, {
-				output: 
+				output:
 					{
 						ascii_only:true
 					},
@@ -738,7 +758,28 @@ function buildVersions(scripts) {
 			fileName: 'lottie_light_html.min.js',
 			build: 'html_light',
 			process: uglifyCode
-		}];
+		},
+		{
+			fileName: 'lottie_three.js',
+			build: 'three',
+			process: noop
+		},
+		// {
+		// 	fileName: 'lottie_three.min.js',
+		// 	build: 'html',
+		// 	process: uglifyCode
+		// },
+		{
+			fileName: 'lottie_light_three.js',
+			build: 'three_light',
+			process: noop
+		},
+		// {
+		// 	fileName: 'lottie_light_three.min.js',
+		// 	build: 'html_light',
+		// 	process: uglifyCode
+		// }
+		];
 
 		if (buildReducedVersion) {
 			versions = versions.splice(0,1);

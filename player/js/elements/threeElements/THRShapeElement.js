@@ -1,0 +1,36 @@
+import {
+  DoubleSide,
+  Mesh, MeshBasicMaterial, PlaneGeometry,
+} from 'three';
+import {
+  extendPrototype,
+} from '../../utils/functionExtensions';
+import BaseElement from '../BaseElement';
+import TransformElement from '../helpers/TransformElement';
+import HierarchyElement from '../helpers/HierarchyElement';
+import FrameElement from '../helpers/FrameElement';
+import THRBaseElement from './THRBaseElement';
+import RenderableElement from '../helpers/RenderableElement';
+
+function THRShapeElement(data, globalData, comp) {
+  this.initElement(data, globalData, comp);
+}
+extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableElement], THRShapeElement);
+
+THRShapeElement.prototype.createContent = function () {
+  // TODO: How to support mask?
+  // if (this.data.hasMask) {
+  //   rect = createNS('rect');
+  //   rect.setAttribute('width', this.data.sw);
+  //   rect.setAttribute('height', this.data.sh);
+  //   rect.setAttribute('fill', this.data.sc);
+  //   this.svgElement.setAttribute('width', this.data.sw);
+  //   this.svgElement.setAttribute('height', this.data.sh);
+  console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
+  const geometry = new PlaneGeometry(this.data.sw, this.data.sh);
+  const material = new MeshBasicMaterial({ color: this.data.sc, side: DoubleSide });
+  const plane = new Mesh(geometry, material);
+  this.layerElement.add(plane);
+};
+
+export default THRShapeElement;
