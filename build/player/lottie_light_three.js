@@ -12182,15 +12182,14 @@
   // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
 
   THRImageElement.prototype.createContent = function () {
-    var assetPath = this.globalData.getAssetsPath(this.assetData);
+    var assetPath = "".concat(this.assetData.u).concat(this.assetData.p);
 
     // Create a plane geometry
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
 
     // Load the PNG image as a texture
     var textureLoader = new three.TextureLoader();
-    console.log('LOAD texture', "/demo/threejs/".concat(assetPath));
-    var texture = textureLoader.load("/demo/threejs/".concat(assetPath));
+    var texture = textureLoader.load(assetPath);
     var material = new three.MeshBasicMaterial({
       map: texture,
       side: three.DoubleSide,
@@ -12198,17 +12197,7 @@
     });
     var plane = new three.Mesh(geometry, material);
 
-    // if (assetPath.indexOf('img_4.png') > 0) {
-    //   plane.z = -200;
-    // } else if (assetPath.indexOf('img_3.png') > 0) {
-    //   plane.z = -400;
-    // } else if (assetPath.indexOf('img_2.png') > 0) {
-    //   plane.z = -600;
-    // } else if (assetPath.indexOf('img_1.png') > 0) {
-    //   plane.z = -800;
-    // }
-
-    console.log('THRImageElement::Assets loading >>>', "/demo/threejs/".concat(assetPath), texture, this.layerElement, this.assetData);
+    // console.log('THRImageElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
     // if (this.data.hasMask) {
     //   this.imageElem = createNS('image');
     //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
