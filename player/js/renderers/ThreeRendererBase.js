@@ -242,9 +242,11 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   controls.listenToKeyEvents(window); // optional
 
   // Create a plane geometry
+  // TODO: Something here?
+  console.log('animData', animData, this.globalData);
   var planeGeometry = new PlaneGeometry(20, 20);
   var textureLoader = new TextureLoader();
-  var texture = textureLoader.load('/demo/threejs/images/img_5.png');
+  var texture = textureLoader.load(`${this.globalData.imageLoader.assetsPath}images/img_5.png`);
   var material = new MeshBasicMaterial({
     map: texture,
     color: 0xffc0cb,

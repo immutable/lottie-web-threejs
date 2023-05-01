@@ -6717,7 +6717,7 @@
     prepareProperties: function prepareProperties(num, isVisible) {
       var i;
       var len = this.dynamicProperties.length;
-      console.log('FrameElement::prepareProperties()', len);
+      // console.log('FrameElement::prepareProperties()', len);
       for (i = 0; i < len; i += 1) {
         if (isVisible || this._isParent && this.dynamicProperties[i].propType === 'transform') {
           this.dynamicProperties[i].getValue();
@@ -18303,9 +18303,11 @@
     controls.listenToKeyEvents(window); // optional
 
     // Create a plane geometry
+    // TODO: Something here?
+    console.log('animData', animData, this.globalData);
     var planeGeometry = new three.PlaneGeometry(20, 20);
     var textureLoader = new three.TextureLoader();
-    var texture = textureLoader.load('/demo/threejs/images/img_5.png');
+    var texture = textureLoader.load("".concat(this.globalData.imageLoader.assetsPath, "images/img_5.png"));
     var material = new three.MeshBasicMaterial({
       map: texture,
       color: 0xffc0cb,

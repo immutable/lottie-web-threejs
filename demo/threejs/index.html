@@ -146,12 +146,14 @@
          currentPos[2] = currentPos[2] + (mousePos[2] - currentPos[2])*0.25;
 
          // Pos x
-         camera.ks.p.k[0].s[0] = currentPos[0];
-         camera.ks.p.k[1].s[0] = currentPos[0];
+         if(camera) {
+              camera.ks.p.k[0].s[0] = currentPos[0];
+              camera.ks.p.k[1].s[0] = currentPos[0];
 
-         // Pos y
-         camera.ks.p.k[0].s[1] = currentPos[1];
-         camera.ks.p.k[1].s[1] = currentPos[1];
+              // Pos y
+              camera.ks.p.k[0].s[1] = currentPos[1];
+              camera.ks.p.k[1].s[1] = currentPos[1];
+         }
     });
 
 </script>
