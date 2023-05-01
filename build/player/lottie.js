@@ -17827,7 +17827,7 @@
   // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
 
   THRImageElement.prototype.createContent = function () {
-    var assetPath = "".concat(this.assetData.u).concat(this.assetData.p);
+    var assetPath = "".concat(this.globalData.renderConfig.assetsPath).concat(this.assetData.u).concat(this.assetData.p);
 
     // Create a plane geometry
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
@@ -17835,7 +17835,7 @@
     // Load the PNG image as a texture
     var textureLoader = new three.TextureLoader();
     console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
-    console.log('THRImageElement::loading()', this.globalData);
+    console.log('THRImageElement::loading()', this.globalData.renderConfig.assetsPath);
     var texture = textureLoader.load(assetPath);
     var material = new three.MeshBasicMaterial({
       map: texture,
@@ -18111,7 +18111,8 @@
         height: config && config.filterSize && config.filterSize.height || '400%',
         x: config && config.filterSize && config.filterSize.x || '-100%',
         y: config && config.filterSize && config.filterSize.y || '-100%'
-      }
+      },
+      assetsPath: config.assetsPath
     };
     this.globalData = {
       _mdf: false,
@@ -18561,7 +18562,8 @@
         y: config && config.filterSize && config.filterSize.y || '-100%',
         assetsPath: config.assetsPath
       },
-      runExpressions: !config || config.runExpressions === undefined || config.runExpressions
+      runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
+      assetsPath: config.assetsPath
     };
     this.globalData = {
       _mdf: false,

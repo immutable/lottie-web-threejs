@@ -22,7 +22,7 @@ extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement
 // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
 
 THRImageElement.prototype.createContent = function () {
-  var assetPath = `${this.assetData.u}${this.assetData.p}`;
+  var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
   // Create a plane geometry
   var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h);
@@ -31,7 +31,7 @@ THRImageElement.prototype.createContent = function () {
   var textureLoader = new TextureLoader();
 
   console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
-  console.log('THRImageElement::loading()', this.globalData);
+  console.log('THRImageElement::loading()', this.globalData.renderConfig.assetsPath);
   var texture = textureLoader.load(assetPath);
   var material = new MeshBasicMaterial({
     map: texture,

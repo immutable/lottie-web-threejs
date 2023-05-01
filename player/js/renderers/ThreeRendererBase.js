@@ -37,6 +37,7 @@ function ThreeRendererBase(animationItem, config) {
       x: (config && config.filterSize && config.filterSize.x) || '-100%',
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
     },
+    assetsPath: config.assetsPath,
   };
   this.globalData = {
     _mdf: false,
