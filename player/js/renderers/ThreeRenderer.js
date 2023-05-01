@@ -23,7 +23,8 @@ function ThreeRenderer(animationItem, config) {
       assetsPath: config.assetsPath,
     },
     runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
-    assetsPath: config.assetsPath,
+    assetsPath: config && config.assetsPath,
+    three: config && config.three,
   };
   this.globalData = {
     _mdf: false,

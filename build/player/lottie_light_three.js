@@ -12308,11 +12308,13 @@
     });
   };
   THRCameraElement.prototype.refresh = function () {
-    var camera = this.globalData.three.camera;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    var renderer = this.globalData.three.renderer;
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.globalData.renderConfig.three) {
+      var camera = this.globalData.renderConfig.three.camera;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      var renderer = this.globalData.renderConfig.three.renderer;
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
   };
   THRCameraElement.prototype.createElements = function () {};
   THRCameraElement.prototype.hide = function () {};
@@ -12365,7 +12367,7 @@
       this.mat.rotateX(-this.or.v[0]).rotateY(-this.or.v[1]).rotateZ(this.or.v[2]);
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
-      var camera = this.globalData.three.camera;
+      var camera = this.globalData.renderConfig.three.camera;
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -12467,7 +12469,8 @@
         x: config && config.filterSize && config.filterSize.x || '-100%',
         y: config && config.filterSize && config.filterSize.y || '-100%'
       },
-      assetsPath: config.assetsPath
+      assetsPath: config && config.assetsPath,
+      three: config && config.three
     };
     this.globalData = {
       _mdf: false,
@@ -12649,33 +12652,38 @@
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
     var _this = this;
-    var scene = new three.Scene();
-    var camera = new three.PerspectiveCamera(55, animData.w / animData.h, 0.1, 20000);
-    camera.fov = 25;
-    camera.focus = 10;
-    camera.updateProjectionMatrix();
-    var renderer = new three.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(animData.w, animData.h);
-    var controls = new OrbitControls(camera, renderer.domElement);
-    controls.listenToKeyEvents(window); // optional
+    var three$1 = this.globalData.renderConfig.three;
+    if (!three$1) {
+      three$1 = {};
+      this.globalData.renderConfig.three = three$1;
+    }
+    if (!three$1.scene) {
+      three$1.scene = new three.Scene();
+    }
+    if (!three$1.camera) {
+      three$1.camera = new three.PerspectiveCamera(25, animData.w / animData.h, 0.1, 20000);
+      three$1.camera.fov = 25;
+      three$1.camera.focus = 10;
+      three$1.camera.updateProjectionMatrix();
+    }
+    if (!three$1.renderer) {
+      three$1.renderer = new three.WebGLRenderer();
+      three$1.renderer.setPixelRatio(window.devicePixelRatio);
+      three$1.renderer.setSize(animData.w, animData.h);
+    }
+    if (!three$1.controls) {
+      three$1.controls = new OrbitControls(three$1.camera, three$1.renderer.domElement);
+      three$1.controls.listenToKeyEvents(window); // optional
+    }
 
     // Create a plane geometry
     // TODO: Something here?
-    console.log('animData', animData, this.globalData);
-    // var planeGeometry = new PlaneGeometry(20, 20);
+    console.log('ThreeRendererBase::configAnimation() animData', animData, this.globalData);
     var textureLoader = new three.TextureLoader();
-    textureLoader.load(animData.assets[0].u + animData.assets[0].p);
-    // var material = new MeshBasicMaterial({
-    //   map: texture,
-    //   color: 0xffc0cb,
-    //   side: DoubleSide,
-    // });
-    // var plane = new Mesh(planeGeometry, material);
-    // scene.add(plane);
+    textureLoader.load("".concat(this.globalData.renderConfig.assetsPath).concat(animData.assets[0].u).concat(animData.assets[0].p));
 
     // Position the camera and render the scene
-    camera.position.set(972, 477, 2536);
+    three$1.camera.position.set(972, 477, 2536);
     // camera.lookAt(new Vector3(977, 540, 0));
 
     three.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -12692,26 +12700,13 @@
     three.DefaultLoadingManager.onError = function (url) {
       console.log('There was an error loading ' + url);
     };
-
-    // eslint-disable-next-line no-undef
-    var stats = new Stats();
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
-    function animate() {
-      // controls.update();
-      stats.begin();
-      renderer.render(scene, camera);
-      stats.end();
-      requestAnimationFrame(animate);
-    }
-    animate();
-    console.log('Setup the THREE renderer', renderer);
+    console.log('Setup the THREE renderer', three$1.renderer);
     var resizerElem = new three.Group();
     // var style = resizerElem.style;
     // style.width = animData.w + 'px';
     // style.height = animData.h + 'px';
     this.resizerElem = resizerElem;
-    scene.add(resizerElem);
+    three$1.scene.add(resizerElem);
     // styleDiv(resizerElem);
     // style.transformStyle = 'flat';
     // style.mozTransformStyle = 'flat';
@@ -12720,21 +12715,38 @@
     //   resizerElem.setAttribute('class', this.renderConfig.className);
     // }
     var wrapper = this.animationItem.wrapper || document.body;
-    wrapper.appendChild(renderer.domElement);
+    if (three$1.renderer.domElement !== wrapper) {
+      wrapper.appendChild(three$1.renderer.domElement);
+    }
+    var stats;
+    if (!three$1.animate) {
+      // eslint-disable-next-line no-undef
+      stats = new Stats();
+      stats.showPanel(0);
+      document.body.appendChild(stats.dom);
+      animate();
+    }
+    function animate() {
+      // controls.update();
+      stats.begin();
+      three$1.renderer.render(three$1.scene, three$1.camera);
+      stats.end();
+      requestAnimationFrame(animate);
+    }
 
     // style.overflow = 'hidden';
     this.data = animData;
     // Mask animation
     this.setupGlobalData(animData, document.body);
-    this.globalData.three = {
-      scene: scene,
-      camera: camera,
-      renderer: renderer,
-      look: function look(lookX, lookY, lookZ) {
-        camera.lookAt(new three.Vector3(lookX, lookY, lookZ));
-      },
-      controls: controls
-    };
+    // this.globalData.three = {
+    //   scene,
+    //   camera,
+    //   renderer,
+    //   look: (lookX, lookY, lookZ) => {
+    //     camera.lookAt(new Vector3(lookX, lookY, lookZ));
+    //   },
+    //   controls,
+    // };
     this.layers = animData.layers;
     this.layerElement = this.resizerElem;
     this.build3dContainers();
@@ -12918,7 +12930,8 @@
         assetsPath: config.assetsPath
       },
       runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
-      assetsPath: config.assetsPath
+      assetsPath: config && config.assetsPath,
+      three: config && config.three
     };
     this.globalData = {
       _mdf: false,

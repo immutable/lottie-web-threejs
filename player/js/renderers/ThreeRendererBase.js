@@ -5,7 +5,6 @@ import {
   PerspectiveCamera,
   Scene,
   TextureLoader,
-  Vector3,
   WebGLRenderer,
 } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
@@ -37,7 +36,8 @@ function ThreeRendererBase(animationItem, config) {
       x: (config && config.filterSize && config.filterSize.x) || '-100%',
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
     },
-    assetsPath: config.assetsPath,
+    assetsPath: config && config.assetsPath,
+    three: config && config.three,
   };
   this.globalData = {
     _mdf: false,
@@ -234,35 +234,41 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 };
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
-  var scene = new Scene();
-  var camera = new PerspectiveCamera(55, animData.w / animData.h, 0.1, 20000);
-  camera.fov = 25;
-  camera.focus = 10;
-  camera.updateProjectionMatrix();
+  let three = this.globalData.renderConfig.three;
+  if (!three) {
+    three = {};
+    this.globalData.renderConfig.three = three;
+  }
+  if (!three.scene) {
+    three.scene = new Scene();
+  }
 
-  var renderer = new WebGLRenderer();
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(animData.w, animData.h);
+  if (!three.camera) {
+    three.camera = new PerspectiveCamera(25, animData.w / animData.h, 0.1, 20000);
+    three.camera.fov = 25;
+    three.camera.focus = 10;
+    three.camera.updateProjectionMatrix();
+  }
 
-  var controls = new OrbitControls(camera, renderer.domElement);
-  controls.listenToKeyEvents(window); // optional
+  if (!three.renderer) {
+    three.renderer = new WebGLRenderer();
+    three.renderer.setPixelRatio(window.devicePixelRatio);
+    three.renderer.setSize(animData.w, animData.h);
+  }
+
+  if (!three.controls) {
+    three.controls = new OrbitControls(three.camera, three.renderer.domElement);
+    three.controls.listenToKeyEvents(window); // optional
+  }
 
   // Create a plane geometry
   // TODO: Something here?
-  console.log('animData', animData, this.globalData);
-  // var planeGeometry = new PlaneGeometry(20, 20);
+  console.log('ThreeRendererBase::configAnimation() animData', animData, this.globalData);
   var textureLoader = new TextureLoader();
-  textureLoader.load(animData.assets[0].u + animData.assets[0].p);
-  // var material = new MeshBasicMaterial({
-  //   map: texture,
-  //   color: 0xffc0cb,
-  //   side: DoubleSide,
-  // });
-  // var plane = new Mesh(planeGeometry, material);
-  // scene.add(plane);
+  textureLoader.load(`${this.globalData.renderConfig.assetsPath}${animData.assets[0].u}${animData.assets[0].p}`);
 
   // Position the camera and render the scene
-  camera.position.set(972, 477, 2536);
+  three.camera.position.set(972, 477, 2536);
   // camera.lookAt(new Vector3(977, 540, 0));
 
   DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
@@ -283,27 +289,13 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     console.log('There was an error loading ' + url);
   };
 
-  // eslint-disable-next-line no-undef
-  const stats = new Stats();
-  stats.showPanel(0);
-  document.body.appendChild(stats.dom);
-  function animate() {
-    // controls.update();
-    stats.begin();
-    renderer.render(scene, camera);
-    stats.end();
-
-    requestAnimationFrame(animate);
-  }
-  animate();
-
-  console.log('Setup the THREE renderer', renderer);
+  console.log('Setup the THREE renderer', three.renderer);
   var resizerElem = new Group();
   // var style = resizerElem.style;
   // style.width = animData.w + 'px';
   // style.height = animData.h + 'px';
   this.resizerElem = resizerElem;
-  scene.add(resizerElem);
+  three.scene.add(resizerElem);
   // styleDiv(resizerElem);
   // style.transformStyle = 'flat';
   // style.mozTransformStyle = 'flat';
@@ -312,21 +304,41 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   //   resizerElem.setAttribute('class', this.renderConfig.className);
   // }
   var wrapper = this.animationItem.wrapper || document.body;
-  wrapper.appendChild(renderer.domElement);
+  if (three.renderer.domElement !== wrapper) {
+    wrapper.appendChild(three.renderer.domElement);
+  }
+
+  let stats;
+  if (!three.animate) {
+    // eslint-disable-next-line no-undef
+    stats = new Stats();
+    stats.showPanel(0);
+    document.body.appendChild(stats.dom);
+    animate();
+  }
+
+  function animate() {
+    // controls.update();
+    stats.begin();
+    three.renderer.render(three.scene, three.camera);
+    stats.end();
+
+    requestAnimationFrame(animate);
+  }
 
   // style.overflow = 'hidden';
   this.data = animData;
   // Mask animation
   this.setupGlobalData(animData, document.body);
-  this.globalData.three = {
-    scene,
-    camera,
-    renderer,
-    look: (lookX, lookY, lookZ) => {
-      camera.lookAt(new Vector3(lookX, lookY, lookZ));
-    },
-    controls,
-  };
+  // this.globalData.three = {
+  //   scene,
+  //   camera,
+  //   renderer,
+  //   look: (lookX, lookY, lookZ) => {
+  //     camera.lookAt(new Vector3(lookX, lookY, lookZ));
+  //   },
+  //   controls,
+  // };
   this.layers = animData.layers;
   this.layerElement = this.resizerElem;
   this.build3dContainers();

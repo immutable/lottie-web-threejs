@@ -2,16 +2,15 @@
 <html style="width: 100%;height: 100%">
 <head>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js"></script>
-     <script type="importmap">
-       {
-         "imports": {
-           "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js",
-           "three/addons/": "https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js",
-         }
-       }
-     </script>
-
+<!--     <script src="https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js"></script>-->
+<!--     <script type="importmap">-->
+<!--       {-->
+<!--         "imports": {-->
+<!--           "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js",-->
+<!--           "three/addons/": "https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js",-->
+<!--         }-->
+<!--       }-->
+<!--     </script>-->
      <script src="../../build/player/lottie.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18"></script>
 </head>
@@ -60,10 +59,9 @@
      gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
      gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
 
-
      var animData = {
         wrapper: document.getElementById('bodymovin'),
-        animType: 'three',
+        animType: 'threejs',
         loop: true,
         prerender: true,
         autoplay: true,
