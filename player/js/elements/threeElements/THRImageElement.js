@@ -29,6 +29,8 @@ THRImageElement.prototype.createContent = function () {
 
   // Load the PNG image as a texture
   var textureLoader = new TextureLoader();
+
+  console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
   var texture = textureLoader.load(assetPath);
   var material = new MeshBasicMaterial({
     map: texture,

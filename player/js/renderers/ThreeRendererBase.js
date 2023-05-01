@@ -1,7 +1,12 @@
 import {
-  DefaultLoadingManager, DoubleSide,
-  Group, Matrix4,
-  Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Scene, TextureLoader, Vector3, WebGLRenderer,
+  DefaultLoadingManager,
+  Group,
+  Matrix4,
+  PerspectiveCamera,
+  Scene,
+  TextureLoader,
+  Vector3,
+  WebGLRenderer,
 } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -244,16 +249,16 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   // Create a plane geometry
   // TODO: Something here?
   console.log('animData', animData, this.globalData);
-  var planeGeometry = new PlaneGeometry(20, 20);
+  // var planeGeometry = new PlaneGeometry(20, 20);
   var textureLoader = new TextureLoader();
-  var texture = textureLoader.load(`${this.globalData.imageLoader.assetsPath}images/img_5.png`);
-  var material = new MeshBasicMaterial({
-    map: texture,
-    color: 0xffc0cb,
-    side: DoubleSide,
-  });
-  var plane = new Mesh(planeGeometry, material);
-  scene.add(plane);
+  textureLoader.load(animData.assets[0].u + animData.assets[0].p);
+  // var material = new MeshBasicMaterial({
+  //   map: texture,
+  //   color: 0xffc0cb,
+  //   side: DoubleSide,
+  // });
+  // var plane = new Mesh(planeGeometry, material);
+  // scene.add(plane);
 
   // Position the camera and render the scene
   camera.position.set(972, 477, 2536);
@@ -264,7 +269,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   };
 
   DefaultLoadingManager.onLoad = () => {
-    console.log('Loading Complete!');
+    console.log('Loading Complete! ');
     this.globalData.isAssetsLoaded = true;
     this.animationItem.checkLoaded();
   };
