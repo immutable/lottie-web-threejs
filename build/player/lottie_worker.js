@@ -18131,6 +18131,7 @@
     // Load the PNG image as a texture
     var textureLoader = new three.TextureLoader();
     console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
+    console.log('THRImageElement::loading()', this.globalData);
     var texture = textureLoader.load(assetPath);
     var material = new three.MeshBasicMaterial({
       map: texture,
@@ -18841,7 +18842,7 @@
   };
 
   function ThreeRenderer(animationItem, config) {
-    console.log('ThreeRenderer::constructor()');
+    console.log('ThreeRenderer::constructor()', config);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -18853,7 +18854,8 @@
         width: config && config.filterSize && config.filterSize.width || '400%',
         height: config && config.filterSize && config.filterSize.height || '400%',
         x: config && config.filterSize && config.filterSize.x || '-100%',
-        y: config && config.filterSize && config.filterSize.y || '-100%'
+        y: config && config.filterSize && config.filterSize.y || '-100%',
+        assetsPath: config.assetsPath
       },
       runExpressions: !config || config.runExpressions === undefined || config.runExpressions
     };

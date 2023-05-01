@@ -7,7 +7,7 @@ import AnimationItem from '../animation/AnimationItem';
 import THRCompElement from '../elements/threeElements/THRCompElement';
 
 function ThreeRenderer(animationItem, config) {
-  console.log('ThreeRenderer::constructor()');
+  console.log('ThreeRenderer::constructor()', config);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;
@@ -20,6 +20,7 @@ function ThreeRenderer(animationItem, config) {
       height: (config && config.filterSize && config.filterSize.height) || '400%',
       x: (config && config.filterSize && config.filterSize.x) || '-100%',
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
+      assetsPath: config.assetsPath,
     },
     runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
   };

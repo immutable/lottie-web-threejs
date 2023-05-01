@@ -31,6 +31,7 @@ THRImageElement.prototype.createContent = function () {
   var textureLoader = new TextureLoader();
 
   console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
+  console.log('THRImageElement::loading()', this.globalData);
   var texture = textureLoader.load(assetPath);
   var material = new MeshBasicMaterial({
     map: texture,
