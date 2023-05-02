@@ -3,10 +3,10 @@ import {
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
-import MaskElement from '../../mask';
 import PropertyFactory from '../../utils/PropertyFactory';
 import { degToRads } from '../../utils/common';
 import TransformElement from '../helpers/TransformElement';
+import THRMaskElement from './THRMaskElement';
 
 function THRBaseElement() {}
 THRBaseElement.prototype = {
@@ -191,7 +191,7 @@ THRBaseElement.prototype = {
     }
   },
   createRenderableComponents: function () {
-    this.maskManager = new MaskElement(this.data, this, this.globalData);
+    this.maskManager = new THRMaskElement(this.data, this, this.globalData);
   },
   addEffects: function () {
   },
