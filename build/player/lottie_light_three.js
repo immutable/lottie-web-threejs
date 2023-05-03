@@ -12338,11 +12338,11 @@
     });
   };
   THRCameraElement.prototype.refresh = function () {
-    if (this.globalData.renderConfig.three) {
-      var camera = this.globalData.renderConfig.three.camera;
+    if (this.globalData.renderConfig.renderer) {
+      var camera = this.globalData.renderConfig.renderer.camera;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      var renderer = this.globalData.renderConfig.three.renderer;
+      var renderer = this.globalData.renderConfig.renderer.renderer;
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
   };
@@ -12397,7 +12397,7 @@
       this.mat.rotateX(-this.or.v[0]).rotateY(-this.or.v[1]).rotateZ(this.or.v[2]);
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
-      var camera = this.globalData.renderConfig.three.camera;
+      var camera = this.globalData.renderConfig.renderer.camera;
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -12682,10 +12682,11 @@
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
     var _this = this;
-    var three$1 = this.globalData.renderConfig.three;
+    console.log('ThreeRendererBase::configAnimation()', this.globalData);
+    var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
       three$1 = {};
-      this.globalData.renderConfig.three = three$1;
+      this.globalData.renderConfig.renderer = three$1;
     }
     if (!three$1.scene) {
       three$1.scene = new three.Scene();

@@ -234,10 +234,11 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 };
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
-  let three = this.globalData.renderConfig.three;
+  console.log('ThreeRendererBase::configAnimation()', this.globalData);
+  let three = this.globalData.renderConfig.renderer;
   if (!three) {
     three = {};
-    this.globalData.renderConfig.three = three;
+    this.globalData.renderConfig.renderer = three;
   }
   if (!three.scene) {
     three.scene = new Scene();

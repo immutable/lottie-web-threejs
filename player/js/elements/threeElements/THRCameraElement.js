@@ -83,12 +83,12 @@ THRCameraElement.prototype.setup = function () {
 };
 
 THRCameraElement.prototype.refresh = function () {
-  if (this.globalData.renderConfig.three) {
-    const camera = this.globalData.renderConfig.three.camera;
+  if (this.globalData.renderConfig.renderer) {
+    const camera = this.globalData.renderConfig.renderer.camera;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    const renderer = this.globalData.renderConfig.three.renderer;
+    const renderer = this.globalData.renderConfig.renderer.renderer;
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
 };
@@ -150,7 +150,7 @@ THRCameraElement.prototype.renderFrame = function () {
     this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
     this.mat.translate(0, 0, this.pe.v);
 
-    const camera = this.globalData.renderConfig.three.camera;
+    const camera = this.globalData.renderConfig.renderer.camera;
     var hasMatrixChanged = !this._prevMat.equals(this.mat);
     if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
       len = this.comp.threeDElements.length;
