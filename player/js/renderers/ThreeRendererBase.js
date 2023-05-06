@@ -8,7 +8,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
   extendPrototype,
 } from '../utils/functionExtensions';
@@ -257,10 +257,10 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     three.renderer.setSize(animData.w, animData.h);
   }
 
-  if (!three.controls) {
-    three.controls = new OrbitControls(three.camera, three.renderer.domElement);
-    three.controls.listenToKeyEvents(window); // optional
-  }
+  // if (!three.controls) {
+  //   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
+  //   three.controls.listenToKeyEvents(window); // optional
+  // }
 
   // Create a plane geometry
   // TODO: Something here?
