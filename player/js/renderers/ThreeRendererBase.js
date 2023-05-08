@@ -236,13 +236,16 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
   console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
+  console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
   let three = this.globalData.renderConfig.renderer;
   if (!three) {
     three = {};
     this.globalData.renderConfig.renderer = three;
+    console.log('** creating new three instance');
   }
   if (!three.scene) {
     three.scene = new Scene();
+    console.log('** creating new three scene');
   }
 
   if (!three.camera) {
@@ -250,12 +253,14 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     three.camera.fov = 25;
     three.camera.focus = 10;
     three.camera.updateProjectionMatrix();
+    console.log('** creating new three camera');
   }
 
   if (!three.renderer) {
     three.renderer = new WebGLRenderer();
     three.renderer.setPixelRatio(window.devicePixelRatio);
     three.renderer.setSize(animData.w, animData.h);
+    console.log('** creating new three renderer');
   }
 
   // if (!three.controls) {

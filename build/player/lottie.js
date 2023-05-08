@@ -17567,24 +17567,29 @@
   ThreeRendererBase.prototype.configAnimation = function (animData) {
     var _this = this;
     console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
+    console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
       three$1 = {};
       this.globalData.renderConfig.renderer = three$1;
+      console.log('** creating new three instance');
     }
     if (!three$1.scene) {
       three$1.scene = new three.Scene();
+      console.log('** creating new three scene');
     }
     if (!three$1.camera) {
       three$1.camera = new three.PerspectiveCamera(25, animData.w / animData.h, 0.1, 20000);
       three$1.camera.fov = 25;
       three$1.camera.focus = 10;
       three$1.camera.updateProjectionMatrix();
+      console.log('** creating new three camera');
     }
     if (!three$1.renderer) {
       three$1.renderer = new three.WebGLRenderer();
       three$1.renderer.setPixelRatio(window.devicePixelRatio);
       three$1.renderer.setSize(animData.w, animData.h);
+      console.log('** creating new three renderer');
     }
 
     // if (!three.controls) {
