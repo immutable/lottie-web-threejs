@@ -23,6 +23,7 @@ import THRSolidElement from '../elements/threeElements/THRSolidElement';
 import THRCameraElement from '../elements/threeElements/THRCameraElement';
 
 function ThreeRendererBase(animationItem, config) {
+  console.log('ThreeRendererBase::constructor()', config);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;
@@ -37,7 +38,7 @@ function ThreeRendererBase(animationItem, config) {
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
     },
     assetsPath: config && config.assetsPath,
-    three: config && config.three,
+    renderer: config && config.renderer,
   };
   this.globalData = {
     _mdf: false,
@@ -234,7 +235,7 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 };
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
-  console.log('ThreeRendererBase::configAnimation()', this.globalData);
+  console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
   let three = this.globalData.renderConfig.renderer;
   if (!three) {
     three = {};
@@ -269,7 +270,9 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   textureLoader.load(`${this.globalData.renderConfig.assetsPath}${animData.assets[0].u}${animData.assets[0].p}`);
 
   // Position the camera and render the scene
-  three.camera.position.set(972, 477, 2536);
+  // TODO: Extract the camera initial position and lookAt
+  // this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, this);
+  // three.camera.position.set(972, 477, 2536);
   // camera.lookAt(new Vector3(977, 540, 0));
 
   DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {

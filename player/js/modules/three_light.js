@@ -12,7 +12,7 @@ import {
 import ThreeRenderer from '../renderers/ThreeRenderer';
 
 // Registering renderers
-registerRenderer('threejs', ThreeRenderer);
+registerRenderer('three', ThreeRenderer);
 
 // Registering shape modifiers
 ShapeModifiers.registerModifier('tm', TrimModifier);

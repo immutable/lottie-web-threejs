@@ -1470,6 +1470,7 @@
   };
   extendPrototype([BaseEvent], AnimationItem);
   AnimationItem.prototype.setParams = function (params) {
+    console.log('AnimationItem::setParams()', params);
     if (params.wrapper || params.container) {
       this.wrapper = params.wrapper || params.container;
     }

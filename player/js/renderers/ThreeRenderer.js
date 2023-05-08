@@ -24,7 +24,7 @@ function ThreeRenderer(animationItem, config) {
     },
     runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
     assetsPath: config && config.assetsPath,
-    three: config && config.three,
+    renderer: config && config.renderer,
   };
   this.globalData = {
     _mdf: false,

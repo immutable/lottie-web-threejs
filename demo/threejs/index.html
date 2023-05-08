@@ -11,14 +11,43 @@
 <!--         }-->
 <!--       }-->
 <!--     </script>-->
+
+<!--     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>-->
+<!--     <script type="importmap">-->
+<!--       {-->
+<!--         "imports": {-->
+<!--           "three": "https://unpkg.com/three@0.151.3/build/three.module.js",-->
+<!--           "three/addons/": "https://unpkg.com/three@0.151.3/examples/jsm/"-->
+<!--         }-->
+<!--       }-->
+<!--     </script>-->
+
+     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+     <script type="importmap">
+       {
+         "imports": {
+           "three": "https://unpkg.com/three@v0.149.0/build/three.module.js",
+           "three/addons/": "https://unpkg.com/three@v0.149.0/examples/jsm/"
+         }
+       }
+     </script>
      <script src="../../build/player/lottie.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18"></script>
+<!--     <script type="module">-->
+<!--          import {OrbitControls} from 'https://cdn.skypack.dev/@three-ts/orbit-controls';-->
+<!--          window.OrbitControls = OrbitControls;-->
+<!--     </script>-->
 </head>
 <body style="background-color:#ccc; margin: 0px;height: 100%; font-family: sans-serif;font-size: 10px">
 
 <div style="width:100%;height:100%;background-color:#333;" id="bodymovin"></div>
+<script type="module">
 
-<script>
+     import * as THREE from 'three';
+     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+     import { TransformControls } from 'three/addons/controls/TransformControls.js';
+
      var GUI = lil.GUI;
      const gui = new GUI();
      const myObject = {
@@ -39,29 +68,33 @@
           cameraRotX: 0.0,
           cameraRotY: 0.0,
           cameraRotZ: 0.0,
+          objX: 1000,
+          objY: 1000,
+          objZ: 1000
      };
 
-     gui.add( myObject, 'myBoolean' );  // Checkbox
-     gui.add( myObject, 'myString' );   // Text Field
-     gui.add( myObject, 'myNumber' );   // Number Field
-     gui.add( myObject, 'fov' );   // Number Field
-     gui.add( myObject, 'focus' );   // Number Field
-     gui.add( myObject, 'near' );   // Number Field
-     gui.add( myObject, 'far' );   // Number Field
-     gui.add( myObject, 'ortho' );   // Number Field
-     gui.add( myObject, 'cameraX' );   // Number Field
-     gui.add( myObject, 'cameraY' );   // Number Field
-     gui.add( myObject, 'cameraZ' );   // Number Field
-     gui.add( myObject, 'lookX' );   // Number Field
-     gui.add( myObject, 'lookY' );   // Number Field
-     gui.add( myObject, 'lookZ' );   // Number Field
-     gui.add( myObject, 'cameraRotX', -360.0, 360.0 );   // Number Field
-     gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
-     gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
+     gui.add( myObject, 'objX' );  // Checkbox
+     gui.add( myObject, 'objY' );   // Text Field
+     gui.add( myObject, 'objZ' );   // Number Field
+     // gui.add( myObject, 'fov' );   // Number Field
+     // gui.add( myObject, 'focus' );   // Number Field
+     // gui.add( myObject, 'near' );   // Number Field
+     // gui.add( myObject, 'far' );   // Number Field
+     // gui.add( myObject, 'ortho' );   // Number Field
+     // gui.add( myObject, 'cameraX' );   // Number Field
+     // gui.add( myObject, 'cameraY' );   // Number Field
+     // gui.add( myObject, 'cameraZ' );   // Number Field
+     // gui.add( myObject, 'lookX' );   // Number Field
+     // gui.add( myObject, 'lookY' );   // Number Field
+     // gui.add( myObject, 'lookZ' );   // Number Field
+     // gui.add( myObject, 'cameraRotX', -360.0, 360.0 );   // Number Field
+     // gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
+     // gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
 
+     var threeData = initThree({width: 1920, height: 720});
      var animData = {
         wrapper: document.getElementById('bodymovin'),
-        animType: 'threejs',
+        animType: 'three',
         loop: true,
         prerender: true,
         autoplay: true,
@@ -69,6 +102,7 @@
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
              assetsPath: '/demo/threejs/',
+             renderer: threeData
         }
     };
     var anim = bodymovin.loadAnimation(animData);
@@ -76,11 +110,12 @@
     anim.onError = (error) => {
          console.error(error);
     };
-     var cameraElement;
+    var cameraElement;
     var camera;
     var currentLayerNum = -1;
-    var currentPos = [960, 540, -2666.667];
+    var currentPos = [1150, 645, 780];
     var mousePos = [960, 540, -2666.667];
+    var packObj;
 
     // function moveCamera(){
     //
@@ -108,11 +143,36 @@
     //      requestAnimationFrame(moveCamera);
     // }
 
+     var initPack = false;
+     var theta;
     var windowW, windowH, dist;
     var mouseCoords = {
          x:0,
          y:0
     }
+
+     function initThree(options) {
+          const three = {
+               scene: new THREE.Scene(),
+               camera: new THREE.PerspectiveCamera(25, (options.width || 1) / (options.height || 1), 0.1, 20000),
+               renderer: new THREE.WebGLRenderer(),
+          };
+
+          three.camera.fov = 25;
+          three.camera.focus = 10;
+          three.camera.updateProjectionMatrix();
+
+          three.renderer.setPixelRatio(window.devicePixelRatio);
+          three.renderer.setSize(options.width, options.height);
+
+          // if (!three.controls) {
+          // three.controls = new OrbitControls(three.camera, three.renderer.domElement);
+          // three.controls.listenToKeyEvents(window); // optional
+          // }
+
+          return three;
+     }
+
     function calculateSize(){
          windowW = window.innerWidth;
          windowH = window.innerHeight;
@@ -121,7 +181,66 @@
     calculateSize();
 
     anim.addEventListener('DOMLoaded', function() {
-         camera = anim.animationData.layers.find((layer) => layer.nm === 'Camera 1');
+         console.log('Anim::DOMLoaded()');
+         if (!initPack) {
+              initPack = true;
+              camera = anim.animationData.layers.find((layer) => layer.nm === 'Camera 1');
+              threeData.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+              threeData.renderer.toneMappingExposure = 1;
+
+              // TODO: Load a gltf file..
+              const loader = new GLTFLoader().setPath('/demo/threejs/model/');
+              loader.load('m2.gltf', function (gltf) {
+                    console.log('Loaded GLTF', gltf);
+                   packObj = gltf;
+                   gltf.scene.scale.set(900, 900, 900);
+                   gltf.scene.position.set(currentPos[0], currentPos[1], currentPos[2]);
+
+                   threeData.scene.add(gltf.scene);
+
+                   const ambientLight = new THREE.AmbientLight(0x404040, 1);
+                   threeData.scene.add(ambientLight);
+
+                   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                   directionalLight.position.set(1, 1, 1).normalize();
+                   threeData.scene.add(directionalLight);
+
+                   // Add axes helper
+                   const axesHelper = new THREE.AxesHelper(5);
+                   threeData.scene.add(axesHelper);
+
+                   // Add camera helper (for perspective camera)
+                   const cameraHelper = new THREE.CameraHelper(threeData.camera);
+                   threeData.scene.add(cameraHelper);
+
+                   // Create TransformControls
+                   // const transformControls = new THREE.TransformControls(threeData.camera, threeData.renderer.domElement);
+                   // threeData.scene.add(transformControls);
+
+                   // // Add directional light helper
+                   //  const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+                   // threeData.scene.add(directionalLightHelper);
+
+                   console.log('Loaded GLTF', gltf);
+                   // transformControls.attach(gltf.scene);
+
+                   // gltf.scene.children[0].children[0].material.wireframe = true;
+
+                   // Details of the KHR_materials_variants extension used here can be found below
+                   // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+                   // const parser = gltf.parser;
+                   // const variantsExtension = gltf.userData.gltfExtensions[ 'KHR_materials_variants' ];
+                   // const variants = variantsExtension.variants.map( ( variant ) => variant.name );
+                   // const variantsCtrl = gui.add( state, 'variant', variants ).name( 'Variant' );
+                   //selectVariant( scene, parser, variantsExtension, state.variant );
+
+                   console.log('AnimatedMorphSphere::onLoaded', gltf);
+                   // variantsCtrl.onChange( ( value ) => selectVariant( scene, parser, variantsExtension, value ) );
+                   //
+                   // render();
+
+              });
+         }
     });
 
     window.addEventListener('mousemove', function(ev){
@@ -143,6 +262,7 @@
          currentPos[1] = currentPos[1] + (mousePos[1] - currentPos[1])*0.25 + 10;
          currentPos[2] = currentPos[2] + (mousePos[2] - currentPos[2])*0.25;
 
+         // threeData.controls.update();
          // Pos x
          if(camera) {
               camera.ks.p.k[0].s[0] = currentPos[0];
@@ -151,6 +271,11 @@
               // Pos y
               camera.ks.p.k[0].s[1] = currentPos[1];
               camera.ks.p.k[1].s[1] = currentPos[1];
+         }
+
+         if (packObj) {
+              // packObj.scene.position.set(myObject.objX, myObject.objY, myObject.objZ);
+             // packObj.scene.scale.set(myObject.objX, myObject.objY, myObject.objZ);
          }
     });
 

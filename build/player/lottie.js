@@ -1470,6 +1470,7 @@
   };
   extendPrototype([BaseEvent], AnimationItem);
   AnimationItem.prototype.setParams = function (params) {
+    console.log('AnimationItem::setParams()', params);
     if (params.wrapper || params.container) {
       this.wrapper = params.wrapper || params.container;
     }
@@ -17368,6 +17369,7 @@
   // }
 
   function ThreeRendererBase(animationItem, config) {
+    console.log('ThreeRendererBase::constructor()', config);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -17382,7 +17384,7 @@
         y: config && config.filterSize && config.filterSize.y || '-100%'
       },
       assetsPath: config && config.assetsPath,
-      three: config && config.three
+      renderer: config && config.renderer
     };
     this.globalData = {
       _mdf: false,
@@ -17564,7 +17566,7 @@
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
     var _this = this;
-    console.log('ThreeRendererBase::configAnimation()', this.globalData);
+    console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
       three$1 = {};
@@ -17597,7 +17599,9 @@
     textureLoader.load("".concat(this.globalData.renderConfig.assetsPath).concat(animData.assets[0].u).concat(animData.assets[0].p));
 
     // Position the camera and render the scene
-    three$1.camera.position.set(972, 477, 2536);
+    // TODO: Extract the camera initial position and lookAt
+    // this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, this);
+    // three.camera.position.set(972, 477, 2536);
     // camera.lookAt(new Vector3(977, 540, 0));
 
     three.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -17845,7 +17849,7 @@
       },
       runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
       assetsPath: config && config.assetsPath,
-      three: config && config.three
+      renderer: config && config.renderer
     };
     this.globalData = {
       _mdf: false,
@@ -17899,7 +17903,7 @@
   registerRenderer('canvas', CanvasRenderer);
   registerRenderer('html', HybridRenderer);
   registerRenderer('svg', SVGRenderer);
-  registerRenderer('threejs', ThreeRenderer);
+  registerRenderer('three', ThreeRenderer);
 
   // Registering shape modifiers
   ShapeModifiers.registerModifier('tm', TrimModifier);
