@@ -18107,7 +18107,26 @@
       this.maskManager = new THRMaskElement(this.data, this, this.globalData);
     },
     addEffects: function addEffects() {},
-    setMatte: function setMatte() {}
+    setMatte: function setMatte() {},
+    hide: function hide() {
+      // console.log('HIDE', this);
+      if (!this.hidden && (!this.isInRange || this.isTransparent)) {
+        var elem = this.baseElement || this.layerElement;
+        elem.visible = false;
+        this.hidden = true;
+      }
+    },
+    show: function show() {
+      // console.log('SHOW', this);
+      if (this.isInRange && !this.isTransparent) {
+        if (!this.data.hd) {
+          var elem = this.baseElement || this.layerElement;
+          elem.visible = true;
+        }
+        this.hidden = false;
+        this._isFirstFrame = true;
+      }
+    }
   };
   THRBaseElement.prototype.getBaseElement = SVGBaseElement.prototype.getBaseElement;
   THRBaseElement.prototype.destroyBaseElement = THRBaseElement.prototype.destroy;
@@ -18980,8 +18999,6 @@
   }
   extendPrototype([ThreeRendererBase, ICompElement, THRBaseElement], THRCompElement);
   THRCompElement.prototype._createBaseContainerElements = THRCompElement.prototype.createContainerElements;
-  THRCompElement.prototype.hide = RenderableObjectElement.prototype.hide;
-  THRCompElement.prototype.show = RenderableObjectElement.prototype.show;
   THRCompElement.prototype.createContainerElements = function () {
     this._createBaseContainerElements();
     // divElement.style.clip = 'rect(0px, '+this.data.w+'px, '+this.data.h+'px, 0px)';
