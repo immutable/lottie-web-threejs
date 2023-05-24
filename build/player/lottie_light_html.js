@@ -6874,6 +6874,8 @@
         return this.createText(layer);
       case 6:
         return this.createAudio(layer);
+      case 9:
+        return this.createVideo(layer);
       case 13:
         return this.createCamera(layer);
       case 15:
@@ -7020,7 +7022,9 @@
         _matMdf: false,
         _opMdf: false,
         mat: new Matrix()
+        // NEW: matrix4 here
       };
+
       if (this.data.ao) {
         this.finalTransform.mProp.autoOriented = true;
       }

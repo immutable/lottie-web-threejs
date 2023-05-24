@@ -8,7 +8,8 @@ import {
   WebGLRenderer,
 } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
   extendPrototype,
 } from '../utils/functionExtensions';
@@ -21,6 +22,7 @@ import THRShapeElement from '../elements/threeElements/THRShapeElement';
 import THRImageElement from '../elements/threeElements/THRImageElement';
 import THRSolidElement from '../elements/threeElements/THRSolidElement';
 import THRCameraElement from '../elements/threeElements/THRCameraElement';
+import THRVideoElement from '../elements/threeElements/THRVideoElement';
 
 function ThreeRendererBase(animationItem, config) {
   console.log('ThreeRendererBase::constructor()', config);
@@ -123,6 +125,11 @@ ThreeRendererBase.prototype.createCamera = function (data) {
   console.log('ThreeRendererBase::createCamera()', data);
   this.camera = new THRCameraElement(data, this.globalData, this);
   return this.camera;
+};
+
+ThreeRendererBase.prototype.createVideo = function (data) {
+  console.log('ThreeRendererBase::createVideo()', data);
+  return new THRVideoElement(data, this.globalData, this);
 };
 
 ThreeRendererBase.prototype.createImage = function (data) {
@@ -263,10 +270,10 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     console.log('** creating new three renderer');
   }
 
-  // if (!three.controls) {
-  //   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
-  //   three.controls.listenToKeyEvents(window); // optional
-  // }
+  if (three.controls !== false) {
+    three.controls = new OrbitControls(three.camera, three.renderer.domElement);
+    three.controls.listenToKeyEvents(window); // optional
+  }
 
   // Create a plane geometry
   // TODO: Something here?
@@ -327,7 +334,9 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   }
 
   function animate() {
-    // controls.update();
+    if (three.controls) {
+      three.controls.update();
+    }
     stats.begin();
     three.renderer.render(three.scene, three.camera);
     stats.end();

@@ -1,6 +1,6 @@
 import {
   DoubleSide,
-  Mesh, MeshBasicMaterial, PlaneGeometry, TextureLoader,
+  Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
 import {
   extendPrototype,
@@ -33,12 +33,19 @@ THRImageElement.prototype.createContent = function () {
   console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
   console.log('THRImageElement::loading()', this.globalData.renderConfig.assetsPath);
   var texture = textureLoader.load(assetPath);
+  // texture.colorSpace = LinearSRGBColorSpace;
+  texture.encoding = sRGBEncoding;
   var material = new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
     transparent: true,
+    toneMapped: false,
   });
+
+  // material.needsUpdate();
+  this.material = material;
   var plane = new Mesh(geometry, material);
+  plane.rotation.order = 'ZYX';
 
   // console.log('THRImageElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
   // if (this.data.hasMask) {

@@ -8,6 +8,7 @@ import PropertyFactory from '../../utils/PropertyFactory';
 import ICompElement from '../CompElement';
 import THRBaseElement from './THRBaseElement';
 import ThreeRendererBase from '../../renderers/ThreeRendererBase';
+import RenderableObjectElement from '../helpers/RenderableObjectElement';
 
 function THRCompElement(data, globalData, comp) {
   console.log('THRCompElement', data, globalData, comp);
@@ -22,6 +23,8 @@ function THRCompElement(data, globalData, comp) {
 
 extendPrototype([ThreeRendererBase, ICompElement, THRBaseElement], THRCompElement);
 THRCompElement.prototype._createBaseContainerElements = THRCompElement.prototype.createContainerElements;
+THRCompElement.prototype.hide = RenderableObjectElement.prototype.hide;
+THRCompElement.prototype.show = RenderableObjectElement.prototype.show;
 
 THRCompElement.prototype.createContainerElements = function () {
   this._createBaseContainerElements();

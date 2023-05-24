@@ -28,7 +28,9 @@ THRSolidElement.prototype.createContent = function () {
   console.log('THRSolidElement::createContent()', this.data.sc, this.data.sw, this.data.sh, this.data);
   const geometry = new PlaneGeometry(this.data.sw, this.data.sh);
   const material = new MeshBasicMaterial({ color: this.data.sc });
+  this.material = material;
   const plane = new Mesh(geometry, material);
+  plane.rotation.order = 'ZYX';
   this.layerElement.add(plane);
 };
 

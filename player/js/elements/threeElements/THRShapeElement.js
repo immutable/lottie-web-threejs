@@ -29,7 +29,10 @@ THRShapeElement.prototype.createContent = function () {
   console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
   const geometry = new PlaneGeometry(this.data.sw, this.data.sh);
   const material = new MeshBasicMaterial({ color: this.data.sc, side: DoubleSide });
+  this.material = material;
+
   const plane = new Mesh(geometry, material);
+  plane.rotation.order = 'ZYX';
   this.layerElement.add(plane);
 };
 

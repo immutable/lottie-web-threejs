@@ -37,6 +37,8 @@ BaseRenderer.prototype.createItem = function (layer) {
       return this.createText(layer);
     case 6:
       return this.createAudio(layer);
+    case 9:
+      return this.createVideo(layer);
     case 13:
       return this.createCamera(layer);
     case 15:

@@ -21,7 +21,7 @@
 <!--         }-->
 <!--       }-->
 <!--     </script>-->
-
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
      <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
      <script type="importmap">
        {
@@ -39,7 +39,9 @@
 <!--     </script>-->
 </head>
 <body style="background-color:#ccc; margin: 0px;height: 100%; font-family: sans-serif;font-size: 10px">
-
+<div style="position: absolute; z-index: 1; top: 5px; left: 80px;">
+ <button id="playBtn" style="min-width: 160px; height: 40px;">Play</button>
+</div>
 <div style="width:100%;height:100%;background-color:#333;" id="bodymovin"></div>
 <script type="module">
 
@@ -47,6 +49,9 @@
      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
+     import { LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding } from 'three';
+
+     var threeData = initThree({width: 1920, height: 720});
 
      var GUI = lil.GUI;
      const gui = new GUI();
@@ -70,12 +75,46 @@
           cameraRotZ: 0.0,
           objX: 1000,
           objY: 1000,
-          objZ: 1000
+          objZ: 1000,
+          exposure: 0.4,
+          roughness: 0.2,
+          lightDirect: 10,
+          lightAmbient: 10
      };
 
      gui.add( myObject, 'objX' );  // Checkbox
      gui.add( myObject, 'objY' );   // Text Field
      gui.add( myObject, 'objZ' );   // Number Field
+     var controller = gui.add( myObject, 'exposure' );   // Number Field
+     controller.onChange((value) => {
+          threeData.renderer.toneMappingExposure = value;
+     });
+
+     var directController = gui.add( myObject, 'lightDirect' );   // Number Field
+     directController.onChange((value) => {
+          if(threeData.directionalLight) {
+               threeData.directionalLight.intensity = value;
+          }
+     });
+
+     var ambientController = gui.add( myObject, 'lightAmbient' );   // Number Field
+     ambientController.onChange((value) => {
+          if(threeData.ambientLight) {
+               threeData.ambientLight.intensity = value;
+          }
+     });
+
+     var roughnessController = gui.add( myObject, 'roughness' );   // Number Field
+     roughnessController.onChange((value) => {
+          if(threeData.pack) {
+               const mat = threeData.pack.scene.children[0].material;
+               mat.roughness = value;
+               mat.needsUpdate = true;
+          }
+     });
+
+     // gui.hide();
+
      // gui.add( myObject, 'fov' );   // Number Field
      // gui.add( myObject, 'focus' );   // Number Field
      // gui.add( myObject, 'near' );   // Number Field
@@ -91,7 +130,7 @@
      // gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
      // gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
 
-     var threeData = initThree({width: 1920, height: 720});
+
      var animData = {
         wrapper: document.getElementById('bodymovin'),
         animType: 'three',
@@ -106,7 +145,7 @@
         }
     };
     var anim = bodymovin.loadAnimation(animData);
-    anim.play();
+    //
     anim.onError = (error) => {
          console.error(error);
     };
@@ -114,8 +153,17 @@
     var camera;
     var currentLayerNum = -1;
     var currentPos = [1150, 645, 780];
-    var mousePos = [960, 540, -2666.667];
+    var mousePos = [960, 540, -500];
     var packObj;
+    var config = {
+      modelRotationY: 0
+    };
+
+    var playBtn = document.getElementById('playBtn');
+    playBtn.addEventListener('click', () => {
+       console.log('play me');
+         anim.play();
+    });
 
     // function moveCamera(){
     //
@@ -155,15 +203,36 @@
           const three = {
                scene: new THREE.Scene(),
                camera: new THREE.PerspectiveCamera(25, (options.width || 1) / (options.height || 1), 0.1, 20000),
-               renderer: new THREE.WebGLRenderer(),
+               renderer: new THREE.WebGLRenderer({ antialias: true }),
+               clock: new THREE.Clock(),
+               mixers: [],
+               controls: false,
+               pack: false
           };
 
           three.camera.fov = 25;
           three.camera.focus = 10;
           three.camera.updateProjectionMatrix();
 
+          THREE.ColorManagement.enabled = false;
+          THREE.ColorManagement.legacyMode = false;
+
+          three.renderer.useLegacyLights = false;
+          three.renderer.outputEncoding = THREE.sRGBEncoding;
+          three.renderer.toneMapping = THREE.LinearToneMapping;
+          three.renderer.toneMappingExposure = 0.4;
+          three.renderer.setClearColor( 0xcccccc );
           three.renderer.setPixelRatio(window.devicePixelRatio);
           three.renderer.setSize(options.width, options.height);
+
+          const animate = () => {
+               requestAnimationFrame(animate);
+               const delta = three.clock.getDelta();
+               if (three.mixers.length > 0) {
+                    three.mixers.forEach((mixer) => mixer.update(delta));
+               }
+          }
+          animate();
 
           // if (!three.controls) {
           // three.controls = new OrbitControls(three.camera, three.renderer.domElement);
@@ -185,33 +254,88 @@
          if (!initPack) {
               initPack = true;
               camera = anim.animationData.layers.find((layer) => layer.nm === 'Camera 1');
-              threeData.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-              threeData.renderer.toneMappingExposure = 1;
 
               // TODO: Load a gltf file..
               const loader = new GLTFLoader().setPath('/demo/threejs/model/');
               loader.load('m2.gltf', function (gltf) {
-                    console.log('Loaded GLTF', gltf);
-                   packObj = gltf;
-                   gltf.scene.scale.set(900, 900, 900);
-                   gltf.scene.position.set(currentPos[0], currentPos[1], currentPos[2]);
+                    console.log('>> Loaded GLTF', gltf, 'add to position');
 
+                    threeData.pack = gltf;
+                   packObj = gltf;
+                   gltf.scene.scale.set(8, 8, 8);
+                   gltf.scene.position.set(currentPos[0], currentPos[1], currentPos[2]);
+                   // threeData.controls.target = gltf.scene.children[1].position;
+
+                   // gltf.scene.position.set(0, 0, 1000);
                    threeData.scene.add(gltf.scene);
 
-                   const ambientLight = new THREE.AmbientLight(0x404040, 1);
+                   const ambientLight = new THREE.AmbientLight(0x404040, 10);
+                   threeData.ambientLight = ambientLight;
                    threeData.scene.add(ambientLight);
 
-                   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                   const directionalLight = new THREE.DirectionalLight(0xffffff, 35);
                    directionalLight.position.set(1, 1, 1).normalize();
+                   threeData.directionalLight = directionalLight;
                    threeData.scene.add(directionalLight);
 
+                   const cubeTextureLoader = new THREE.CubeTextureLoader();
+                   const diffuseCubemap = cubeTextureLoader.load([
+                        '/demo/threejs/materials/diffuse_posx.png',
+                        '/demo/threejs/materials/diffuse_negx.png',
+                        '/demo/threejs/materials/diffuse_posy.png',
+                        '/demo/threejs/materials/diffuse_negy.png',
+                        '/demo/threejs/materials/diffuse_posz.png',
+                        '/demo/threejs/materials/diffuse_negz.png',
+                   ]);
+
+                   const albedoTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_albedo.png`);
+                   const normalTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_normal.png`);
+                   const aoTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_AO.png`);
+                   const ormTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_ORM.png`);
+                   const emissiveTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_emissive.png`);
+
+                   threeData.scene.environment = diffuseCubemap;
+
+                   console.log('THREE Mesh Physical>> ', gltf.scene);
+                   // const mat = new THREE.MeshPhysicalMaterial();
+                   const mat = gltf.scene.children[0].material;
+                   mat.colorSpace = SRGBColorSpace;
+                   // // //
+                   mat.envMap = diffuseCubemap;
+                   // mat.map = albedoTexture;
+                   // mat.map.flipY = false;
+                   // mat.aoMap = aoTexture;
+                   // mat.aoMap.flipY = false;
+                   // mat.normalMap = normalTexture;
+                   // mat.normalMap.flipY = false;
+                   // mat.emissiveMap = emissiveTexture;
+                   // mat.emissiveMap.flipY = false;
+                   // mat.roughnessMap = ormTexture;
+                   // mat.roughnessMap.flipY = false;
+                   // //
+                   // mat.side = THREE.DoubleSide;
+                   mat.roughness = 1.5;
+                   mat.needsUpdate = true;
+
+                   const mixer = new THREE.AnimationMixer( gltf.scene );
+                   const openClip = THREE.AnimationClip.findByName(gltf.animations, 'Anim_0');
+                   const openAction = mixer.clipAction( openClip );
+                   if (openAction) {
+                        openAction.clampWhenFinished = true;
+                        openAction.reset();
+                        openAction.play();
+                        openAction.loop = THREE.LoopOnce;
+
+                        threeData.mixers.push(mixer);
+                   }
+
                    // Add axes helper
-                   const axesHelper = new THREE.AxesHelper(5);
-                   threeData.scene.add(axesHelper);
+                   // const axesHelper = new THREE.AxesHelper(5);
+                   // threeData.scene.add(axesHelper);
 
                    // Add camera helper (for perspective camera)
-                   const cameraHelper = new THREE.CameraHelper(threeData.camera);
-                   threeData.scene.add(cameraHelper);
+                   // const cameraHelper = new THREE.CameraHelper(threeData.camera);
+                   // threeData.scene.add(cameraHelper);
 
                    // Create TransformControls
                    // const transformControls = new THREE.TransformControls(threeData.camera, threeData.renderer.domElement);
@@ -234,10 +358,29 @@
                    // const variantsCtrl = gui.add( state, 'variant', variants ).name( 'Variant' );
                    //selectVariant( scene, parser, variantsExtension, state.variant );
 
-                   console.log('AnimatedMorphSphere::onLoaded', gltf);
+                   console.log('Loaded SCENE::', threeData);
+                   // threeData.scene.children[0].children[1].children[0].children.forEach((child) => {
+                   //      console.log('Child is', child);
+                   //      var mat = child.children[0].material;
+                   //      mat.fog = false;
+                   //      mat.map.encoding = THREE.LinearEncoding;
+                   //      mat.map.colorSpace = THREE.LinearSRGBColorSpace;
+                   // });
                    // variantsCtrl.onChange( ( value ) => selectVariant( scene, parser, variantsExtension, value ) );
                    //
                    // render();
+
+                   // window.gsap.to(config, {
+                   //      duration: 2000,
+                   //      modelRotationY: 360,
+                   //      repeat: -1,
+                   //      ease: 'none',
+                   //      onUpdate: (controller) => {
+                   //           if (gltf) {
+                   //                gltf.scene.rotation.set(0, config.modelRotationY, 0);
+                   //           }
+                   //      },
+                   // });
 
               });
          }
@@ -264,14 +407,14 @@
 
          // threeData.controls.update();
          // Pos x
-         if(camera) {
-              camera.ks.p.k[0].s[0] = currentPos[0];
-              camera.ks.p.k[1].s[0] = currentPos[0];
-
-              // Pos y
-              camera.ks.p.k[0].s[1] = currentPos[1];
-              camera.ks.p.k[1].s[1] = currentPos[1];
-         }
+         // if(camera) {
+         //      camera.ks.p.k[0].s[0] = currentPos[0];
+         //      camera.ks.p.k[1].s[0] = currentPos[0];
+         //
+         //      // Pos y
+         //      camera.ks.p.k[0].s[1] = currentPos[1];
+         //      camera.ks.p.k[1].s[1] = currentPos[1];
+         // }
 
          if (packObj) {
               // packObj.scene.position.set(myObject.objX, myObject.objY, myObject.objZ);

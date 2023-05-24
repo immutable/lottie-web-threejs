@@ -10,6 +10,7 @@ TransformElement.prototype = {
       _matMdf: false,
       _opMdf: false,
       mat: new Matrix(),
+      // NEW: matrix4 here
     };
     if (this.data.ao) {
       this.finalTransform.mProp.autoOriented = true;

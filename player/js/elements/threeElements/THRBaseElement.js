@@ -1,5 +1,5 @@
 import {
-  Group,
+  Group, Matrix4,
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
@@ -7,12 +7,16 @@ import PropertyFactory from '../../utils/PropertyFactory';
 import { degToRads } from '../../utils/common';
 import TransformElement from '../helpers/TransformElement';
 import THRMaskElement from './THRMaskElement';
+import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRBaseElement() {}
 THRBaseElement.prototype = {
   checkBlendMode: function () {},
   initRendererElement: function () {
+    this.material = null;
     this.baseElement = new Group(); // this.data.tg
+    this.baseElement.rotation.order = 'ZYX';
+
     if (this.data.hasMask) {
       // TODO: setup mask support
     }
@@ -29,9 +33,16 @@ THRBaseElement.prototype = {
       this.setBlendMode();
     }
   },
+  setBlendMode: function () {
+    var blendModeValue = getBlendMode(this.data.bm);
+    var elem = this.baseElement || this.layerElement;
+
+    console.log('Setup blend mode', blendModeValue, this.data.bm, elem);
+  },
   initTransform: function () {
     TransformElement.prototype.initTransform.call(this);
 
+    console.log('THRBaseElement::initTransform()', this, this.hierarchy);
     const elem = this;
     const data = this.data.ks;
     if (data.p && data.p.s) {
@@ -43,7 +54,24 @@ THRBaseElement.prototype = {
     } else {
       this.p = PropertyFactory.getProp(elem, data.p || { k: [0, 0, 0] }, 1, 0, this);
     }
-
+    if (data.rx) {
+      this.rx = PropertyFactory.getProp(elem, data.rx, 0, degToRads, this);
+      this.ry = PropertyFactory.getProp(elem, data.ry, 0, degToRads, this);
+      this.rz = PropertyFactory.getProp(elem, data.rz, 0, degToRads, this);
+      if (data.or.k[0].ti) {
+        var i;
+        var len = data.or.k.length;
+        for (i = 0; i < len; i += 1) {
+          data.or.k[i].to = null;
+          data.or.k[i].ti = null;
+        }
+      }
+      this.or = PropertyFactory.getProp(elem, data.or, 1, degToRads, this);
+      // sh Indicates it needs to be capped between -180 and 180
+      this.or.sh = true;
+    } else {
+      this.r = PropertyFactory.getProp(elem, data.r || { k: 0 }, 0, degToRads, this);
+    }
     if (data.sk) {
       this.sk = PropertyFactory.getProp(elem, data.sk, 0, degToRads, this);
       this.sa = PropertyFactory.getProp(elem, data.sa, 0, degToRads, this);
@@ -75,7 +103,8 @@ THRBaseElement.prototype = {
       // Create a ThreeJS matrix
       // const decomposed = decomposeMatrix(this.finalTransform.mat.props);
       // const matrix = lottieMatrixToThreeMatrix(this.finalTransform.mat.props);
-      // const matrix = new Matrix4().fromArray(this.finalTransform.mat.props);
+      // Euler.order
+      // const mat = new Matrix4().fromArray(this.finalTransform.mat.props);
       // Apply
       // const mat = new Matrix4();
       // if (this.a) {
@@ -98,13 +127,7 @@ THRBaseElement.prototype = {
       // }
       // this.transformedElement.applyMatrix4(mat);
 
-      if (this.s) {
-        this.transformedElement.scale.set(this.s.v[0], this.s.v[1], this.s.v[2]);
-      }
-      // if (this.sk) {
-      //   console.log('**** Need to skew from axis', this.sk, this);
-      //   // mat.skewFromAxis(-this.sk.v, this.sa.v);
-      // }
+      // TODO: iterateDynamicProperties ??
 
       // Position
       const data = this.data.ks;
@@ -116,6 +139,35 @@ THRBaseElement.prototype = {
         }
       } else {
         this.transformedElement.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
+      }
+
+      // Scale
+      if (this.s) {
+        this.transformedElement.scale.set(this.s.v[0], this.s.v[1], this.s.v[2]);
+      }
+
+      // Skew
+      if (this.sk) {
+        console.log('Skew is', -this.sk.v, this.sa.v);
+
+        var matrix = new Matrix4();
+        matrix.makeRotationAxis(-this.sk.v, this.sa.v);
+        this.transformedElement.matrixAutoUpdate = false;
+        this.transformedElement.matrix.applyMatrix4(matrix); // .set(...matrix);
+        this.transformedElement.updateMatrixWorld(true);
+      }
+
+      // Rotation
+      if (this.r) {
+        // TODO: Look at working vector in
+        // this.transformedElement.rotate(-this.r.v);
+      } else if (!this.r) {
+        this.transformedElement.rotation.z += -this.rz.v;
+        this.transformedElement.rotation.y += this.ry.v;
+        this.transformedElement.rotation.x += this.rx.v;
+        this.transformedElement.rotation.z += -this.or.v[2];
+        this.transformedElement.rotation.y += this.or.v[1];
+        this.transformedElement.rotation.x += this.or.v[0];
       }
 
       // console.log('Found prop', this.data.nm, this, this.px, this.py, this.pz, this.p);
@@ -160,9 +212,8 @@ THRBaseElement.prototype = {
       // );
       // console.log('renderElement >> ', this.finalTransform.mat.props, transformedElement);
     }
-    if (this.finalTransform._opMdf) {
-      // transformedElementStyle.opacity = this.finalTransform.mProp.o.v;
-      // TODO: Get the mesh.material and apply opacity
+    if (this.finalTransform._opMdf && this.material) {
+      this.material.opacity = this.finalTransform.mProp.o.v;
     }
   },
   renderFrame: function () {
@@ -200,6 +251,18 @@ THRBaseElement.prototype = {
 THRBaseElement.prototype.getBaseElement = SVGBaseElement.prototype.getBaseElement;
 THRBaseElement.prototype.destroyBaseElement = THRBaseElement.prototype.destroy;
 THRBaseElement.prototype.buildElementParenting = BaseRenderer.prototype.buildElementParenting;
+
+// function skewFromAxis(ax, angle) {
+//   var mCos = Math.cos(angle);
+//   var mSin = Math.sin(angle);
+//
+//   // Assuming _t() function returns an array representing a 4x4 matrix
+//   var matrix = Matrix4.fromArray(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+//     ._t(1, 0, 0, 0, Math.tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+//     ._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+//
+//   return matrix;
+// }
 
 // function decomposeMatrix(matrix) {
 //   // Extract the translation values
