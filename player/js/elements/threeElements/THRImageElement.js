@@ -11,6 +11,7 @@ import HierarchyElement from '../helpers/HierarchyElement';
 import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
+import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRImageElement(data, globalData, comp) {
   this.assetData = globalData.getAssetData(data.refId);
@@ -20,6 +21,12 @@ function THRImageElement(data, globalData, comp) {
 extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRImageElement);
 
 // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
+THRImageElement.prototype.setBlendMode = function () {
+  var blendModeValue = getBlendMode(this.data.bm);
+  var elem = this.baseElement || this.layerElement;
+
+  console.log('THRImageElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+};
 
 THRImageElement.prototype.createContent = function () {
   var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;

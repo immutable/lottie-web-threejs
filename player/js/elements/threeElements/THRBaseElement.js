@@ -37,7 +37,7 @@ THRBaseElement.prototype = {
     var blendModeValue = getBlendMode(this.data.bm);
     var elem = this.baseElement || this.layerElement;
 
-    console.log('Setup blend mode', blendModeValue, this.data.bm, elem);
+    console.log('THRBaseElement::Setup blend mode', blendModeValue, this.data.bm, elem);
   },
   initTransform: function () {
     TransformElement.prototype.initTransform.call(this);
