@@ -11951,7 +11951,7 @@
     setBlendMode: function setBlendMode() {
       var blendModeValue = getBlendMode(this.data.bm);
       var elem = this.baseElement || this.layerElement;
-      console.log('Setup blend mode', blendModeValue, this.data.bm, elem);
+      console.log('THRBaseElement::Setup blend mode', blendModeValue, this.data.bm, elem);
     },
     initTransform: function initTransform() {
       TransformElement.prototype.initTransform.call(this);
@@ -12286,7 +12286,11 @@
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRImageElement);
 
   // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
-
+  THRImageElement.prototype.setBlendMode = function () {
+    var blendModeValue = getBlendMode(this.data.bm);
+    var elem = this.baseElement || this.layerElement;
+    console.log('THRImageElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+  };
   THRImageElement.prototype.createContent = function () {
     var assetPath = "".concat(this.globalData.renderConfig.assetsPath).concat(this.assetData.u).concat(this.assetData.p);
 

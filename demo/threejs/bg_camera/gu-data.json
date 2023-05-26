@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "timeline": [
+    {
+      "id": "background",
+      "assetId": "bg",
+      "time": "0"
+    }
+  ],
+  "assets": [
+    {
+      "id": "bg",
+      "format": "bodymovin",
+      "contentPath": "/assets/animations/opening/bg_camera/data.json"
+    }
+  ]
+}
