@@ -137,10 +137,10 @@
         loop: true,
         prerender: true,
         autoplay: true,
-        path: 'data.json',
+        path: 'pack/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/',
+             assetsPath: '/demo/threejs/pack/',
              renderer: threeData
         }
     };
@@ -215,8 +215,6 @@
           three.camera.updateProjectionMatrix();
 
           THREE.ColorManagement.enabled = false;
-          THREE.ColorManagement.legacyMode = false;
-
           three.renderer.useLegacyLights = false;
           three.renderer.outputEncoding = THREE.sRGBEncoding;
           three.renderer.toneMapping = THREE.LinearToneMapping;
