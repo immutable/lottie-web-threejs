@@ -15,7 +15,7 @@ import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRImageElement(data, globalData, comp) {
   const version = 0.4;
-  console.log('THRImageElement', version);
+  console.info('THRImageElement::version', version);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }

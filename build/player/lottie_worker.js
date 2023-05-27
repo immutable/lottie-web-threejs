@@ -18222,7 +18222,7 @@
 
   function THRImageElement(data, globalData, comp) {
     var version = 0.4;
-    console.log('THRImageElement', version);
+    console.info('THRImageElement::version', version);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
   }
