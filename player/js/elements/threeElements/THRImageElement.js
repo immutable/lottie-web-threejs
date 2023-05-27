@@ -12,10 +12,10 @@ import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 import getBlendMode from '../../utils/helpers/blendModes';
+import { VERSION } from '../../renderers/version';
 
 function THRImageElement(data, globalData, comp) {
-  const version = 0.4;
-  console.info('THRImageElement::version', version);
+  console.info('THRImageElement::constructor()', VERSION);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }

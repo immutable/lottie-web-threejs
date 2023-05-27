@@ -23,9 +23,10 @@ import THRImageElement from '../elements/threeElements/THRImageElement';
 import THRSolidElement from '../elements/threeElements/THRSolidElement';
 import THRCameraElement from '../elements/threeElements/THRCameraElement';
 import THRVideoElement from '../elements/threeElements/THRVideoElement';
+import { VERSION } from './version';
 
 function ThreeRendererBase(animationItem, config) {
-  console.log('ThreeRendererBase::constructor()', config);
+  console.log('ThreeRendererBase::constructor()', VERSION, config);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;

@@ -12279,9 +12279,10 @@
     extendPrototype([RenderableElement, createProxyFunction(_prototype)], RenderableObjectElement);
   })();
 
+  var VERSION = '4.0';
+
   function THRImageElement(data, globalData, comp) {
-    var version = 0.4;
-    console.info('THRImageElement::version', version);
+    console.info('THRImageElement::constructor()', VERSION);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
   }
@@ -12629,7 +12630,7 @@
   };
 
   function ThreeRendererBase(animationItem, config) {
-    console.log('ThreeRendererBase::constructor()', config);
+    console.log('ThreeRendererBase::constructor()', VERSION, config);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -13102,7 +13103,7 @@
   };
 
   function ThreeRenderer(animationItem, config) {
-    console.log('ThreeRenderer::constructor()', config);
+    console.log('ThreeRenderer::constructor()', VERSION, config);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
