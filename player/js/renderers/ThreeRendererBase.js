@@ -7,8 +7,8 @@ import {
   TextureLoader,
   WebGLRenderer,
 } from 'three';
+import { InteractionManager } from 'three.interactive';
 import Stats from 'three/examples/jsm/libs/stats.module';
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
   extendPrototype,
@@ -271,14 +271,25 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     console.log('** creating new three renderer');
   }
 
-  if (three.controls !== false) {
+  // Define orbit controls as required
+  if (three.controls === true) {
     three.controls = new OrbitControls(three.camera, three.renderer.domElement);
     three.controls.listenToKeyEvents(window); // optional
+    console.log('** creating orbit controller');
   }
 
-  // Create a plane geometry
-  // TODO: Something here?
+  // Define interaction manager as required
+  if (three.interaction === true) {
+    three.interaction = new InteractionManager(
+      three.renderer,
+      three.camera,
+      three.renderer.domElement
+    );
+    console.log('** creating new interaction manager');
+  }
+
   console.log('ThreeRendererBase::configAnimation() animData', animData, this.globalData);
+  // For some reason this texture loader has to be here?!
   var textureLoader = new TextureLoader();
   textureLoader.load(`${this.globalData.renderConfig.assetsPath}${animData.assets[0].u}${animData.assets[0].p}`);
 
@@ -306,7 +317,6 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     console.log('There was an error loading ' + url);
   };
 
-  console.log('Setup the THREE renderer', three.renderer);
   var resizerElem = new Group();
   // var style = resizerElem.style;
   // style.width = animData.w + 'px';
@@ -325,39 +335,50 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     wrapper.appendChild(three.renderer.domElement);
   }
 
+  // If three.animate is defined it assumes that control of the renderer.render function and other three lifecycle
+  // events is handled externally, otherwise we create a default render lifecycle here with animate.
   let stats;
   if (!three.animate) {
-    // eslint-disable-next-line no-undef
-    stats = new Stats();
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
-    animate();
+    if (three.debug === true) {
+      stats = new Stats();
+      stats.showPanel(0);
+      document.body.appendChild(stats.dom);
+      debugAnimate();
+    } else {
+      animate();
+    }
+  }
+
+  function debugAnimate() {
+    stats.begin();
+    render();
+    stats.end();
+    requestAnimationFrame(debugAnimate);
   }
 
   function animate() {
-    if (three.controls) {
-      three.controls.update();
-    }
-    stats.begin();
-    three.renderer.render(three.scene, three.camera);
-    stats.end();
-
+    render();
     requestAnimationFrame(animate);
   }
 
-  // style.overflow = 'hidden';
+  /**
+   * Default three.js lifecycle render function.
+   * Try to keep this as tight as possible for performance.
+   */
+  function render() {
+    if (three.controls) {
+      three.controls.update();
+    }
+
+    if (three.interaction) {
+      three.interaction.update();
+    }
+    three.renderer.render(three.scene, three.camera);
+  }
+
   this.data = animData;
   // Mask animation
   this.setupGlobalData(animData, document.body);
-  // this.globalData.three = {
-  //   scene,
-  //   camera,
-  //   renderer,
-  //   look: (lookX, lookY, lookZ) => {
-  //     camera.lookAt(new Vector3(lookX, lookY, lookZ));
-  //   },
-  //   controls,
-  // };
   this.layers = animData.layers;
   this.layerElement = this.resizerElem;
   this.build3dContainers();

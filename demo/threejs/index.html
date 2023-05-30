@@ -137,7 +137,7 @@
         loop: true,
         prerender: true,
         autoplay: true,
-        path: 'pack/data.json',
+        path: 'bg_camera/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
              assetsPath: '/demo/threejs/pack/',
@@ -207,7 +207,9 @@
                clock: new THREE.Clock(),
                mixers: [],
                controls: false,
-               pack: false
+               interaction: true,
+               pack: false,
+               debug: true
           };
 
           three.camera.fov = 25;
@@ -223,6 +225,7 @@
           three.renderer.setPixelRatio(window.devicePixelRatio);
           three.renderer.setSize(options.width, options.height);
 
+          // TODO: Move away from mixer / animate function here and use GSAP
           const animate = () => {
                requestAnimationFrame(animate);
                const delta = three.clock.getDelta();
@@ -276,6 +279,7 @@
                    threeData.directionalLight = directionalLight;
                    threeData.scene.add(directionalLight);
 
+                   // TODO: Switch to HDR skybox
                    const cubeTextureLoader = new THREE.CubeTextureLoader();
                    const diffuseCubemap = cubeTextureLoader.load([
                         '/demo/threejs/materials/diffuse_posx.png',
@@ -346,8 +350,35 @@
                    console.log('Loaded GLTF', gltf);
                    // transformControls.attach(gltf.scene);
 
-                   // gltf.scene.children[0].children[0].material.wireframe = true;
+                   // Testing pack interaction
+                   const pack = gltf.scene.children[0];
+                   if (pack) {
+                        pack.material = pack.material.clone();
+                        pack.userData.initialEmissive = pack.material.emissive.clone();
+                        pack.material.emissiveIntensity = 0.5;
 
+                        threeData.interaction.add(pack);
+
+                        pack.addEventListener('mouseover', (event) => {
+                             console.log('Pack::mouseover()', event);
+                             document.body.style.cursor = 'pointer';
+
+                             if (pack.material) {
+                                  pack.userData.materialEmissiveHex = pack.material.emissive.getHex();
+                                  pack.material.emissive.setHex(0xff0000);
+                                  pack.material.emissiveIntensity = 0.8;
+                             }
+                        });
+
+                        pack.addEventListener('mouseout', (event) => {
+                             console.log('Pack::mouseout()', event);
+                             document.body.style.cursor = 'default';
+
+                             if (pack.material) {
+                                  pack.material.emissiveIntensity = 0;
+                             }
+                        });
+                   }
                    // Details of the KHR_materials_variants extension used here can be found below
                    // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
                    // const parser = gltf.parser;
