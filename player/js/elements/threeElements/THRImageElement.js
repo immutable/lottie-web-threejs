@@ -1,5 +1,5 @@
 import {
-  FrontSide, ImageUtils,
+  FrontSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
 import {
@@ -36,10 +36,10 @@ THRImageElement.prototype.createContent = function () {
 
   // Use the preloaded image asset from the ImagePreloader
   // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
-  // var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
-  const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
-  const dataURI = ImageUtils.getDataURL(loadedAsset);
-  var texture = textureLoader.load(dataURI);
+  var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
+  // const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
+  // const dataURI = ImageUtils.getDataURL(loadedAsset);
+  var texture = textureLoader.load(assetPath);
   texture.encoding = sRGBEncoding;
 
   var material = new MeshBasicMaterial({

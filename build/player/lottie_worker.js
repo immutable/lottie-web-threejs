@@ -18646,10 +18646,10 @@
 
     // Use the preloaded image asset from the ImagePreloader
     // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
-    // var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
-    var loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
-    var dataURI = three.ImageUtils.getDataURL(loadedAsset);
-    var texture = textureLoader.load(dataURI);
+    var assetPath = "".concat(this.globalData.renderConfig.assetsPath || '').concat(this.assetData.u).concat(this.assetData.p);
+    // const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
+    // const dataURI = ImageUtils.getDataURL(loadedAsset);
+    var texture = textureLoader.load(assetPath);
     texture.encoding = three.sRGBEncoding;
     var material = new three.MeshBasicMaterial({
       map: texture,
