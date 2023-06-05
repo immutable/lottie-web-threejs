@@ -39,7 +39,7 @@ function ThreeRenderer(animationItem, config) {
   this.destroyed = false;
   this.camera = null;
   this.supports3d = true;
-  this.rendererType = 'three';
+  this.rendererType = 'threejs';
 
   // Hook the loading process into Pixi Loader
   AnimationItem.prototype.checkLoaded = ThreeRenderer.prototype.checkLoaded;
@@ -53,13 +53,14 @@ ThreeRenderer.prototype.createComp = function (data) {
 };
 
 ThreeRenderer.prototype.checkLoaded = function () {
-  console.log('AnimationItem::checkLoaded() ****', this, this.renderer.globalData);
-  if (this.renderer.globalData.isAssetsLoaded) {
-    //   if (!this.isLoaded
-    //     && this.renderer.globalData.fontManager.isLoaded
-    //     && (this.imagePreloader.loadedImages() || this.rendererType !== 'canvas')
-    //     && (this.imagePreloader.loadedFootages())
-    //   ) {
+  console.log('AnimationItem::checkLoaded() ****', this, this.renderer);
+
+  if (!this.isLoaded
+    && this.renderer.globalData.fontManager.isLoaded
+    && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas')
+    && this.imagePreloader.loadedFootages()
+    && this.videoPreloader.loadedVideos()
+  ) {
     this.isLoaded = true;
     var expressionsPlugin = getExpressionsPlugin();
     if (expressionsPlugin) {
@@ -74,8 +75,6 @@ ThreeRenderer.prototype.checkLoaded = function () {
       this.play();
     }
   }
-  //   }
-  // }
 };
 
 export default ThreeRenderer;

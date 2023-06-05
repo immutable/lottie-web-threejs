@@ -1218,21 +1218,29 @@
       }.bind(this));
       return ob;
     }
+    function isValid(filename) {
+      var regex = /\.(jpe?g|png|gif|bmp|webp|tiff|apng?)$/i;
+      return regex.test(filename);
+    }
     function loadAssets(assets, cb) {
+      console.log('ImagePreloader::loadAssets()', assets);
       this.imagesLoadedCb = cb;
       var i;
       var len = assets.length;
       for (i = 0; i < len; i += 1) {
         if (!assets[i].layers) {
-          if (!assets[i].t || assets[i].t === 'seq') {
-            this.totalImages += 1;
-            this.images.push(this._createImageData(assets[i]));
-          } else if (assets[i].t === 3) {
-            this.totalFootages += 1;
-            this.images.push(this.createFootageData(assets[i]));
+          if (isValid(assets[i].p)) {
+            if (!assets[i].t || assets[i].t === 'seq') {
+              this.totalImages += 1;
+              this.images.push(this._createImageData(assets[i]));
+            } else if (assets[i].t === 3) {
+              this.totalFootages += 1;
+              this.images.push(this.createFootageData(assets[i]));
+            }
           }
         }
       }
+      console.log('ImagePreloader::loadAssets() found:', this.images);
     }
     function setPath(path) {
       this.path = path || '';
@@ -1298,6 +1306,168 @@
       setCacheType: setCacheType
     };
     return ImagePreloaderFactory;
+  }();
+
+  // import { isSafari } from './common';
+  var VideoPreloader = function () {
+    var proxyVideo = function () {
+      var canvas = createTag('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.fillRect(0, 0, 1, 1);
+      return canvas;
+    }();
+    function videoLoaded(event) {
+      console.log('VideoPreloader::videoLoaded()', event);
+      this.loadedAssets += 1;
+      if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
+        if (this.videosLoadedCb) {
+          this.videosLoadedCb(null);
+        }
+      }
+    }
+    function videoEvent(event) {
+      console.log('VideoPreloader::videoEvent()', event.type, event);
+    }
+    function getAssetsPath(assetData, assetsPath, originalPath) {
+      var path = '';
+      if (assetData.e) {
+        path = assetData.p;
+      } else if (assetsPath) {
+        var assetPath = assetData.p;
+        if (assetPath.indexOf('images/') !== -1) {
+          assetPath = assetPath.split('/')[1];
+        }
+        path = assetsPath + assetPath;
+      } else {
+        path = originalPath;
+        path += assetData.u ? assetData.u : '';
+        path += assetData.p;
+      }
+      return path;
+    }
+
+    // function testImageLoaded(img) {
+    //   var _count = 0;
+    //   var intervalId = setInterval(function () {
+    //     var box = img.getBBox();
+    //     if (box.width || _count > 500) {
+    //       this._imageLoaded();
+    //       clearInterval(intervalId);
+    //     }
+    //     _count += 1;
+    //   }.bind(this), 50);
+    // }
+
+    function createVideoData(assetData) {
+      var path = getAssetsPath(assetData, this.assetsPath, this.path);
+
+      // var img = createTag('img');
+      var video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.autoplay = 'autoplay';
+      video.preload = 'auto';
+      video.muted = 'true';
+      video.addEventListener('play', this._videoEvent, false);
+      video.addEventListener('playing', this._videoEvent, false);
+      video.addEventListener('waiting', this._videoEvent, false);
+      video.addEventListener('seeked', this._videoEvent, false);
+      video.addEventListener('seeking', this._videoEvent, false);
+      video.addEventListener('progress', this._videoEvent, false);
+      video.addEventListener('canplaythrough', this._videoLoaded, false);
+      video.addEventListener('canplay', this._videoEvent, false);
+      video.addEventListener('load', this._videoLoaded, false);
+      video.addEventListener('error', function () {
+        ob.video = proxyVideo;
+        this._videoLoaded();
+      }.bind(this), false);
+      video.src = path;
+      video.load();
+      video.pause();
+
+      // if (this._elementHelper.append) {
+      //   this._elementHelper.append(img);
+      // } else {
+      //   this._elementHelper.appendChild(img);
+      // }
+      var ob = {
+        video: video,
+        assetData: assetData
+      };
+      return ob;
+    }
+    function isValid(filename) {
+      var regex = /\.(mp4|mov|ogg|mpg|webm)$/i;
+      return regex.test(filename);
+    }
+    function loadAssets(assets, callback) {
+      console.log('VideoPreloader::loadAssets()', assets);
+      this.videosLoadedCb = callback;
+      var i;
+      var len = assets.length;
+      for (i = 0; i < len; i += 1) {
+        if (!assets[i].layers) {
+          if (isValid(assets[i].p)) {
+            if (!assets[i].t || assets[i].t === 'seq') {
+              this.videos.push(this._createVideoData(assets[i]));
+            }
+          }
+        }
+      }
+      this.totalVideos = this.videos.length;
+      console.log('VideoPreloader::loadAssets() found:', this.videos);
+    }
+    function setPath(path) {
+      this.path = path || '';
+    }
+    function setAssetsPath(path) {
+      this.assetsPath = path || '';
+    }
+    function getAsset(assetData) {
+      var i = 0;
+      var len = this.videos.length;
+      while (i < len) {
+        if (this.videos[i].assetData === assetData) {
+          return this.videos[i].video;
+        }
+        i += 1;
+      }
+      return null;
+    }
+    function destroy() {
+      this.videosLoadedCb = null;
+      this.videos.length = 0;
+    }
+    function loadedVideos() {
+      return this.totalVideos === this.loadedAssets;
+    }
+    function setCacheType(type, elementHelper) {
+      this._elementHelper = elementHelper;
+      this._createVideoData = createVideoData.bind(this);
+    }
+    function VideoPreloaderFactory() {
+      this._videoLoaded = videoLoaded.bind(this);
+      this._videoEvent = videoEvent.bind(this);
+      this.assetsPath = '';
+      this.path = '';
+      this.totalVideos = 0;
+      this.loadedAssets = 0;
+      this.videosLoadedCb = null;
+      this.videos = [];
+    }
+    VideoPreloaderFactory.prototype = {
+      loadAssets: loadAssets,
+      setAssetsPath: setAssetsPath,
+      setPath: setPath,
+      loadedVideos: loadedVideos,
+      destroy: destroy,
+      getAsset: getAsset,
+      videoLoaded: videoLoaded,
+      setCacheType: setCacheType
+    };
+    return VideoPreloaderFactory;
   }();
 
   function BaseEvent() {}
@@ -1461,6 +1631,7 @@
     this._completedLoop = false;
     this.projectInterface = ProjectInterface();
     this.imagePreloader = new ImagePreloader();
+    this.videoPreloader = new VideoPreloader();
     this.audioController = audioControllerFactory();
     this.markers = [];
     this.configAnimation = this.configAnimation.bind(this);
@@ -1483,6 +1654,7 @@
     var RendererClass = getRenderer(animType);
     this.renderer = new RendererClass(this, params.rendererSettings);
     this.imagePreloader.setCacheType(animType, this.renderer.globalData.defs);
+    this.videoPreloader.setCacheType(animType, this.renderer.globalData.defs);
     this.renderer.setProjectInterface(this.projectInterface);
     this.animType = animType;
     if (params.loop === '' || params.loop === null || params.loop === undefined || params.loop === true) {
@@ -1636,11 +1808,23 @@
     this.checkLoaded();
   };
   AnimationItem.prototype.preloadImages = function () {
+    console.log('AnimationItem::preloadImages()', this.animationData);
     this.imagePreloader.setAssetsPath(this.assetsPath);
     this.imagePreloader.setPath(this.path);
     this.imagePreloader.loadAssets(this.animationData.assets, this.imagesLoaded.bind(this));
   };
+  AnimationItem.prototype.videosLoaded = function () {
+    this.trigger('loaded_videos');
+    this.checkLoaded();
+  };
+  AnimationItem.prototype.preloadVideos = function () {
+    console.log('AnimationItem::preloadVideos()', this.animationData);
+    this.videoPreloader.setAssetsPath(this.assetsPath);
+    this.videoPreloader.setPath(this.path);
+    this.videoPreloader.loadAssets(this.animationData.assets, this.videosLoaded.bind(this));
+  };
   AnimationItem.prototype.configAnimation = function (animData) {
+    console.log('AnimationItem::configAnimation()', this.renderer, animData);
     if (!this.renderer) {
       return;
     }
@@ -1664,6 +1848,7 @@
       this.markers = markerParser(animData.markers || []);
       this.trigger('config_ready');
       this.preloadImages();
+      this.preloadVideos();
       this.loadSegments();
       this.updaFrameModifier();
       this.waitForFontsLoaded();
@@ -1671,6 +1856,7 @@
         this.audioController.pause();
       }
     } catch (error) {
+      console.error('AnimationItem::configAnimation failed', error);
       this.triggerConfigError(error);
     }
   };
@@ -1685,7 +1871,7 @@
     }
   };
   AnimationItem.prototype.checkLoaded = function () {
-    if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages()) {
+    if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages() && this.videoPreloader.loadedVideos()) {
       this.isLoaded = true;
       var expressionsPlugin = getExpressionsPlugin();
       if (expressionsPlugin) {
@@ -1699,6 +1885,8 @@
       if (this.autoplay) {
         this.play();
       }
+    } else {
+      console.log('AnimationItem::checkLoaded() still loading...');
     }
   };
   AnimationItem.prototype.resize = function (width, height) {
@@ -1954,6 +2142,7 @@
     }
     this.renderer.destroy();
     this.imagePreloader.destroy();
+    this.videoPreloader.destroy();
     this.trigger('destroy');
     this._cbs = null;
     this.onEnterFrame = null;
@@ -1964,6 +2153,7 @@
     this.renderer = null;
     this.renderer = null;
     this.imagePreloader = null;
+    this.videoPreloader = null;
     this.projectInterface = null;
   };
   AnimationItem.prototype.setCurrentRawFrameValue = function (value) {
@@ -7002,6 +7192,7 @@
     this.globalData.getAssetData = this.animationItem.getAssetData.bind(this.animationItem);
     this.globalData.getAssetsPath = this.animationItem.getAssetsPath.bind(this.animationItem);
     this.globalData.imageLoader = this.animationItem.imagePreloader;
+    this.globalData.videoLoader = this.animationItem.videoPreloader;
     this.globalData.audioController = this.animationItem.audioController;
     this.globalData.frameId = 0;
     this.globalData.frameRate = animData.fr;
@@ -17769,8 +17960,16 @@
     checkBlendMode: function checkBlendMode() {},
     initRendererElement: function initRendererElement() {
       this.material = null;
-      this.baseElement = new three.Group(); // this.data.tg
-      this.baseElement.rotation.order = 'ZYX';
+      this.baseElement = new three.Object3D(); // This base element acts as an anchor/pivot point as required
+      // this.baseElement.rotation.order = 'ZYX';
+
+      // Create a red cube
+      // const cubeSize = 100;
+      // const geometry = new BoxGeometry(cubeSize, cubeSize, cubeSize); // dimensions of the cube
+      // const material = new MeshBasicMaterial({ color: 0xff0000 }); // red color
+      // const cube = new Mesh(geometry, material);
+      // this.baseElement.add(cube);
+
       if (this.data.hasMask) {
         // TODO: setup mask support
       }
@@ -17778,10 +17977,10 @@
     },
     createContainerElements: function createContainerElements() {
       // this.renderableEffectsManager = new CVEffects(this);
-      this.transformedElement = this.baseElement;
+      // this.baseElement;
       this.maskedElement = this.layerElement;
-      if (this.data.ln) {
-        this.baseElement.name = this.data.ln;
+      if (this.data.nm) {
+        this.baseElement.name = "".concat(this.data.nm, "_pivot");
       }
       if (this.data.bm !== 0) {
         this.setBlendMode();
@@ -17841,6 +18040,7 @@
     },
     renderElement: function renderElement() {
       // console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement);
+
       var transformedElement = this.transformedElement;
       if (transformedElement && this.finalTransform._matMdf) {
         // var matrix = new Matrix4();
@@ -17889,15 +18089,23 @@
 
         // TODO: iterateDynamicProperties ??
 
+        // TODO: investigate heiarchy or using matrix??
+
+        // if (this.baseElement.name === 'image_1' || this.baseElement.name === 'clouds') {
+        //   console.log('**', this.baseElement.name, this.hierarchy.length, 'a_x', this.a.v[1], this.p.v[1], this.p.v[2], this.transformedElement);
+        // }
+
         // Position
-        var data = this.data.ks;
-        if (data.p.s) {
-          if (data.p.z) {
-            this.transformedElement.position.set(this.px.v, this.py.v, -this.pz.v);
-          } else {
-            this.transformedElement.position.set(this.px.v, this.py.v, 0);
-          }
-        } else {
+        // const data = this.data.ks;
+        // if (data.p.s) {
+        //   if (data.p.z) {
+        //     this.transformedElement.position.set(this.px.v, this.py.v, -this.pz.v);
+        //   } else {
+        //     this.transformedElement.position.set(this.px.v, this.py.v, 0);
+        //   }
+        // } else {
+        // }
+        if (this.p) {
           this.transformedElement.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
         }
 
@@ -17907,27 +18115,28 @@
         }
 
         // Skew
-        if (this.sk) {
-          console.log('Skew is', -this.sk.v, this.sa.v);
-          var matrix = new three.Matrix4();
-          matrix.makeRotationAxis(-this.sk.v, this.sa.v);
-          this.transformedElement.matrixAutoUpdate = false;
-          this.transformedElement.matrix.applyMatrix4(matrix); // .set(...matrix);
-          this.transformedElement.updateMatrixWorld(true);
-        }
+        // if (this.sk) {
+        //   console.log('Skew is', -this.sk.v, this.sa.v);
+        //
+        //   var matrix = new Matrix4();
+        //   matrix.makeRotationAxis(-this.sk.v, this.sa.v);
+        //   this.transformedElement.matrixAutoUpdate = false;
+        //   this.transformedElement.matrix.applyMatrix4(matrix); // .set(...matrix);
+        //   this.transformedElement.updateMatrixWorld(true);
+        // }
 
         // Rotation
-        if (this.r) {
-          // TODO: Look at working vector in
-          // this.transformedElement.rotate(-this.r.v);
-        } else if (!this.r) {
-          this.transformedElement.rotation.z += -this.rz.v;
-          this.transformedElement.rotation.y += this.ry.v;
-          this.transformedElement.rotation.x += this.rx.v;
-          this.transformedElement.rotation.z += -this.or.v[2];
-          this.transformedElement.rotation.y += this.or.v[1];
-          this.transformedElement.rotation.x += this.or.v[0];
-        }
+        // if (this.r) {
+        //   // TODO: Look at working vector in
+        //   // this.transformedElement.rotate(-this.r.v);
+        // } else if (!this.r) {
+        //   this.transformedElement.rotation.z += -this.rz.v;
+        //   this.transformedElement.rotation.y += this.ry.v;
+        //   this.transformedElement.rotation.x += this.rx.v;
+        //   this.transformedElement.rotation.z += -this.or.v[2];
+        //   this.transformedElement.rotation.y += this.or.v[1];
+        //   this.transformedElement.rotation.x += this.or.v[0];
+        // }
 
         // console.log('Found prop', this.data.nm, this, this.px, this.py, this.pz, this.p);
         // if (this.data.ddd) {
@@ -17972,10 +18181,13 @@
         // console.log('renderElement >> ', this.finalTransform.mat.props, transformedElement);
       }
 
+      // Opacity
       if (this.finalTransform._opMdf && this.material) {
         this.material.opacity = this.finalTransform.mProp.o.v;
       }
+      // TODO: Review renderTransform??
     },
+
     renderFrame: function renderFrame() {
       // If it is exported as hidden (data.hd === true) no need to render
       // If it is not visible no need to render
@@ -18051,8 +18263,8 @@
     });
     this.material = material;
     var plane = new three.Mesh(geometry, material);
-    plane.rotation.order = 'ZYX';
-    this.layerElement.add(plane);
+    // plane.rotation.order = 'ZYX';
+    this.baseElement.add(plane);
   };
 
   function RenderableObjectElement() {}
@@ -18118,10 +18330,8 @@
     extendPrototype([RenderableElement, createProxyFunction(_prototype)], RenderableObjectElement);
   })();
 
-  var VERSION = '4.1';
-
   function THRImageElement(data, globalData, comp) {
-    console.info('THRImageElement::constructor()', VERSION);
+    console.info('THRImageElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
   }
@@ -18134,43 +18344,32 @@
     console.log('THRImageElement::Setup blend mode', blendModeValue, this.data.bm, elem);
   };
   THRImageElement.prototype.createContent = function () {
-    var assetPath = "".concat(this.globalData.renderConfig.assetsPath).concat(this.assetData.u).concat(this.assetData.p);
-
     // Create a plane geometry
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
-
-    // Load the PNG image as a texture
     var textureLoader = new three.TextureLoader();
-    console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
-    console.log('THRImageElement::loading()', this.globalData.renderConfig.assetsPath);
-    var texture = textureLoader.load(assetPath);
-    // texture.colorSpace = LinearSRGBColorSpace;
+
+    // Use the preloaded image asset from the ImagePreloader
+    // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
+    // var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
+    var loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
+    var dataURI = three.ImageUtils.getDataURL(loadedAsset);
+    var texture = textureLoader.load(dataURI);
     texture.encoding = three.sRGBEncoding;
     var material = new three.MeshBasicMaterial({
       map: texture,
-      side: three.DoubleSide,
+      side: three.FrontSide,
       transparent: true,
       toneMapped: false
     });
-
-    // material.needsUpdate();
     this.material = material;
     var plane = new three.Mesh(geometry, material);
-    plane.rotation.order = 'ZYX';
+    plane.name = this.assetData.id;
+    // plane.rotation.order = 'ZYX';
 
-    // console.log('THRImageElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
-    // if (this.data.hasMask) {
-    //   this.imageElem = createNS('image');
-    //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
-    //   this.imageElem.setAttribute('height', this.assetData.h + 'px');
-    //   this.imageElem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetPath);
-    //   this.layerElement.appendChild(this.imageElem);
-    //   this.baseElement.setAttribute('width', this.assetData.w);
-    //   this.baseElement.setAttribute('height', this.assetData.h);
-    // } else {
-    this.layerElement.add(plane);
-    if (this.data.ln) {
-      this.baseElement.name = this.data.ln;
+    this.baseElement.add(plane);
+    this.transformedElement = plane;
+    if (this.data.nm) {
+      this.baseElement.name = "".concat(this.data.nm, "_pivot");
     }
   };
 
@@ -18194,8 +18393,8 @@
     });
     this.material = material;
     var plane = new three.Mesh(geometry, material);
-    plane.rotation.order = 'ZYX';
-    this.layerElement.add(plane);
+    // plane.rotation.order = 'ZYX';
+    this.baseElement.add(plane);
   };
 
   // import { Matrix4 } from 'three';
@@ -18419,29 +18618,35 @@
   function THRVideoElement(data, globalData, comp) {
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
+    this.video = null;
+    this._isPlaying = false;
+    this._canPlay = false;
+    this.renderedFrame = 0;
+    this.tm = data.tm ? PropertyFactory.getProp(this, data.tm, 0, globalData.frameRate, this) : {
+      _placeholder: true
+    };
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
-
-  // THRVideoElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
-
   THRVideoElement.prototype.createContent = function () {
-    var assetPath = "".concat(this.globalData.renderConfig.assetsPath).concat(this.assetData.u).concat(this.assetData.p);
-    var video = document.createElement('video');
-    video.src = assetPath;
-    video.load(); // must call after setting/changing source
-    video.play();
+    // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
+
+    this.video = this.globalData.videoLoader.getAsset(this.assetData);
+    this.video.pause();
+    this._canPlay = true;
 
     // Create a plane geometry
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
 
     // Load the PNG image as a texture
     var textureLoader = new three.TextureLoader();
-    console.log('THRVideoElement::createContent()', assetPath, this.assetData, textureLoader);
-    console.log('THRVideoElement::loading()', this.globalData.renderConfig.assetsPath);
+    console.log('THRVideoElement::createContent()', this.video, this.assetData, textureLoader);
+    console.log('THRVideoElement::createContent()', this.globalData.renderConfig.assetsPath, 'video:', this.video);
     // var texture = textureLoader.load(assetPath);
-    var texture = new three.VideoTexture(video);
-    texture.minFilter = three.LinearFilter;
-    texture.magFilter = three.LinearFilter;
+    var texture = new three.VideoTexture(this.video);
+    // texture.minFilter = LinearFilter;
+    // texture.magFilter = LinearFilter;
+    // texture.colorSpace = LinearSRGBColorSpace;
+    texture.encoding = three.sRGBEncoding;
     texture.format = three.RGBAFormat;
     var material = new three.MeshBasicMaterial({
       map: texture,
@@ -18450,8 +18655,8 @@
     });
     this.material = material;
     var plane = new three.Mesh(geometry, material);
-    plane.rotation.order = 'ZYX';
-
+    plane.name = this.assetData.id;
+    // plane.rotation.order = 'ZYX';
     // console.log('THRVideoElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
     // if (this.data.hasMask) {
     //   this.imageElem = createNS('image');
@@ -18462,11 +18667,102 @@
     //   this.baseElement.setAttribute('width', this.assetData.w);
     //   this.baseElement.setAttribute('height', this.assetData.h);
     // } else {
-    this.layerElement.add(plane);
-    if (this.data.ln) {
-      this.baseElement.name = this.data.ln;
+    this.baseElement.add(plane);
+    this.transformedElement = plane;
+
+    // const elem = this;
+    // const data = this.data.ks;
+    // this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, this);
+    // this.baseElement.position.set(this.a.v[0], this.a.v[1], this.a.v[2]);
+    // console.log('THRVideoElement::Anchor properties', this.data, this.data.nm, this.a.v);
+
+    if (this.data.nm) {
+      this.baseElement.name = "".concat(this.data.nm, "_pivot");
     }
   };
+  THRVideoElement.prototype.prepareFrame = function (num) {
+    this._mdf = false;
+    this.prepareRenderableFrame(num);
+    this.prepareProperties(num, this.isInRange);
+    this.checkTransparency();
+    if (!this.tm._placeholder) {
+      var timeRemapped = this.tm.v;
+      if (timeRemapped === this.data.op) {
+        timeRemapped = this.data.op - 1;
+      }
+      this.renderedFrame = timeRemapped;
+    } else {
+      this.renderedFrame = num / this.data.sr;
+    }
+  };
+  THRVideoElement.prototype.renderFrame = function () {
+    // console.log('THRVideoElement::renderFrame() isInRange', this.isInRange);
+    // If it is exported as hidden (data.hd === true) no need to render
+    // If it is not visible no need to render
+    if (this.data.hd || this.hidden) {
+      return;
+    }
+
+    // Anchor
+    if (this.a) {
+      this.baseElement.position.set(this.a.v[0], this.a.v[1], this.a.v[2]);
+    }
+    this.renderTransform();
+    this.renderRenderable();
+    this.renderElement();
+    this.renderInnerContent();
+    if (this._isFirstFrame) {
+      this._isFirstFrame = false;
+    }
+    if (this._canPlay && this.video) {
+      if (this.isInRange) {
+        // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
+        if (!this._isPlaying) {
+          this.video.play();
+          this.video.currentTime = this.renderedFrame / this.globalData.frameRate;
+          this._isPlaying = true;
+          console.log('THRVideoElement:renderFrame() Play', this.renderedFrame / this.globalData.frameRate);
+        } else if (!this.isPlaying() && Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime) > 0.2) {
+          console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
+          // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
+          this.video.play();
+          this.video.currentTime = this.renderedFrame / this.globalData.frameRate + 0.05;
+          this._isPlaying = true;
+        }
+      } else if (this._isPlaying) {
+        // Reset video
+        this.video.pause();
+        this.video.currentTime = 0;
+        this._isPlaying = false;
+      }
+    } else {
+      var asset = this.globalData.videoLoader.getAsset(this.assetData);
+      this.video = asset;
+      this._canPlay = true;
+      console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
+    }
+  };
+  THRVideoElement.prototype.isPlaying = function () {
+    return this.video && !this.video.paused && !this.video.ended && this.video.readyState > 2;
+  };
+  THRVideoElement.prototype.show = function () {
+    // this.audio.play()
+  };
+  THRVideoElement.prototype.hide = function () {
+    if (this.video) this.video.pause();
+    this._isPlaying = false;
+  };
+  THRVideoElement.prototype.pause = function () {
+    if (this.video) this.video.pause();
+    this._isPlaying = false;
+    // this._canPlay = false;
+  };
+
+  THRVideoElement.prototype.resume = function () {
+    this._canPlay = true;
+  };
+
+  var VERSION = '4.1';
 
   function ThreeRendererBase(animationItem, config) {
     console.log('ThreeRendererBase::constructor()', VERSION, config);
@@ -18498,7 +18794,7 @@
     this.destroyed = false;
     this.camera = null;
     this.supports3d = true;
-    this.rendererType = 'three';
+    this.rendererType = 'threejs';
   }
   extendPrototype([BaseRenderer], ThreeRendererBase);
   ThreeRendererBase.prototype.buildItem = SVGRenderer.prototype.buildItem;
@@ -18874,12 +19170,26 @@
       }
     }
   };
+  ThreeRendererBase.prototype.videosLoaded = function () {
+    // this.trigger('loaded_images');
+    // this.checkLoaded();
+    console.log('ThreeRendererBase::Videos loaded!!');
+  };
   ThreeRendererBase.prototype.initItems = function () {
-    console.log('initItems!!');
+    console.log('ThreeRendererBase::initItems!!', this);
     this.buildAllItems();
     if (this.camera) {
       this.camera.setup();
     }
+
+    // TODO: Check for video assets to preload // do this within AnimationItem
+    // TODO: Detect any videos required to load but move this into AnimationItem later
+    // console.log('ThreeRendererBase::Check for preload of videos..', this.animationItem.assetsPath, this.animationItem.path);
+    // this.videoPreloader = new VideoPreloader();
+    // this.videoPreloader.setAssetsPath(this.animationItem.assetsPath);
+    // this.videoPreloader.setPath(this.animationItem.path);
+    // this.videoPreloader.loadAssets(this.animationItem.animationData.assets, this.videosLoaded.bind(this));
+
     // else {
     //   var cWidth = this.globalData.compSize.w;
     //   var cHeight = this.globalData.compSize.h;
@@ -18931,8 +19241,9 @@
     //   this.transformedElement = this.layerElement;
     // }
     // TODO: Define the mask
-    this.transformedElement = this.baseElement;
+    // this.transformedElement = this.baseElement;
   };
+
   THRCompElement.prototype.addTo3dContainer = function (elem, pos) {
     var j = 0;
     var nextElement;
@@ -18989,7 +19300,7 @@
     this.destroyed = false;
     this.camera = null;
     this.supports3d = true;
-    this.rendererType = 'three';
+    this.rendererType = 'threejs';
 
     // Hook the loading process into Pixi Loader
     AnimationItem.prototype.checkLoaded = ThreeRenderer.prototype.checkLoaded;
@@ -19000,13 +19311,8 @@
     return new THRCompElement(data, this.globalData, this);
   };
   ThreeRenderer.prototype.checkLoaded = function () {
-    console.log('AnimationItem::checkLoaded() ****', this, this.renderer.globalData);
-    if (this.renderer.globalData.isAssetsLoaded) {
-      //   if (!this.isLoaded
-      //     && this.renderer.globalData.fontManager.isLoaded
-      //     && (this.imagePreloader.loadedImages() || this.rendererType !== 'canvas')
-      //     && (this.imagePreloader.loadedFootages())
-      //   ) {
+    console.log('AnimationItem::checkLoaded() ****', this, this.renderer);
+    if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages() && this.videoPreloader.loadedVideos()) {
       this.isLoaded = true;
       var expressionsPlugin = getExpressionsPlugin();
       if (expressionsPlugin) {
@@ -19021,15 +19327,13 @@
         this.play();
       }
     }
-    //   }
-    // }
   };
 
   // Registering renderers
   registerRenderer('canvas', CanvasRenderer);
   registerRenderer('html', HybridRenderer);
   registerRenderer('svg', SVGRenderer);
-  registerRenderer('three', ThreeRenderer);
+  registerRenderer('threejs', ThreeRenderer);
 
   // Registering shape modifiers
   ShapeModifiers.registerModifier('tm', TrimModifier);

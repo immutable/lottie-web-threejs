@@ -30,8 +30,8 @@ THRSolidElement.prototype.createContent = function () {
   const material = new MeshBasicMaterial({ color: this.data.sc });
   this.material = material;
   const plane = new Mesh(geometry, material);
-  plane.rotation.order = 'ZYX';
-  this.layerElement.add(plane);
+  // plane.rotation.order = 'ZYX';
+  this.baseElement.add(plane);
 };
 
 export default THRSolidElement;

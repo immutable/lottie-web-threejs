@@ -34,7 +34,7 @@ THRCompElement.prototype.createContainerElements = function () {
   //   this.transformedElement = this.layerElement;
   // }
   // TODO: Define the mask
-  this.transformedElement = this.baseElement;
+  // this.transformedElement = this.baseElement;
 };
 
 THRCompElement.prototype.addTo3dContainer = function (elem, pos) {

@@ -1,5 +1,5 @@
 import {
-  Group, Matrix4,
+  Object3D,
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
@@ -14,8 +14,15 @@ THRBaseElement.prototype = {
   checkBlendMode: function () {},
   initRendererElement: function () {
     this.material = null;
-    this.baseElement = new Group(); // this.data.tg
-    this.baseElement.rotation.order = 'ZYX';
+    this.baseElement = new Object3D(); // This base element acts as an anchor/pivot point as required
+    // this.baseElement.rotation.order = 'ZYX';
+
+    // Create a red cube
+    // const cubeSize = 100;
+    // const geometry = new BoxGeometry(cubeSize, cubeSize, cubeSize); // dimensions of the cube
+    // const material = new MeshBasicMaterial({ color: 0xff0000 }); // red color
+    // const cube = new Mesh(geometry, material);
+    // this.baseElement.add(cube);
 
     if (this.data.hasMask) {
       // TODO: setup mask support
@@ -24,10 +31,10 @@ THRBaseElement.prototype = {
   },
   createContainerElements: function () {
     // this.renderableEffectsManager = new CVEffects(this);
-    this.transformedElement = this.baseElement;
+    // this.baseElement;
     this.maskedElement = this.layerElement;
-    if (this.data.ln) {
-      this.baseElement.name = this.data.ln;
+    if (this.data.nm) {
+      this.baseElement.name = `${this.data.nm}_pivot`;
     }
     if (this.data.bm !== 0) {
       this.setBlendMode();
@@ -81,6 +88,7 @@ THRBaseElement.prototype = {
   },
   renderElement: function () {
     // console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement);
+
     var transformedElement = this.transformedElement;
     if (transformedElement && this.finalTransform._matMdf) {
       // var matrix = new Matrix4();
@@ -129,15 +137,23 @@ THRBaseElement.prototype = {
 
       // TODO: iterateDynamicProperties ??
 
+      // TODO: investigate heiarchy or using matrix??
+
+      // if (this.baseElement.name === 'image_1' || this.baseElement.name === 'clouds') {
+      //   console.log('**', this.baseElement.name, this.hierarchy.length, 'a_x', this.a.v[1], this.p.v[1], this.p.v[2], this.transformedElement);
+      // }
+
       // Position
-      const data = this.data.ks;
-      if (data.p.s) {
-        if (data.p.z) {
-          this.transformedElement.position.set(this.px.v, this.py.v, -this.pz.v);
-        } else {
-          this.transformedElement.position.set(this.px.v, this.py.v, 0);
-        }
-      } else {
+      // const data = this.data.ks;
+      // if (data.p.s) {
+      //   if (data.p.z) {
+      //     this.transformedElement.position.set(this.px.v, this.py.v, -this.pz.v);
+      //   } else {
+      //     this.transformedElement.position.set(this.px.v, this.py.v, 0);
+      //   }
+      // } else {
+      // }
+      if (this.p) {
         this.transformedElement.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
       }
 
@@ -147,28 +163,28 @@ THRBaseElement.prototype = {
       }
 
       // Skew
-      if (this.sk) {
-        console.log('Skew is', -this.sk.v, this.sa.v);
-
-        var matrix = new Matrix4();
-        matrix.makeRotationAxis(-this.sk.v, this.sa.v);
-        this.transformedElement.matrixAutoUpdate = false;
-        this.transformedElement.matrix.applyMatrix4(matrix); // .set(...matrix);
-        this.transformedElement.updateMatrixWorld(true);
-      }
+      // if (this.sk) {
+      //   console.log('Skew is', -this.sk.v, this.sa.v);
+      //
+      //   var matrix = new Matrix4();
+      //   matrix.makeRotationAxis(-this.sk.v, this.sa.v);
+      //   this.transformedElement.matrixAutoUpdate = false;
+      //   this.transformedElement.matrix.applyMatrix4(matrix); // .set(...matrix);
+      //   this.transformedElement.updateMatrixWorld(true);
+      // }
 
       // Rotation
-      if (this.r) {
-        // TODO: Look at working vector in
-        // this.transformedElement.rotate(-this.r.v);
-      } else if (!this.r) {
-        this.transformedElement.rotation.z += -this.rz.v;
-        this.transformedElement.rotation.y += this.ry.v;
-        this.transformedElement.rotation.x += this.rx.v;
-        this.transformedElement.rotation.z += -this.or.v[2];
-        this.transformedElement.rotation.y += this.or.v[1];
-        this.transformedElement.rotation.x += this.or.v[0];
-      }
+      // if (this.r) {
+      //   // TODO: Look at working vector in
+      //   // this.transformedElement.rotate(-this.r.v);
+      // } else if (!this.r) {
+      //   this.transformedElement.rotation.z += -this.rz.v;
+      //   this.transformedElement.rotation.y += this.ry.v;
+      //   this.transformedElement.rotation.x += this.rx.v;
+      //   this.transformedElement.rotation.z += -this.or.v[2];
+      //   this.transformedElement.rotation.y += this.or.v[1];
+      //   this.transformedElement.rotation.x += this.or.v[0];
+      // }
 
       // console.log('Found prop', this.data.nm, this, this.px, this.py, this.pz, this.p);
       // if (this.data.ddd) {
@@ -212,9 +228,12 @@ THRBaseElement.prototype = {
       // );
       // console.log('renderElement >> ', this.finalTransform.mat.props, transformedElement);
     }
+
+    // Opacity
     if (this.finalTransform._opMdf && this.material) {
       this.material.opacity = this.finalTransform.mProp.o.v;
     }
+    // TODO: Review renderTransform??
   },
   renderFrame: function () {
     // If it is exported as hidden (data.hd === true) no need to render

@@ -1218,21 +1218,29 @@
       }.bind(this));
       return ob;
     }
+    function isValid(filename) {
+      var regex = /\.(jpe?g|png|gif|bmp|webp|tiff|apng?)$/i;
+      return regex.test(filename);
+    }
     function loadAssets(assets, cb) {
+      console.log('ImagePreloader::loadAssets()', assets);
       this.imagesLoadedCb = cb;
       var i;
       var len = assets.length;
       for (i = 0; i < len; i += 1) {
         if (!assets[i].layers) {
-          if (!assets[i].t || assets[i].t === 'seq') {
-            this.totalImages += 1;
-            this.images.push(this._createImageData(assets[i]));
-          } else if (assets[i].t === 3) {
-            this.totalFootages += 1;
-            this.images.push(this.createFootageData(assets[i]));
+          if (isValid(assets[i].p)) {
+            if (!assets[i].t || assets[i].t === 'seq') {
+              this.totalImages += 1;
+              this.images.push(this._createImageData(assets[i]));
+            } else if (assets[i].t === 3) {
+              this.totalFootages += 1;
+              this.images.push(this.createFootageData(assets[i]));
+            }
           }
         }
       }
+      console.log('ImagePreloader::loadAssets() found:', this.images);
     }
     function setPath(path) {
       this.path = path || '';
@@ -1298,6 +1306,168 @@
       setCacheType: setCacheType
     };
     return ImagePreloaderFactory;
+  }();
+
+  // import { isSafari } from './common';
+  var VideoPreloader = function () {
+    var proxyVideo = function () {
+      var canvas = createTag('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.fillRect(0, 0, 1, 1);
+      return canvas;
+    }();
+    function videoLoaded(event) {
+      console.log('VideoPreloader::videoLoaded()', event);
+      this.loadedAssets += 1;
+      if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
+        if (this.videosLoadedCb) {
+          this.videosLoadedCb(null);
+        }
+      }
+    }
+    function videoEvent(event) {
+      console.log('VideoPreloader::videoEvent()', event.type, event);
+    }
+    function getAssetsPath(assetData, assetsPath, originalPath) {
+      var path = '';
+      if (assetData.e) {
+        path = assetData.p;
+      } else if (assetsPath) {
+        var assetPath = assetData.p;
+        if (assetPath.indexOf('images/') !== -1) {
+          assetPath = assetPath.split('/')[1];
+        }
+        path = assetsPath + assetPath;
+      } else {
+        path = originalPath;
+        path += assetData.u ? assetData.u : '';
+        path += assetData.p;
+      }
+      return path;
+    }
+
+    // function testImageLoaded(img) {
+    //   var _count = 0;
+    //   var intervalId = setInterval(function () {
+    //     var box = img.getBBox();
+    //     if (box.width || _count > 500) {
+    //       this._imageLoaded();
+    //       clearInterval(intervalId);
+    //     }
+    //     _count += 1;
+    //   }.bind(this), 50);
+    // }
+
+    function createVideoData(assetData) {
+      var path = getAssetsPath(assetData, this.assetsPath, this.path);
+
+      // var img = createTag('img');
+      var video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.autoplay = 'autoplay';
+      video.preload = 'auto';
+      video.muted = 'true';
+      video.addEventListener('play', this._videoEvent, false);
+      video.addEventListener('playing', this._videoEvent, false);
+      video.addEventListener('waiting', this._videoEvent, false);
+      video.addEventListener('seeked', this._videoEvent, false);
+      video.addEventListener('seeking', this._videoEvent, false);
+      video.addEventListener('progress', this._videoEvent, false);
+      video.addEventListener('canplaythrough', this._videoLoaded, false);
+      video.addEventListener('canplay', this._videoEvent, false);
+      video.addEventListener('load', this._videoLoaded, false);
+      video.addEventListener('error', function () {
+        ob.video = proxyVideo;
+        this._videoLoaded();
+      }.bind(this), false);
+      video.src = path;
+      video.load();
+      video.pause();
+
+      // if (this._elementHelper.append) {
+      //   this._elementHelper.append(img);
+      // } else {
+      //   this._elementHelper.appendChild(img);
+      // }
+      var ob = {
+        video: video,
+        assetData: assetData
+      };
+      return ob;
+    }
+    function isValid(filename) {
+      var regex = /\.(mp4|mov|ogg|mpg|webm)$/i;
+      return regex.test(filename);
+    }
+    function loadAssets(assets, callback) {
+      console.log('VideoPreloader::loadAssets()', assets);
+      this.videosLoadedCb = callback;
+      var i;
+      var len = assets.length;
+      for (i = 0; i < len; i += 1) {
+        if (!assets[i].layers) {
+          if (isValid(assets[i].p)) {
+            if (!assets[i].t || assets[i].t === 'seq') {
+              this.videos.push(this._createVideoData(assets[i]));
+            }
+          }
+        }
+      }
+      this.totalVideos = this.videos.length;
+      console.log('VideoPreloader::loadAssets() found:', this.videos);
+    }
+    function setPath(path) {
+      this.path = path || '';
+    }
+    function setAssetsPath(path) {
+      this.assetsPath = path || '';
+    }
+    function getAsset(assetData) {
+      var i = 0;
+      var len = this.videos.length;
+      while (i < len) {
+        if (this.videos[i].assetData === assetData) {
+          return this.videos[i].video;
+        }
+        i += 1;
+      }
+      return null;
+    }
+    function destroy() {
+      this.videosLoadedCb = null;
+      this.videos.length = 0;
+    }
+    function loadedVideos() {
+      return this.totalVideos === this.loadedAssets;
+    }
+    function setCacheType(type, elementHelper) {
+      this._elementHelper = elementHelper;
+      this._createVideoData = createVideoData.bind(this);
+    }
+    function VideoPreloaderFactory() {
+      this._videoLoaded = videoLoaded.bind(this);
+      this._videoEvent = videoEvent.bind(this);
+      this.assetsPath = '';
+      this.path = '';
+      this.totalVideos = 0;
+      this.loadedAssets = 0;
+      this.videosLoadedCb = null;
+      this.videos = [];
+    }
+    VideoPreloaderFactory.prototype = {
+      loadAssets: loadAssets,
+      setAssetsPath: setAssetsPath,
+      setPath: setPath,
+      loadedVideos: loadedVideos,
+      destroy: destroy,
+      getAsset: getAsset,
+      videoLoaded: videoLoaded,
+      setCacheType: setCacheType
+    };
+    return VideoPreloaderFactory;
   }();
 
   function BaseEvent() {}
@@ -1461,6 +1631,7 @@
     this._completedLoop = false;
     this.projectInterface = ProjectInterface();
     this.imagePreloader = new ImagePreloader();
+    this.videoPreloader = new VideoPreloader();
     this.audioController = audioControllerFactory();
     this.markers = [];
     this.configAnimation = this.configAnimation.bind(this);
@@ -1483,6 +1654,7 @@
     var RendererClass = getRenderer(animType);
     this.renderer = new RendererClass(this, params.rendererSettings);
     this.imagePreloader.setCacheType(animType, this.renderer.globalData.defs);
+    this.videoPreloader.setCacheType(animType, this.renderer.globalData.defs);
     this.renderer.setProjectInterface(this.projectInterface);
     this.animType = animType;
     if (params.loop === '' || params.loop === null || params.loop === undefined || params.loop === true) {
@@ -1636,11 +1808,23 @@
     this.checkLoaded();
   };
   AnimationItem.prototype.preloadImages = function () {
+    console.log('AnimationItem::preloadImages()', this.animationData);
     this.imagePreloader.setAssetsPath(this.assetsPath);
     this.imagePreloader.setPath(this.path);
     this.imagePreloader.loadAssets(this.animationData.assets, this.imagesLoaded.bind(this));
   };
+  AnimationItem.prototype.videosLoaded = function () {
+    this.trigger('loaded_videos');
+    this.checkLoaded();
+  };
+  AnimationItem.prototype.preloadVideos = function () {
+    console.log('AnimationItem::preloadVideos()', this.animationData);
+    this.videoPreloader.setAssetsPath(this.assetsPath);
+    this.videoPreloader.setPath(this.path);
+    this.videoPreloader.loadAssets(this.animationData.assets, this.videosLoaded.bind(this));
+  };
   AnimationItem.prototype.configAnimation = function (animData) {
+    console.log('AnimationItem::configAnimation()', this.renderer, animData);
     if (!this.renderer) {
       return;
     }
@@ -1664,6 +1848,7 @@
       this.markers = markerParser(animData.markers || []);
       this.trigger('config_ready');
       this.preloadImages();
+      this.preloadVideos();
       this.loadSegments();
       this.updaFrameModifier();
       this.waitForFontsLoaded();
@@ -1671,6 +1856,7 @@
         this.audioController.pause();
       }
     } catch (error) {
+      console.error('AnimationItem::configAnimation failed', error);
       this.triggerConfigError(error);
     }
   };
@@ -1685,7 +1871,7 @@
     }
   };
   AnimationItem.prototype.checkLoaded = function () {
-    if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages()) {
+    if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages() && this.videoPreloader.loadedVideos()) {
       this.isLoaded = true;
       var expressionsPlugin = getExpressionsPlugin();
       if (expressionsPlugin) {
@@ -1699,6 +1885,8 @@
       if (this.autoplay) {
         this.play();
       }
+    } else {
+      console.log('AnimationItem::checkLoaded() still loading...');
     }
   };
   AnimationItem.prototype.resize = function (width, height) {
@@ -1954,6 +2142,7 @@
     }
     this.renderer.destroy();
     this.imagePreloader.destroy();
+    this.videoPreloader.destroy();
     this.trigger('destroy');
     this._cbs = null;
     this.onEnterFrame = null;
@@ -1964,6 +2153,7 @@
     this.renderer = null;
     this.renderer = null;
     this.imagePreloader = null;
+    this.videoPreloader = null;
     this.projectInterface = null;
   };
   AnimationItem.prototype.setCurrentRawFrameValue = function (value) {
@@ -7002,6 +7192,7 @@
     this.globalData.getAssetData = this.animationItem.getAssetData.bind(this.animationItem);
     this.globalData.getAssetsPath = this.animationItem.getAssetsPath.bind(this.animationItem);
     this.globalData.imageLoader = this.animationItem.imagePreloader;
+    this.globalData.videoLoader = this.animationItem.videoPreloader;
     this.globalData.audioController = this.animationItem.audioController;
     this.globalData.frameId = 0;
     this.globalData.frameRate = animData.fr;

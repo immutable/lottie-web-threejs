@@ -118,21 +118,30 @@ const ImagePreloader = (function () {
     return ob;
   }
 
+  function isValid(filename) {
+    var regex = /\.(jpe?g|png|gif|bmp|webp|tiff|apng?)$/i;
+    return regex.test(filename);
+  }
+
   function loadAssets(assets, cb) {
+    console.log('ImagePreloader::loadAssets()', assets);
     this.imagesLoadedCb = cb;
     var i;
     var len = assets.length;
     for (i = 0; i < len; i += 1) {
       if (!assets[i].layers) {
-        if (!assets[i].t || assets[i].t === 'seq') {
-          this.totalImages += 1;
-          this.images.push(this._createImageData(assets[i]));
-        } else if (assets[i].t === 3) {
-          this.totalFootages += 1;
-          this.images.push(this.createFootageData(assets[i]));
+        if (isValid(assets[i].p)) {
+          if (!assets[i].t || assets[i].t === 'seq') {
+            this.totalImages += 1;
+            this.images.push(this._createImageData(assets[i]));
+          } else if (assets[i].t === 3) {
+            this.totalFootages += 1;
+            this.images.push(this.createFootageData(assets[i]));
+          }
         }
       }
     }
+    console.log('ImagePreloader::loadAssets() found:', this.images);
   }
 
   function setPath(path) {

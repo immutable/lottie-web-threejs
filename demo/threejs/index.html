@@ -49,30 +49,42 @@
      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
-     import { LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding } from 'three';
+     import { LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
 
      var threeData = initThree({width: 1920, height: 720});
 
      var GUI = lil.GUI;
      const gui = new GUI();
      const myObject = {
-          myBoolean: true,
-          myString: 'lil-gui',
-          myNumber: 1,
+          isEditingCamera: false,
+          isEditingTarget: false,
+          isFollowing: false,
           fov: 25,
           focus: 10,
           near: 10,
           far: 10000,
           ortho: false,
-          cameraX: 972,
-          cameraY: 477,
-          cameraZ: 2536,
+          cameraX: 1704,
+          cameraY: 1152,
+          cameraZ: -2270,
           lookX: 977,
           lookY: 540,
           lookZ: 0,
           cameraRotX: 0.0,
           cameraRotY: 0.0,
           cameraRotZ: 0.0,
+          target: '',
+          targetX: 0,
+          targetY: 0,
+          targetZ: 0,
+          targetScaleX: 0,
+          targetScaleY: 0,
+          targetScaleZ: 0,
+          targetRotationX: 0,
+          targetRotationY: 0,
+          targetRotationZ: 0,
+          targetItem: {},
+          targetName: '',
           objX: 1000,
           objY: 1000,
           objZ: 1000,
@@ -82,9 +94,53 @@
           lightAmbient: 10
      };
 
-     gui.add( myObject, 'objX' );  // Checkbox
-     gui.add( myObject, 'objY' );   // Text Field
-     gui.add( myObject, 'objZ' );   // Number Field
+     gui.add( myObject, 'isFollowing' );
+
+     const targetFolder = gui.addFolder('Target');
+     targetFolder.add(myObject, 'targetName').listen();
+     const editingTargetController = targetFolder.add(myObject, 'isEditingTarget');
+     editingTargetController.onChange((value) => {
+          console.log('Toggle isEditingTarget()', value, myObject.targetItem);
+          if (value && myObject.targetItem) {
+               myObject.targetX = myObject.targetItem.position.x;
+               myObject.targetY = myObject.targetItem.position.y;
+               myObject.targetZ = myObject.targetItem.position.z;
+               myObject.targetScaleX = myObject.targetItem.scale.x;
+               myObject.targetScaleY = myObject.targetItem.scale.y;
+               myObject.targetScaleZ = myObject.targetItem.scale.z;
+               myObject.targetRotationX = THREE.MathUtils.radToDeg(myObject.targetItem.rotation.x);
+               myObject.targetRotationY = THREE.MathUtils.radToDeg(myObject.targetItem.rotation.y);
+               myObject.targetRotationZ = THREE.MathUtils.radToDeg(myObject.targetItem.rotation.z);
+          }
+     });
+     targetFolder.add(myObject, 'targetX').listen();
+     targetFolder.add(myObject, 'targetY').listen();
+     targetFolder.add(myObject, 'targetZ').listen();
+     targetFolder.add(myObject, 'targetScaleX').listen();
+     targetFolder.add(myObject, 'targetScaleY').listen();
+     targetFolder.add(myObject, 'targetScaleZ').listen();
+     targetFolder.add(myObject, 'targetRotationX', 0, 350).listen();
+     targetFolder.add(myObject, 'targetRotationY', 0, 360).listen();
+     targetFolder.add(myObject, 'targetRotationZ', 0, 360).listen();
+
+     const cameraFolder = gui.addFolder('Camera');
+     const editingCameraController = cameraFolder.add(myObject, 'isEditingCamera');
+     editingCameraController.onChange((value) => {
+          if (value && camera) {
+               // Capture the camera position from the AE values
+               console.log('Current Camera Position', camera.ks);
+               myObject.cameraX = camera.ks.p.k[0].s[0];
+               myObject.cameraY = camera.ks.p.k[0].s[1];
+               myObject.cameraZ = camera.ks.p.k[0].s[2];
+          }
+     });
+     cameraFolder.add(myObject, 'cameraX', -1000, 2000).listen();
+     cameraFolder.add(myObject, 'cameraY', -1000, 2000).listen();
+     cameraFolder.add(myObject, 'cameraZ', -7800, 7000).listen();
+     cameraFolder.add( myObject, 'lookX' ).listen();
+     cameraFolder.add( myObject, 'lookY' ).listen();
+     cameraFolder.add( myObject, 'lookZ' ).listen();
+
      var controller = gui.add( myObject, 'exposure' );   // Number Field
      controller.onChange((value) => {
           threeData.renderer.toneMappingExposure = value;
@@ -113,6 +169,35 @@
           }
      });
 
+     gui.onChange((value) => {
+          if (myObject.isEditingCamera && camera) {
+
+               // Pos x
+               camera.ks.p.k[0].s[0] = myObject.cameraX;
+               camera.ks.p.k[1].s[0] = myObject.cameraX;
+
+               // Pos y
+               camera.ks.p.k[0].s[1] = myObject.cameraY;
+               camera.ks.p.k[1].s[1] = myObject.cameraY;
+
+               // Pos z
+               camera.ks.p.k[0].s[2] = myObject.cameraZ;
+               camera.ks.p.k[1].s[2] = myObject.cameraZ;
+
+               threeData.camera.lookAt(new Vector3(myObject.lookX, myObject.lookY, myObject.lookZ));
+          }
+
+          if (myObject.isEditingTarget && myObject.targetItem && myObject.targetX !== 0) {
+               myObject.targetItem.position.set(myObject.targetX, myObject.targetY, myObject.targetZ);
+               myObject.targetItem.scale.set(myObject.targetScaleX, myObject.targetScaleY, myObject.targetScaleZ);
+               myObject.targetItem.rotation.set(
+                       THREE.MathUtils.degToRad(myObject.targetRotationX),
+                       THREE.MathUtils.degToRad(myObject.targetRotationY),
+                       THREE.MathUtils.degToRad(myObject.targetRotationZ),
+               );
+          }
+     })
+
      // gui.hide();
 
      // gui.add( myObject, 'fov' );   // Number Field
@@ -133,14 +218,16 @@
 
      var animData = {
         wrapper: document.getElementById('bodymovin'),
-        animType: 'three',
+        animType: 'threejs',
         loop: true,
         prerender: true,
         autoplay: true,
-        path: 'bg_camera/data.json',
+        // path: '/demo/threejs/andy/data.json',
+        path: '/demo/threejs/viddy/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/pack/',
+             // assetsPath: '/demo/threejs/andy/',
+             assetsPath: '/demo/threejs/viddy/',
              renderer: threeData
         }
     };
@@ -151,6 +238,7 @@
     };
     var cameraElement;
     var camera;
+    var clouds;
     var currentLayerNum = -1;
     var currentPos = [1150, 645, 780];
     var mousePos = [960, 540, -500];
@@ -208,7 +296,6 @@
                mixers: [],
                controls: false,
                interaction: true,
-               pack: false,
                debug: true
           };
 
@@ -226,14 +313,14 @@
           three.renderer.setSize(options.width, options.height);
 
           // TODO: Move away from mixer / animate function here and use GSAP
-          const animate = () => {
-               requestAnimationFrame(animate);
-               const delta = three.clock.getDelta();
-               if (three.mixers.length > 0) {
-                    three.mixers.forEach((mixer) => mixer.update(delta));
-               }
-          }
-          animate();
+          // const animate = () => {
+          //      requestAnimationFrame(animate);
+          //      const delta = three.clock.getDelta();
+          //      if (three.mixers.length > 0) {
+          //           three.mixers.forEach((mixer) => mixer.update(delta));
+          //      }
+          // }
+          // animate();
 
           // if (!three.controls) {
           // three.controls = new OrbitControls(three.camera, three.renderer.domElement);
@@ -251,167 +338,183 @@
     calculateSize();
 
     anim.addEventListener('DOMLoaded', function() {
-         console.log('Anim::DOMLoaded()');
+         console.log('Example::DOMLoaded');
          if (!initPack) {
               initPack = true;
-              camera = anim.animationData.layers.find((layer) => layer.nm === 'Camera 1');
+              camera = anim.animationData.layers.find((layer) => {
+                   return layer.nm === 'Camera 1';
+              });
+
+              // clouds = anim.renderer.elements.find((item) => {
+              //      return item.data.nm === 'clouds';
+              // })
+              myObject.targetName = 'Shiny Pack';
+              // clouds = anim.animationData.layers.find((layer) => {
+              //      return layer.nm === myObject.targetName;
+              // });
+              clouds = anim.renderer.elements.find((layer) => {
+                   return layer.data.nm === myObject.targetName;
+              });
+              if (clouds) {
+                   myObject.targetItem = clouds.transformedElement;
+              }
+
+
+              console.log('*** Anim::DOMLoaded() found target', clouds);
+
+              // camera.ks.p.k[0].s[0] = myObject.cameraX;
+              // camera.ks.p.k[1].s[0] = myObject.cameraX;
+              //
+              // camera.ks.p.k[0].s[1] = myObject.cameraY;
+              // camera.ks.p.k[1].s[1] = myObject.cameraY;
+              //
+              // camera.ks.p.k[0].s[2] = myObject.cameraZ;
+              // camera.ks.p.k[1].s[2] = myObject.cameraZ;
+
+              // Add axes helper
+              const axesHelper = new THREE.AxesHelper(5);
+              threeData.scene.add(axesHelper);
+              //
+              // // Add camera helper (for perspective camera)
+              const cameraHelper = new THREE.CameraHelper(threeData.camera);
+              threeData.scene.add(cameraHelper);
 
               // TODO: Load a gltf file..
-              const loader = new GLTFLoader().setPath('/demo/threejs/model/');
-              loader.load('m2.gltf', function (gltf) {
-                    console.log('>> Loaded GLTF', gltf, 'add to position');
-
-                    threeData.pack = gltf;
-                   packObj = gltf;
-                   gltf.scene.scale.set(8, 8, 8);
-                   gltf.scene.position.set(currentPos[0], currentPos[1], currentPos[2]);
-                   // threeData.controls.target = gltf.scene.children[1].position;
-
-                   // gltf.scene.position.set(0, 0, 1000);
-                   threeData.scene.add(gltf.scene);
-
-                   const ambientLight = new THREE.AmbientLight(0x404040, 10);
-                   threeData.ambientLight = ambientLight;
-                   threeData.scene.add(ambientLight);
-
-                   const directionalLight = new THREE.DirectionalLight(0xffffff, 35);
-                   directionalLight.position.set(1, 1, 1).normalize();
-                   threeData.directionalLight = directionalLight;
-                   threeData.scene.add(directionalLight);
-
-                   // TODO: Switch to HDR skybox
-                   const cubeTextureLoader = new THREE.CubeTextureLoader();
-                   const diffuseCubemap = cubeTextureLoader.load([
-                        '/demo/threejs/materials/diffuse_posx.png',
-                        '/demo/threejs/materials/diffuse_negx.png',
-                        '/demo/threejs/materials/diffuse_posy.png',
-                        '/demo/threejs/materials/diffuse_negy.png',
-                        '/demo/threejs/materials/diffuse_posz.png',
-                        '/demo/threejs/materials/diffuse_negz.png',
-                   ]);
-
-                   const albedoTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_albedo.png`);
-                   const normalTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_normal.png`);
-                   const aoTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_AO.png`);
-                   const ormTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_ORM.png`);
-                   const emissiveTexture = new THREE.TextureLoader().load(`/demo/threejs/model/m2_pack_booster_emissive.png`);
-
-                   threeData.scene.environment = diffuseCubemap;
-
-                   console.log('THREE Mesh Physical>> ', gltf.scene);
-                   // const mat = new THREE.MeshPhysicalMaterial();
-                   const mat = gltf.scene.children[0].material;
-                   mat.colorSpace = SRGBColorSpace;
-                   // // //
-                   mat.envMap = diffuseCubemap;
-                   // mat.map = albedoTexture;
-                   // mat.map.flipY = false;
-                   // mat.aoMap = aoTexture;
-                   // mat.aoMap.flipY = false;
-                   // mat.normalMap = normalTexture;
-                   // mat.normalMap.flipY = false;
-                   // mat.emissiveMap = emissiveTexture;
-                   // mat.emissiveMap.flipY = false;
-                   // mat.roughnessMap = ormTexture;
-                   // mat.roughnessMap.flipY = false;
-                   // //
-                   // mat.side = THREE.DoubleSide;
-                   mat.roughness = 1.5;
-                   mat.needsUpdate = true;
-
-                   const mixer = new THREE.AnimationMixer( gltf.scene );
-                   const openClip = THREE.AnimationClip.findByName(gltf.animations, 'Anim_0');
-                   const openAction = mixer.clipAction( openClip );
-                   if (openAction) {
-                        openAction.clampWhenFinished = true;
-                        openAction.reset();
-                        openAction.play();
-                        openAction.loop = THREE.LoopOnce;
-
-                        threeData.mixers.push(mixer);
-                   }
-
-                   // Add axes helper
-                   // const axesHelper = new THREE.AxesHelper(5);
-                   // threeData.scene.add(axesHelper);
-
-                   // Add camera helper (for perspective camera)
-                   // const cameraHelper = new THREE.CameraHelper(threeData.camera);
-                   // threeData.scene.add(cameraHelper);
-
-                   // Create TransformControls
-                   // const transformControls = new THREE.TransformControls(threeData.camera, threeData.renderer.domElement);
-                   // threeData.scene.add(transformControls);
-
-                   // // Add directional light helper
-                   //  const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
-                   // threeData.scene.add(directionalLightHelper);
-
-                   console.log('Loaded GLTF', gltf);
-                   // transformControls.attach(gltf.scene);
-
-                   // Testing pack interaction
-                   const pack = gltf.scene.children[0];
-                   if (pack) {
-                        pack.material = pack.material.clone();
-                        pack.userData.initialEmissive = pack.material.emissive.clone();
-                        pack.material.emissiveIntensity = 0.5;
-
-                        threeData.interaction.add(pack);
-
-                        pack.addEventListener('mouseover', (event) => {
-                             console.log('Pack::mouseover()', event);
-                             document.body.style.cursor = 'pointer';
-
-                             if (pack.material) {
-                                  pack.userData.materialEmissiveHex = pack.material.emissive.getHex();
-                                  pack.material.emissive.setHex(0xff0000);
-                                  pack.material.emissiveIntensity = 0.8;
-                             }
-                        });
-
-                        pack.addEventListener('mouseout', (event) => {
-                             console.log('Pack::mouseout()', event);
-                             document.body.style.cursor = 'default';
-
-                             if (pack.material) {
-                                  pack.material.emissiveIntensity = 0;
-                             }
-                        });
-                   }
-                   // Details of the KHR_materials_variants extension used here can be found below
-                   // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
-                   // const parser = gltf.parser;
-                   // const variantsExtension = gltf.userData.gltfExtensions[ 'KHR_materials_variants' ];
-                   // const variants = variantsExtension.variants.map( ( variant ) => variant.name );
-                   // const variantsCtrl = gui.add( state, 'variant', variants ).name( 'Variant' );
-                   //selectVariant( scene, parser, variantsExtension, state.variant );
-
-                   console.log('Loaded SCENE::', threeData);
-                   // threeData.scene.children[0].children[1].children[0].children.forEach((child) => {
-                   //      console.log('Child is', child);
-                   //      var mat = child.children[0].material;
-                   //      mat.fog = false;
-                   //      mat.map.encoding = THREE.LinearEncoding;
-                   //      mat.map.colorSpace = THREE.LinearSRGBColorSpace;
-                   // });
-                   // variantsCtrl.onChange( ( value ) => selectVariant( scene, parser, variantsExtension, value ) );
-                   //
-                   // render();
-
-                   // window.gsap.to(config, {
-                   //      duration: 2000,
-                   //      modelRotationY: 360,
-                   //      repeat: -1,
-                   //      ease: 'none',
-                   //      onUpdate: (controller) => {
-                   //           if (gltf) {
-                   //                gltf.scene.rotation.set(0, config.modelRotationY, 0);
-                   //           }
-                   //      },
-                   // });
-
-              });
+              // const loader = new GLTFLoader().setPath('/demo/threejs/model/');
+              // loader.load('m2.gltf', function (gltf) {
+              //       console.log('>> Loaded GLTF', gltf, 'add to position');
+              //
+              //       threeData.pack = gltf;
+              //      packObj = gltf;
+              //      gltf.scene.scale.set(8, 8, 8);
+              //      gltf.scene.position.set(currentPos[0], currentPos[1], currentPos[2]);
+              //      // threeData.controls.target = gltf.scene.children[1].position;
+              //
+              //      // gltf.scene.position.set(0, 0, 1000);
+              //      threeData.scene.add(gltf.scene);
+              //
+              //      const ambientLight = new THREE.AmbientLight(0x404040, 10);
+              //      threeData.ambientLight = ambientLight;
+              //      threeData.scene.add(ambientLight);
+              //
+              //      const directionalLight = new THREE.DirectionalLight(0xffffff, 35);
+              //      directionalLight.position.set(1, 1, 1).normalize();
+              //      threeData.directionalLight = directionalLight;
+              //      threeData.scene.add(directionalLight);
+              //
+              //      // TODO: Switch to HDR skybox
+              //      const cubeTextureLoader = new THREE.CubeTextureLoader();
+              //      const diffuseCubemap = cubeTextureLoader.load([
+              //           '/demo/threejs/materials/diffuse_posx.png',
+              //           '/demo/threejs/materials/diffuse_negx.png',
+              //           '/demo/threejs/materials/diffuse_posy.png',
+              //           '/demo/threejs/materials/diffuse_negy.png',
+              //           '/demo/threejs/materials/diffuse_posz.png',
+              //           '/demo/threejs/materials/diffuse_negz.png',
+              //      ]);
+              //
+              //      threeData.scene.environment = diffuseCubemap;
+              //
+              //      console.log('THREE Mesh Physical>> ', gltf.scene);
+              //      const mat = gltf.scene.children[0].material;
+              //      mat.colorSpace = SRGBColorSpace;
+              //      mat.envMap = diffuseCubemap;
+              //      mat.roughness = 1.5;
+              //      mat.needsUpdate = true;
+              //
+              //      const mixer = new THREE.AnimationMixer( gltf.scene );
+              //      const openClip = THREE.AnimationClip.findByName(gltf.animations, 'Anim_0');
+              //      const openAction = mixer.clipAction( openClip );
+              //      if (openAction) {
+              //           openAction.clampWhenFinished = true;
+              //           openAction.reset();
+              //           openAction.play();
+              //           openAction.loop = THREE.LoopOnce;
+              //
+              //           threeData.mixers.push(mixer);
+              //      }
+              //
+              //      // Add axes helper
+              //      // const axesHelper = new THREE.AxesHelper(5);
+              //      // threeData.scene.add(axesHelper);
+              //
+              //      // Add camera helper (for perspective camera)
+              //      // const cameraHelper = new THREE.CameraHelper(threeData.camera);
+              //      // threeData.scene.add(cameraHelper);
+              //
+              //      // Create TransformControls
+              //      // const transformControls = new THREE.TransformControls(threeData.camera, threeData.renderer.domElement);
+              //      // threeData.scene.add(transformControls);
+              //
+              //      // // Add directional light helper
+              //      //  const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+              //      // threeData.scene.add(directionalLightHelper);
+              //
+              //      console.log('Loaded GLTF', gltf);
+              //      // transformControls.attach(gltf.scene);
+              //
+              //      // Testing pack interaction
+              //      const pack = gltf.scene.children[0];
+              //      if (pack) {
+              //           pack.material = pack.material.clone();
+              //           pack.userData.initialEmissive = pack.material.emissive.clone();
+              //           pack.material.emissiveIntensity = 0.5;
+              //
+              //           threeData.interaction.add(pack);
+              //
+              //           pack.addEventListener('mouseover', (event) => {
+              //                console.log('Pack::mouseover()', event);
+              //                document.body.style.cursor = 'pointer';
+              //
+              //                if (pack.material) {
+              //                     pack.userData.materialEmissiveHex = pack.material.emissive.getHex();
+              //                     pack.material.emissive.setHex(0xff0000);
+              //                     pack.material.emissiveIntensity = 0.8;
+              //                }
+              //           });
+              //
+              //           pack.addEventListener('mouseout', (event) => {
+              //                console.log('Pack::mouseout()', event);
+              //                document.body.style.cursor = 'default';
+              //
+              //                if (pack.material) {
+              //                     pack.material.emissiveIntensity = 0;
+              //                }
+              //           });
+              //      }
+              //      // Details of the KHR_materials_variants extension used here can be found below
+              //      // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_variants
+              //      // const parser = gltf.parser;
+              //      // const variantsExtension = gltf.userData.gltfExtensions[ 'KHR_materials_variants' ];
+              //      // const variants = variantsExtension.variants.map( ( variant ) => variant.name );
+              //      // const variantsCtrl = gui.add( state, 'variant', variants ).name( 'Variant' );
+              //      //selectVariant( scene, parser, variantsExtension, state.variant );
+              //
+              //      console.log('Loaded SCENE::', threeData);
+              //      // threeData.scene.children[0].children[1].children[0].children.forEach((child) => {
+              //      //      console.log('Child is', child);
+              //      //      var mat = child.children[0].material;
+              //      //      mat.fog = false;
+              //      //      mat.map.encoding = THREE.LinearEncoding;
+              //      //      mat.map.colorSpace = THREE.LinearSRGBColorSpace;
+              //      // });
+              //      // variantsCtrl.onChange( ( value ) => selectVariant( scene, parser, variantsExtension, value ) );
+              //      //
+              //      // render();
+              //
+              //      // window.gsap.to(config, {
+              //      //      duration: 2000,
+              //      //      modelRotationY: 360,
+              //      //      repeat: -1,
+              //      //      ease: 'none',
+              //      //      onUpdate: (controller) => {
+              //      //           if (gltf) {
+              //      //                gltf.scene.rotation.set(0, config.modelRotationY, 0);
+              //      //           }
+              //      //      },
+              //      // });
+              //
+              // });
          }
     });
 
@@ -436,14 +539,14 @@
 
          // threeData.controls.update();
          // Pos x
-         // if(camera) {
-         //      camera.ks.p.k[0].s[0] = currentPos[0];
-         //      camera.ks.p.k[1].s[0] = currentPos[0];
-         //
-         //      // Pos y
-         //      camera.ks.p.k[0].s[1] = currentPos[1];
-         //      camera.ks.p.k[1].s[1] = currentPos[1];
-         // }
+         if(myObject.isFollowing && camera) {
+              camera.ks.p.k[0].s[0] = currentPos[0];
+              camera.ks.p.k[1].s[0] = currentPos[0];
+
+              // Pos y
+              camera.ks.p.k[0].s[1] = currentPos[1];
+              camera.ks.p.k[1].s[1] = currentPos[1];
+         }
 
          if (packObj) {
               // packObj.scene.position.set(myObject.objX, myObject.objY, myObject.objZ);

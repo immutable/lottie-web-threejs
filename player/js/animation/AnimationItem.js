@@ -16,6 +16,7 @@ import {
   getExpressionsPlugin,
 } from '../utils/common';
 import ImagePreloader from '../utils/imagePreloader';
+import VideoPreloader from '../utils/VideoPreloader';
 import BaseEvent from '../utils/BaseEvent';
 import dataManager from '../utils/DataManager';
 import markerParser from '../utils/markers/markerParser';
@@ -52,6 +53,7 @@ const AnimationItem = function () {
   this._completedLoop = false;
   this.projectInterface = ProjectInterface();
   this.imagePreloader = new ImagePreloader();
+  this.videoPreloader = new VideoPreloader();
   this.audioController = audioControllerFactory();
   this.markers = [];
   this.configAnimation = this.configAnimation.bind(this);
@@ -76,6 +78,7 @@ AnimationItem.prototype.setParams = function (params) {
   const RendererClass = getRenderer(animType);
   this.renderer = new RendererClass(this, params.rendererSettings);
   this.imagePreloader.setCacheType(animType, this.renderer.globalData.defs);
+  this.videoPreloader.setCacheType(animType, this.renderer.globalData.defs);
   this.renderer.setProjectInterface(this.projectInterface);
   this.animType = animType;
   if (params.loop === ''
@@ -281,12 +284,26 @@ AnimationItem.prototype.imagesLoaded = function () {
 };
 
 AnimationItem.prototype.preloadImages = function () {
+  console.log('AnimationItem::preloadImages()', this.animationData);
   this.imagePreloader.setAssetsPath(this.assetsPath);
   this.imagePreloader.setPath(this.path);
   this.imagePreloader.loadAssets(this.animationData.assets, this.imagesLoaded.bind(this));
 };
 
+AnimationItem.prototype.videosLoaded = function () {
+  this.trigger('loaded_videos');
+  this.checkLoaded();
+};
+
+AnimationItem.prototype.preloadVideos = function () {
+  console.log('AnimationItem::preloadVideos()', this.animationData);
+  this.videoPreloader.setAssetsPath(this.assetsPath);
+  this.videoPreloader.setPath(this.path);
+  this.videoPreloader.loadAssets(this.animationData.assets, this.videosLoaded.bind(this));
+};
+
 AnimationItem.prototype.configAnimation = function (animData) {
+  console.log('AnimationItem::configAnimation()', this.renderer, animData);
   if (!this.renderer) {
     return;
   }
@@ -311,6 +328,7 @@ AnimationItem.prototype.configAnimation = function (animData) {
     this.markers = markerParser(animData.markers || []);
     this.trigger('config_ready');
     this.preloadImages();
+    this.preloadVideos();
     this.loadSegments();
     this.updaFrameModifier();
     this.waitForFontsLoaded();
@@ -318,6 +336,7 @@ AnimationItem.prototype.configAnimation = function (animData) {
       this.audioController.pause();
     }
   } catch (error) {
+    console.error('AnimationItem::configAnimation failed', error);
     this.triggerConfigError(error);
   }
 };
@@ -337,7 +356,8 @@ AnimationItem.prototype.checkLoaded = function () {
   if (!this.isLoaded
         && this.renderer.globalData.fontManager.isLoaded
         && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas')
-        && (this.imagePreloader.loadedFootages())
+        && this.imagePreloader.loadedFootages()
+        && this.videoPreloader.loadedVideos()
   ) {
     this.isLoaded = true;
     var expressionsPlugin = getExpressionsPlugin();
@@ -352,6 +372,8 @@ AnimationItem.prototype.checkLoaded = function () {
     if (this.autoplay) {
       this.play();
     }
+  } else {
+    console.log('AnimationItem::checkLoaded() still loading...');
   }
 };
 
@@ -623,6 +645,7 @@ AnimationItem.prototype.destroy = function (name) {
   }
   this.renderer.destroy();
   this.imagePreloader.destroy();
+  this.videoPreloader.destroy();
   this.trigger('destroy');
   this._cbs = null;
   this.onEnterFrame = null;
@@ -633,6 +656,7 @@ AnimationItem.prototype.destroy = function (name) {
   this.renderer = null;
   this.renderer = null;
   this.imagePreloader = null;
+  this.videoPreloader = null;
   this.projectInterface = null;
 };
 

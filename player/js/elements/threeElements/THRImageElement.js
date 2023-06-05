@@ -1,5 +1,5 @@
 import {
-  DoubleSide,
+  FrontSide, ImageUtils,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
 import {
@@ -12,10 +12,9 @@ import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 import getBlendMode from '../../utils/helpers/blendModes';
-import { VERSION } from '../../renderers/version';
 
 function THRImageElement(data, globalData, comp) {
-  console.info('THRImageElement::constructor()', VERSION);
+  console.info('THRImageElement::constructor()', data, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }
@@ -31,45 +30,35 @@ THRImageElement.prototype.setBlendMode = function () {
 };
 
 THRImageElement.prototype.createContent = function () {
-  var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
-
   // Create a plane geometry
   var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h);
-
-  // Load the PNG image as a texture
   var textureLoader = new TextureLoader();
 
-  console.log('THRImageElement::createContent()', assetPath, this.assetData, textureLoader);
-  console.log('THRImageElement::loading()', this.globalData.renderConfig.assetsPath);
-  var texture = textureLoader.load(assetPath);
-  // texture.colorSpace = LinearSRGBColorSpace;
+  // Use the preloaded image asset from the ImagePreloader
+  // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
+  // var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
+  const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
+  const dataURI = ImageUtils.getDataURL(loadedAsset);
+  var texture = textureLoader.load(dataURI);
   texture.encoding = sRGBEncoding;
+
   var material = new MeshBasicMaterial({
     map: texture,
-    side: DoubleSide,
+    side: FrontSide,
     transparent: true,
     toneMapped: false,
   });
 
-  // material.needsUpdate();
   this.material = material;
   var plane = new Mesh(geometry, material);
-  plane.rotation.order = 'ZYX';
+  plane.name = this.assetData.id;
+  // plane.rotation.order = 'ZYX';
 
-  // console.log('THRImageElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
-  // if (this.data.hasMask) {
-  //   this.imageElem = createNS('image');
-  //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
-  //   this.imageElem.setAttribute('height', this.assetData.h + 'px');
-  //   this.imageElem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetPath);
-  //   this.layerElement.appendChild(this.imageElem);
-  //   this.baseElement.setAttribute('width', this.assetData.w);
-  //   this.baseElement.setAttribute('height', this.assetData.h);
-  // } else {
-  this.layerElement.add(plane);
+  this.baseElement.add(plane);
+  this.transformedElement = plane;
 
-  if (this.data.ln) {
-    this.baseElement.name = this.data.ln;
+  if (this.data.nm) {
+    this.baseElement.name = `${this.data.nm}_pivot`;
   }
 };
 

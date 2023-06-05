@@ -36,7 +36,7 @@ import ThreeRenderer from '../renderers/ThreeRenderer';
 registerRenderer('canvas', CanvasRenderer);
 registerRenderer('html', HybridRenderer);
 registerRenderer('svg', SVGRenderer);
-registerRenderer('three', ThreeRenderer);
+registerRenderer('threejs', ThreeRenderer);
 
 // Registering shape modifiers
 ShapeModifiers.registerModifier('tm', TrimModifier);

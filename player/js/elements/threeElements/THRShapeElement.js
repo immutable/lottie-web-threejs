@@ -32,8 +32,8 @@ THRShapeElement.prototype.createContent = function () {
   this.material = material;
 
   const plane = new Mesh(geometry, material);
-  plane.rotation.order = 'ZYX';
-  this.layerElement.add(plane);
+  // plane.rotation.order = 'ZYX';
+  this.baseElement.add(plane);
 };
 
 export default THRShapeElement;

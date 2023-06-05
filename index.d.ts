@@ -124,7 +124,7 @@ export type HTMLRendererConfig = BaseRendererConfig & {
     hideOnTransparent?: boolean;
 };
 
-export type RendererType = 'svg' | 'canvas' | 'html';
+export type RendererType = 'svg' | 'canvas' | 'html' | 'threejs';
 
 export type AnimationConfig<T extends RendererType = 'svg'> = {
     container: Element;

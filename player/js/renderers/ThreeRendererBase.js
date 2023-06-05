@@ -55,7 +55,7 @@ function ThreeRendererBase(animationItem, config) {
   this.destroyed = false;
   this.camera = null;
   this.supports3d = true;
-  this.rendererType = 'three';
+  this.rendererType = 'threejs';
 }
 
 extendPrototype([BaseRenderer], ThreeRendererBase);
@@ -465,12 +465,27 @@ ThreeRendererBase.prototype.renderFrame = function (num) {
   }
 };
 
+ThreeRendererBase.prototype.videosLoaded = function () {
+  // this.trigger('loaded_images');
+  // this.checkLoaded();
+  console.log('ThreeRendererBase::Videos loaded!!');
+};
+
 ThreeRendererBase.prototype.initItems = function () {
-  console.log('initItems!!');
+  console.log('ThreeRendererBase::initItems!!', this);
   this.buildAllItems();
   if (this.camera) {
     this.camera.setup();
   }
+
+  // TODO: Check for video assets to preload // do this within AnimationItem
+  // TODO: Detect any videos required to load but move this into AnimationItem later
+  // console.log('ThreeRendererBase::Check for preload of videos..', this.animationItem.assetsPath, this.animationItem.path);
+  // this.videoPreloader = new VideoPreloader();
+  // this.videoPreloader.setAssetsPath(this.animationItem.assetsPath);
+  // this.videoPreloader.setPath(this.animationItem.path);
+  // this.videoPreloader.loadAssets(this.animationItem.animationData.assets, this.videosLoaded.bind(this));
+
   // else {
   //   var cWidth = this.globalData.compSize.w;
   //   var cHeight = this.globalData.compSize.h;

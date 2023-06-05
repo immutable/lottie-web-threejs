@@ -4,7 +4,7 @@ const UglifyJS = require("uglify-js");
 const rootFolder = 'player/';
 const bm_version = '5.8.1';
 const buildReducedVersion = process.argv[2] === 'reduced'
-const defaultBuilds = ['full','svg_light','svg', 'three', 'three_light', 'canvas', 'canvas_light', 'html', 'html_light', 'canvas_worker', 'lottie_worker']
+const defaultBuilds = ['full','svg_light','svg', 'threejs', 'three_light', 'canvas', 'canvas_light', 'html', 'html_light', 'canvas_worker', 'lottie_worker']
 
 const scripts = [
 	{
@@ -217,7 +217,7 @@ const scripts = [
 	},
 	{
 		src: 'js/renderers/ThreeRenderer.js',
-		builds: ['full','three','three_light']
+		builds: ['full','threejs','three_light']
 	},
 	{
 		src: 'js/mask.js',
@@ -453,19 +453,19 @@ const scripts = [
 	},
 	{
 		src: 'js/elements/threeElements/THRBaseElement.js',
-		builds: ['full','three','three_light']
+		builds: ['full','threejs','three_light']
 	},
 	{
 		src: 'js/elements/threeElements/THRCompElement.js',
-		builds: ['full','three','three_light']
+		builds: ['full','threejs','three_light']
 	},
 	{
 		src: 'js/elements/threeElements/THRImageElement.js',
-		builds: ['full','three','three_light']
+		builds: ['full','threejs','three_light']
 	},
 	{
 		src: 'js/elements/threeElements/THRSolidElement.js',
-		builds: ['full','three','three_light']
+		builds: ['full','threejs','three_light']
 	},
 	{
 		src: 'js/animation/AnimationManager.js',
@@ -761,7 +761,7 @@ function buildVersions(scripts) {
 		},
 		{
 			fileName: 'lottie_three.js',
-			build: 'three',
+			build: 'threejs',
 			process: noop
 		},
 		// {
