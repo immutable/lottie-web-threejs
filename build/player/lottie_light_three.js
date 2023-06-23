@@ -12700,7 +12700,6 @@
   };
   THRImageElement.prototype.createContent = function () {
     // Create a plane geometry
-    var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
     var textureLoader = new three.TextureLoader();
 
     // Use the preloaded image asset from the ImagePreloader
@@ -12714,9 +12713,11 @@
       map: texture,
       side: three.FrontSide,
       transparent: true,
-      toneMapped: false
+      toneMapped: false,
+      wireframe: false
     });
     this.material = material;
+    var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
     // plane.rotation.order = 'ZYX';
@@ -13487,11 +13488,10 @@
 
     // TODO: When does this happen?
     console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-    // var matrix = new Matrix4();
-    // matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-    // this.resizerElem.applyMatrix4(matrix);
+    var matrix = new three.Matrix4();
+    matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
+    this.resizerElem.applyMatrix4(matrix);
   };
-
   ThreeRendererBase.prototype.renderFrame = function (num) {
     if (this.renderedFrame === num || this.destroyed) {
       return;

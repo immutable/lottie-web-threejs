@@ -232,7 +232,8 @@
         }
     };
     var anim = bodymovin.loadAnimation(animData);
-    //
+    anim.resize(500, 500);
+
     anim.onError = (error) => {
          console.error(error);
     };

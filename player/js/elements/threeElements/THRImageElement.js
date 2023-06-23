@@ -31,7 +31,6 @@ THRImageElement.prototype.setBlendMode = function () {
 
 THRImageElement.prototype.createContent = function () {
   // Create a plane geometry
-  var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h);
   var textureLoader = new TextureLoader();
 
   // Use the preloaded image asset from the ImagePreloader
@@ -47,9 +46,12 @@ THRImageElement.prototype.createContent = function () {
     side: FrontSide,
     transparent: true,
     toneMapped: false,
+    wireframe: false,
   });
 
   this.material = material;
+
+  var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
   var plane = new Mesh(geometry, material);
   plane.name = this.assetData.id;
   // plane.rotation.order = 'ZYX';

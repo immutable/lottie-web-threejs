@@ -426,9 +426,9 @@ ThreeRendererBase.prototype.updateContainerSize = function () {
 
   // TODO: When does this happen?
   console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-  // var matrix = new Matrix4();
-  // matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-  // this.resizerElem.applyMatrix4(matrix);
+  var matrix = new Matrix4();
+  matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
+  this.resizerElem.applyMatrix4(matrix);
 };
 
 ThreeRendererBase.prototype.renderFrame = function (num) {
