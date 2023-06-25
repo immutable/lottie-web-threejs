@@ -26,7 +26,7 @@ import THRVideoElement from '../elements/threeElements/THRVideoElement';
 import { VERSION } from './version';
 
 function ThreeRendererBase(animationItem, config) {
-  console.log('ThreeRendererBase::constructor()', VERSION, config);
+  console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;
@@ -373,7 +373,12 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     if (three.interaction) {
       three.interaction.update();
     }
-    three.renderer.render(three.scene, three.camera);
+
+    if (three.composer) {
+      three.composer.render();
+    } else {
+      three.renderer.render(three.scene, three.camera);
+    }
   }
 
   this.data = animData;
@@ -404,6 +409,10 @@ ThreeRendererBase.prototype.destroy = function () {
 };
 
 ThreeRendererBase.prototype.updateContainerSize = function () {
+  console.log('updateContainerSize()', this.globalData, this.animationItem);
+  if (!this.globalData.compSize || !this.resizerElem) {
+    return;
+  }
   var elementWidth = this.animationItem.wrapper.offsetWidth;
   var elementHeight = this.animationItem.wrapper.offsetHeight;
   var elementRel = elementWidth / elementHeight;

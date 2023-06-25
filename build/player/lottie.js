@@ -18766,7 +18766,7 @@
   var VERSION = '4.1';
 
   function ThreeRendererBase(animationItem, config) {
-    console.log('ThreeRendererBase::constructor()', VERSION, config);
+    console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -19083,7 +19083,11 @@
       if (three$1.interaction) {
         three$1.interaction.update();
       }
-      three$1.renderer.render(three$1.scene, three$1.camera);
+      if (three$1.composer) {
+        three$1.composer.render();
+      } else {
+        three$1.renderer.render(three$1.scene, three$1.camera);
+      }
     }
     this.data = animData;
     // Mask animation
@@ -19111,6 +19115,10 @@
     this.animationItem = null;
   };
   ThreeRendererBase.prototype.updateContainerSize = function () {
+    console.log('updateContainerSize()', this.globalData, this.animationItem);
+    if (!this.globalData.compSize || !this.resizerElem) {
+      return;
+    }
     var elementWidth = this.animationItem.wrapper.offsetWidth;
     var elementHeight = this.animationItem.wrapper.offsetHeight;
     var elementRel = elementWidth / elementHeight;
@@ -19269,7 +19277,7 @@
   };
 
   function ThreeRenderer(animationItem, config) {
-    console.log('ThreeRenderer::constructor()', VERSION, config);
+    console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;

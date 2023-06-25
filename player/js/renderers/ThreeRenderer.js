@@ -8,7 +8,7 @@ import THRCompElement from '../elements/threeElements/THRCompElement';
 import { VERSION } from './version';
 
 function ThreeRenderer(animationItem, config) {
-  console.log('ThreeRenderer::constructor()', VERSION, config);
+  console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;
