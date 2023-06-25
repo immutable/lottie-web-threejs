@@ -152,6 +152,7 @@ THRCameraElement.prototype.renderFrame = function () {
 
     const camera = this.globalData.renderConfig.renderer.camera;
     const renderScale = this.globalData.renderConfig.scale || 1.0;
+    console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
     var hasMatrixChanged = !this._prevMat.equals(this.mat);
     if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
       len = this.comp.threeDElements.length;

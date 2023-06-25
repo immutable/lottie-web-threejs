@@ -18530,6 +18530,7 @@
       this.mat.translate(0, 0, this.pe.v);
       var camera = this.globalData.renderConfig.renderer.camera;
       var renderScale = this.globalData.renderConfig.scale || 1.0;
+      console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -19090,10 +19091,9 @@
       if (three$1.interaction) {
         three$1.interaction.update();
       }
-      console.log('render() is:', globalData.renderConfig.renderer, three$1);
+      console.log('render() >>', globalData.renderConfig.renderer, three$1);
       if (globalData.renderConfig.renderer.composer) {
-        console.log('render() with composer');
-        globalData.renderConfig.composer.render();
+        globalData.renderConfig.renderer.composer.render();
       } else {
         three$1.renderer.render(three$1.scene, three$1.camera);
       }
