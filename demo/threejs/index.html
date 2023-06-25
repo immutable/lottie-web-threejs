@@ -51,7 +51,7 @@
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
      import { LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
 
-     var threeData = initThree({width: 1920, height: 720});
+     var threeData = initThree({width: 1920, height: 720, scale: 0.5});
 
      var GUI = lil.GUI;
      const gui = new GUI();
@@ -228,8 +228,7 @@
              preserveAspectRatio: 'xMidYMid meet',
              assetsPath: '/demo/threejs/bg_camera/',
              // assetsPath: '/demo/threejs/bg/',
-             renderer: threeData,
-             scale: 0.5,
+             renderer: threeData
         }
     };
     var anim = bodymovin.loadAnimation(animData);
@@ -298,7 +297,8 @@
                mixers: [],
                controls: false,
                interaction: true,
-               debug: true
+               debug: true,
+               scale: options.scale,
           };
 
           three.camera.fov = 25;

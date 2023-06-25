@@ -40,7 +40,6 @@ function ThreeRendererBase(animationItem, config) {
       x: (config && config.filterSize && config.filterSize.x) || '-100%',
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
     },
-    scale: config && config.scale,
     assetsPath: config && config.assetsPath,
     renderer: config && config.renderer,
   };
@@ -320,8 +319,8 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   };
 
   var resizerElem = new Group();
-  if (this.globalData.renderConfig.scale) {
-    const renderScale = this.globalData.renderConfig.scale;
+  if (this.globalData.renderConfig.renderer.scale) {
+    const renderScale = this.globalData.renderConfig.renderer.scale;
     resizerElem.scale.set(renderScale, renderScale, renderScale);
   }
   // var style = resizerElem.style;

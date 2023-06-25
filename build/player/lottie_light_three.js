@@ -13137,7 +13137,6 @@
         x: config && config.filterSize && config.filterSize.x || '-100%',
         y: config && config.filterSize && config.filterSize.y || '-100%'
       },
-      scale: config && config.scale,
       assetsPath: config && config.assetsPath,
       renderer: config && config.renderer
     };
@@ -13390,8 +13389,8 @@
       console.log('There was an error loading ' + url);
     };
     var resizerElem = new three.Group();
-    if (this.globalData.renderConfig.scale) {
-      var renderScale = this.globalData.renderConfig.scale;
+    if (this.globalData.renderConfig.renderer.scale) {
+      var renderScale = this.globalData.renderConfig.renderer.scale;
       resizerElem.scale.set(renderScale, renderScale, renderScale);
     }
     // var style = resizerElem.style;
