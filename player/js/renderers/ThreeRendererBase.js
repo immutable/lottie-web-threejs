@@ -381,8 +381,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     }
     console.log('render() is:', globalData.renderConfig.renderer, three);
     if (globalData.renderConfig.renderer.composer) {
-      console.log('render() with composer');
-      globalData.renderConfig.composer.render();
+      globalData.renderConfig.renderer.composer.render();
     } else {
       three.renderer.render(three.scene, three.camera);
     }
