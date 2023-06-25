@@ -18529,8 +18529,8 @@
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
       var camera = this.globalData.renderConfig.renderer.camera;
-      var renderScale = parseFloat(this.globalData.renderConfig.renderer.scale) || 1.0;
-      // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
+      var renderScale = 1.0; // parseFloat(this.globalData.renderConfig.renderer.scale) || 1.0;
+      console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -19034,6 +19034,7 @@
       console.log('There was an error loading ' + url);
     };
     var resizerElem = new three.Group();
+    resizerElem.name = 'Resizer';
     if (this.globalData.renderConfig.renderer.scale) {
       var renderScale = this.globalData.renderConfig.renderer.scale;
       resizerElem.scale.set(renderScale, renderScale, renderScale);

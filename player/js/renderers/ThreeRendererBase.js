@@ -319,6 +319,8 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   };
 
   var resizerElem = new Group();
+  resizerElem.name = 'Resizer';
+
   if (this.globalData.renderConfig.renderer.scale) {
     const renderScale = this.globalData.renderConfig.renderer.scale;
     resizerElem.scale.set(renderScale, renderScale, renderScale);
