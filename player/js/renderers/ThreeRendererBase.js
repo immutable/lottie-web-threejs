@@ -415,7 +415,7 @@ ThreeRendererBase.prototype.destroy = function () {
 };
 
 ThreeRendererBase.prototype.updateContainerSize = function () {
-  console.log('updateContainerSize()', this.globalData, this.animationItem);
+  // console.log('updateContainerSize()', this.globalData, this.animationItem);
   if (!this.globalData.compSize || !this.resizerElem) {
     return;
   }
@@ -440,7 +440,7 @@ ThreeRendererBase.prototype.updateContainerSize = function () {
   }
 
   // TODO: When does this happen?
-  console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
+  // console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
   var matrix = new Matrix4();
   matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
   // this.resizerElem.applyMatrix4(matrix);
@@ -487,7 +487,7 @@ ThreeRendererBase.prototype.videosLoaded = function () {
 };
 
 ThreeRendererBase.prototype.initItems = function () {
-  console.log('ThreeRendererBase::initItems!!', this);
+  // console.log('ThreeRendererBase::initItems!!', this);
   this.buildAllItems();
   if (this.camera) {
     this.camera.setup();
