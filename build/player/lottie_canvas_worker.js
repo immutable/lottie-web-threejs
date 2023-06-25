@@ -18825,8 +18825,8 @@
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
       var camera = this.globalData.renderConfig.renderer.camera;
-      var renderScale = this.globalData.renderConfig.scale || 1.0;
-      console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
+      var renderScale = parseFloat(this.globalData.renderConfig.renderer.scale) || 1.0;
+      // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -19387,7 +19387,7 @@
       if (three$1.interaction) {
         three$1.interaction.update();
       }
-      console.log('render() >>', globalData.renderConfig.renderer, three$1);
+      // console.log('render() >>', globalData.renderConfig.renderer, three);
       if (globalData.renderConfig.renderer.composer) {
         globalData.renderConfig.renderer.composer.render();
       } else {
@@ -19420,7 +19420,7 @@
     this.animationItem = null;
   };
   ThreeRendererBase.prototype.updateContainerSize = function () {
-    console.log('updateContainerSize()', this.globalData, this.animationItem);
+    // console.log('updateContainerSize()', this.globalData, this.animationItem);
     if (!this.globalData.compSize || !this.resizerElem) {
       return;
     }
@@ -19445,7 +19445,7 @@
     }
 
     // TODO: When does this happen?
-    console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
+    // console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
     var matrix = new three.Matrix4();
     matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
     // this.resizerElem.applyMatrix4(matrix);
@@ -19490,7 +19490,7 @@
     console.log('ThreeRendererBase::Videos loaded!!');
   };
   ThreeRendererBase.prototype.initItems = function () {
-    console.log('ThreeRendererBase::initItems!!', this);
+    // console.log('ThreeRendererBase::initItems!!', this);
     this.buildAllItems();
     if (this.camera) {
       this.camera.setup();
