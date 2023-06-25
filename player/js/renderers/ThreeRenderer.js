@@ -23,6 +23,7 @@ function ThreeRenderer(animationItem, config) {
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
       assetsPath: config.assetsPath,
     },
+    scale: config && config.scale,
     runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
     assetsPath: config && config.assetsPath,
     renderer: config && config.renderer,

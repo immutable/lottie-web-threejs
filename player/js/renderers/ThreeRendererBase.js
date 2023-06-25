@@ -40,6 +40,7 @@ function ThreeRendererBase(animationItem, config) {
       x: (config && config.filterSize && config.filterSize.x) || '-100%',
       y: (config && config.filterSize && config.filterSize.y) || '-100%',
     },
+    scale: config && config.scale,
     assetsPath: config && config.assetsPath,
     renderer: config && config.renderer,
   };
@@ -245,6 +246,7 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 ThreeRendererBase.prototype.configAnimation = function (animData) {
   console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
   console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
+  const globalData = this.globalData;
   let three = this.globalData.renderConfig.renderer;
   if (!three) {
     three = {};
@@ -318,6 +320,10 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   };
 
   var resizerElem = new Group();
+  if (this.globalData.renderConfig.scale) {
+    const renderScale = this.globalData.renderConfig.scale;
+    resizerElem.scale.set(renderScale, renderScale, renderScale);
+  }
   // var style = resizerElem.style;
   // style.width = animData.w + 'px';
   // style.height = animData.h + 'px';
@@ -373,9 +379,10 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     if (three.interaction) {
       three.interaction.update();
     }
-
-    if (three.composer) {
-      three.composer.render();
+    console.log('render() is:', globalData.renderConfig.renderer, three);
+    if (globalData.renderConfig.renderer.composer) {
+      console.log('render() with composer');
+      globalData.renderConfig.composer.render();
     } else {
       three.renderer.render(three.scene, three.camera);
     }
@@ -437,7 +444,7 @@ ThreeRendererBase.prototype.updateContainerSize = function () {
   console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
   var matrix = new Matrix4();
   matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-  this.resizerElem.applyMatrix4(matrix);
+  // this.resizerElem.applyMatrix4(matrix);
 };
 
 ThreeRendererBase.prototype.renderFrame = function (num) {

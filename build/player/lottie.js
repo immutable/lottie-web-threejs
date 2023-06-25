@@ -18529,6 +18529,7 @@
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
       var camera = this.globalData.renderConfig.renderer.camera;
+      var renderScale = this.globalData.renderConfig.scale || 1.0;
       var hasMatrixChanged = !this._prevMat.equals(this.mat);
       if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
         len = this.comp.threeDElements.length;
@@ -18540,9 +18541,9 @@
           if (comp.type === '3d') {
             if (hasMatrixChanged) {
               if (this.p) {
-                camera.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
+                camera.position.set(this.p.v[0] * renderScale, this.p.v[1] * renderScale, -this.p.v[2] * renderScale);
               } else {
-                camera.position.set(this.px.v, this.py.v, -this.pz.v);
+                camera.position.set(this.px.v * renderScale, this.py.v * renderScale, -this.pz.v * renderScale);
               }
               // console.log('comp.container', comp.container, comp.container.position.z);
               // var matValue = this.mat.toCSS();
@@ -18780,6 +18781,7 @@
         x: config && config.filterSize && config.filterSize.x || '-100%',
         y: config && config.filterSize && config.filterSize.y || '-100%'
       },
+      scale: config && config.scale,
       assetsPath: config && config.assetsPath,
       renderer: config && config.renderer
     };
@@ -18969,6 +18971,7 @@
     var _this = this;
     console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
     console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
+    var globalData = this.globalData;
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
       three$1 = {};
@@ -19031,6 +19034,10 @@
       console.log('There was an error loading ' + url);
     };
     var resizerElem = new three.Group();
+    if (this.globalData.renderConfig.scale) {
+      var renderScale = this.globalData.renderConfig.scale;
+      resizerElem.scale.set(renderScale, renderScale, renderScale);
+    }
     // var style = resizerElem.style;
     // style.width = animData.w + 'px';
     // style.height = animData.h + 'px';
@@ -19083,8 +19090,10 @@
       if (three$1.interaction) {
         three$1.interaction.update();
       }
-      if (three$1.composer) {
-        three$1.composer.render();
+      console.log('render() is:', globalData.renderConfig.renderer, three$1);
+      if (globalData.renderConfig.renderer.composer) {
+        console.log('render() with composer');
+        globalData.renderConfig.composer.render();
       } else {
         three$1.renderer.render(three$1.scene, three$1.camera);
       }
@@ -19143,8 +19152,9 @@
     console.log('ThreeRendererBase::updateContainerSize()', sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
     var matrix = new three.Matrix4();
     matrix.set(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1);
-    this.resizerElem.applyMatrix4(matrix);
+    // this.resizerElem.applyMatrix4(matrix);
   };
+
   ThreeRendererBase.prototype.renderFrame = function (num) {
     if (this.renderedFrame === num || this.destroyed) {
       return;
@@ -19292,6 +19302,7 @@
         y: config && config.filterSize && config.filterSize.y || '-100%',
         assetsPath: config.assetsPath
       },
+      scale: config && config.scale,
       runExpressions: !config || config.runExpressions === undefined || config.runExpressions,
       assetsPath: config && config.assetsPath,
       renderer: config && config.renderer

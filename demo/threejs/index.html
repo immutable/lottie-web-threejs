@@ -228,11 +228,12 @@
              preserveAspectRatio: 'xMidYMid meet',
              assetsPath: '/demo/threejs/bg_camera/',
              // assetsPath: '/demo/threejs/bg/',
-             renderer: threeData
+             renderer: threeData,
+             scale: 0.5,
         }
     };
     var anim = bodymovin.loadAnimation(animData);
-    anim.resize(500, 500);
+    // anim.resize(500, 500);
 
     anim.onError = (error) => {
          console.error(error);

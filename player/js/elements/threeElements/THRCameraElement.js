@@ -151,6 +151,7 @@ THRCameraElement.prototype.renderFrame = function () {
     this.mat.translate(0, 0, this.pe.v);
 
     const camera = this.globalData.renderConfig.renderer.camera;
+    const renderScale = this.globalData.renderConfig.scale || 1.0;
     var hasMatrixChanged = !this._prevMat.equals(this.mat);
     if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
       len = this.comp.threeDElements.length;
@@ -162,9 +163,17 @@ THRCameraElement.prototype.renderFrame = function () {
         if (comp.type === '3d') {
           if (hasMatrixChanged) {
             if (this.p) {
-              camera.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
+              camera.position.set(
+                this.p.v[0] * renderScale,
+                this.p.v[1] * renderScale,
+                -this.p.v[2] * renderScale
+              );
             } else {
-              camera.position.set(this.px.v, this.py.v, -this.pz.v);
+              camera.position.set(
+                this.px.v * renderScale,
+                this.py.v * renderScale,
+                -this.pz.v * renderScale
+              );
             }
             // console.log('comp.container', comp.container, comp.container.position.z);
             // var matValue = this.mat.toCSS();
