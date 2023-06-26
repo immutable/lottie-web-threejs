@@ -349,6 +349,8 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     if (three.debug === true) {
       stats = new Stats();
       stats.showPanel(0);
+      three.stats = stats;
+      
       document.body.appendChild(stats.dom);
       debugAnimate();
     } else {
