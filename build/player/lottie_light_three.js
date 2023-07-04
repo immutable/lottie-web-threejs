@@ -7781,7 +7781,8 @@
       12: 'hue',
       13: 'saturation',
       14: 'color',
-      15: 'luminosity'
+      15: 'luminosity',
+      16: 'add'
     };
     return function (mode) {
       return blendModeEnums[mode] || '';
@@ -12331,6 +12332,7 @@
       this.layerElement = this.baseElement;
     },
     createContainerElements: function createContainerElements() {
+      console.log('THRBaseElement::createContainerElements()', this.data.bm);
       // this.renderableEffectsManager = new CVEffects(this);
       // this.baseElement;
       this.maskedElement = this.layerElement;
@@ -12343,12 +12345,32 @@
     },
     setBlendMode: function setBlendMode() {
       var blendModeValue = getBlendMode(this.data.bm);
-      var elem = this.baseElement || this.layerElement;
-      console.log('THRBaseElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+      var material = this.material;
+      if (material) {
+        switch (blendModeValue) {
+          case 'add':
+            material.blending = three.AdditiveBlending;
+            material.needsUpdate = true;
+            break;
+          case 'multiply':
+            material.blending = three.MultiplyBlending;
+            material.needsUpdate = true;
+            break;
+          case 'lighten':
+            material.blending = three.CustomBlending;
+            material.blendEquation = three.AddEquation; // This is default
+            material.blendSrc = three.DstColorFactor; // Setting source color factor
+            material.blendDst = three.OneFactor; // Setting destination color factor
+            material.needsUpdate = true;
+            break;
+          default:
+            console.log('THRBaseElement::setBlendMode() no blend:', this.data.bm, blendModeValue);
+            break;
+        }
+      }
     },
     initTransform: function initTransform() {
       TransformElement.prototype.initTransform.call(this);
-      console.log('THRBaseElement::initTransform()', this, this.hierarchy);
       var elem = this;
       var data = this.data.ks;
       if (data.p && data.p.s) {
@@ -12717,15 +12739,30 @@
       wireframe: false
     });
     this.material = material;
+    console.log('THRImageElement::createContent() data:', this.data);
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
     // plane.rotation.order = 'ZYX';
-
     this.baseElement.add(plane);
+
+    // var debugMaterial = new MeshBasicMaterial({
+    //   side: DoubleSide,
+    //   transparent: true,
+    //   toneMapped: false,
+    //   wireframe: false,
+    //   color: new Color(1.0, 0.0, 1.0),
+    //   blending: AdditiveBlending,
+    // });
+    // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+    // var debugPlane = new Mesh(debugGeometry, debugMaterial);
+    // this.baseElement.add(debugPlane);
     this.transformedElement = plane;
     if (this.data.nm) {
       this.baseElement.name = "".concat(this.data.nm, "_pivot");
+    }
+    if (this.data.bm !== 0) {
+      this.setBlendMode(plane);
     }
   };
 
@@ -12985,25 +13022,26 @@
     };
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
+
+  // THRVideoElement.prototype.setBlendMode = function () {
+  //   var blendModeValue = getBlendMode(this.data.bm);
+  //   var elem = this.baseElement || this.layerElement;
+  //
+  //   console.log('THRVideoElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+  // };
+
   THRVideoElement.prototype.createContent = function () {
     // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
+    var axesHelper = new three.AxesHelper(50);
+    this.baseElement.add(axesHelper);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     this.video.pause();
     this._canPlay = true;
 
     // Create a plane geometry
-    var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h);
-
-    // Load the PNG image as a texture
-    var textureLoader = new three.TextureLoader();
-    console.log('THRVideoElement::createContent()', this.video, this.assetData, textureLoader);
-    console.log('THRVideoElement::createContent()', this.globalData.renderConfig.assetsPath, 'video:', this.video);
-    // var texture = textureLoader.load(assetPath);
+    var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
     var texture = new three.VideoTexture(this.video);
-    // texture.minFilter = LinearFilter;
-    // texture.magFilter = LinearFilter;
-    // texture.colorSpace = LinearSRGBColorSpace;
     texture.encoding = three.sRGBEncoding;
     texture.format = three.RGBAFormat;
     var material = new three.MeshBasicMaterial({
@@ -13014,19 +13052,29 @@
     this.material = material;
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
-    // plane.rotation.order = 'ZYX';
-    // console.log('THRVideoElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
-    // if (this.data.hasMask) {
-    //   this.imageElem = createNS('image');
-    //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
-    //   this.imageElem.setAttribute('height', this.assetData.h + 'px');
-    //   this.imageElem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetPath);
-    //   this.layerElement.appendChild(this.imageElem);
-    //   this.baseElement.setAttribute('width', this.assetData.w);
-    //   this.baseElement.setAttribute('height', this.assetData.h);
-    // } else {
     this.baseElement.add(plane);
-    this.transformedElement = plane;
+
+    // var debugMaterial = new MeshBasicMaterial({
+    //   side: DoubleSide,
+    //   transparent: true,
+    //   toneMapped: false,
+    //   wireframe: false,
+    //   color: new Color(0.0, 0.0, 1.0),
+    // });
+    // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+    // var debugPlane = new Mesh(debugGeometry, debugMaterial);
+    // this.baseElement.add(debugPlane);
+    // this.transformedElement = plane;
+
+    // var debugGeometry = new BoxGeometry(this.assetData.w, this.assetData.h, 10);
+    // var debugMaterial = new MeshBasicMaterial({
+    //   color: 0x00ff00,
+    //   transparent: true,
+    //   opacity: 0.5,
+    // });
+    // var cube = new Mesh(debugGeometry, debugMaterial);
+    // this.baseElement.add(cube);
+    this.transformedElement = this.baseElement; // plane;
 
     // const elem = this;
     // const data = this.data.ks;
@@ -13036,6 +13084,9 @@
 
     if (this.data.nm) {
       this.baseElement.name = "".concat(this.data.nm, "_pivot");
+    }
+    if (this.data.bm !== 0) {
+      this.setBlendMode();
     }
   };
   THRVideoElement.prototype.prepareFrame = function (num) {
@@ -13092,6 +13143,7 @@
         this.video.pause();
         this.video.currentTime = 0;
         this._isPlaying = false;
+        console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
       }
     } else {
       var asset = this.globalData.videoLoader.getAsset(this.assetData);
@@ -13105,10 +13157,28 @@
   };
   THRVideoElement.prototype.show = function () {
     // this.audio.play()
+    // console.log('THRVideoElement::show() ok need to play!');
+
+    if (this.isInRange) {
+      if (this.video) this.video.play();
+      if (!this.data.hd) {
+        var elem = this.baseElement || this.layerElement;
+        elem.visible = true;
+      }
+      this.hidden = false;
+      this._isFirstFrame = true;
+    }
   };
   THRVideoElement.prototype.hide = function () {
     if (this.video) this.video.pause();
     this._isPlaying = false;
+
+    // console.log('THRVideoElement::hide() ok need to hide, so we destory??');
+    if (!this.hidden && !this.isInRange) {
+      var elem = this.baseElement || this.layerElement;
+      elem.visible = false;
+      this.hidden = true;
+    }
   };
   THRVideoElement.prototype.pause = function () {
     if (this.video) this.video.pause();
@@ -13418,6 +13488,7 @@
       if (three$1.debug === true) {
         stats = new Stats();
         stats.showPanel(0);
+        three$1.stats = stats;
         document.body.appendChild(stats.dom);
         debugAnimate();
       } else {

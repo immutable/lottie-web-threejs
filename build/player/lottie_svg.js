@@ -6712,7 +6712,8 @@
       12: 'hue',
       13: 'saturation',
       14: 'color',
-      15: 'luminosity'
+      15: 'luminosity',
+      16: 'add'
     };
     return function (mode) {
       return blendModeEnums[mode] || '';

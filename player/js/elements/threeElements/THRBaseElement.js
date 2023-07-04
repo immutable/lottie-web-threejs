@@ -1,5 +1,7 @@
 import {
-  Object3D,
+  AddEquation,
+  AdditiveBlending, CustomBlending, DstColorFactor, MultiplyBlending,
+  Object3D, OneFactor,
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
@@ -30,6 +32,7 @@ THRBaseElement.prototype = {
     this.layerElement = this.baseElement;
   },
   createContainerElements: function () {
+    console.log('THRBaseElement::createContainerElements()', this.data.bm);
     // this.renderableEffectsManager = new CVEffects(this);
     // this.baseElement;
     this.maskedElement = this.layerElement;
@@ -42,14 +45,35 @@ THRBaseElement.prototype = {
   },
   setBlendMode: function () {
     var blendModeValue = getBlendMode(this.data.bm);
-    var elem = this.baseElement || this.layerElement;
+    var material = this.material;
+    if (material) {
+      switch (blendModeValue) {
+        case 'add':
+          material.blending = AdditiveBlending;
+          material.needsUpdate = true;
+          break;
 
-    console.log('THRBaseElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+        case 'multiply':
+          material.blending = MultiplyBlending;
+          material.needsUpdate = true;
+          break;
+
+        case 'lighten':
+          material.blending = CustomBlending;
+          material.blendEquation = AddEquation; // This is default
+          material.blendSrc = DstColorFactor; // Setting source color factor
+          material.blendDst = OneFactor; // Setting destination color factor
+          material.needsUpdate = true;
+          break;
+
+        default:
+          console.log('THRBaseElement::setBlendMode() no blend:', this.data.bm, blendModeValue);
+          break;
+      }
+    }
   },
   initTransform: function () {
     TransformElement.prototype.initTransform.call(this);
-
-    console.log('THRBaseElement::initTransform()', this, this.hierarchy);
     const elem = this;
     const data = this.data.ks;
     if (data.p && data.p.s) {

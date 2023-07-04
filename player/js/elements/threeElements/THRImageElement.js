@@ -51,16 +51,32 @@ THRImageElement.prototype.createContent = function () {
 
   this.material = material;
 
+  console.log('THRImageElement::createContent() data:', this.data);
   var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
   var plane = new Mesh(geometry, material);
   plane.name = this.assetData.id;
   // plane.rotation.order = 'ZYX';
-
   this.baseElement.add(plane);
+
+  // var debugMaterial = new MeshBasicMaterial({
+  //   side: DoubleSide,
+  //   transparent: true,
+  //   toneMapped: false,
+  //   wireframe: false,
+  //   color: new Color(1.0, 0.0, 1.0),
+  //   blending: AdditiveBlending,
+  // });
+  // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+  // var debugPlane = new Mesh(debugGeometry, debugMaterial);
+  // this.baseElement.add(debugPlane);
   this.transformedElement = plane;
 
   if (this.data.nm) {
     this.baseElement.name = `${this.data.nm}_pivot`;
+  }
+
+  if (this.data.bm !== 0) {
+    this.setBlendMode(plane);
   }
 };
 

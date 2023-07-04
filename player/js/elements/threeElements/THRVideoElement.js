@@ -1,9 +1,10 @@
 import {
+  AxesHelper,
   Mesh,
   MeshBasicMaterial,
   PlaneGeometry,
-  RGBAFormat, sRGBEncoding,
-  TextureLoader,
+  RGBAFormat,
+  sRGBEncoding,
   VideoTexture,
 } from 'three';
 import {
@@ -29,26 +30,26 @@ function THRVideoElement(data, globalData, comp) {
 
 extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
 
+// THRVideoElement.prototype.setBlendMode = function () {
+//   var blendModeValue = getBlendMode(this.data.bm);
+//   var elem = this.baseElement || this.layerElement;
+//
+//   console.log('THRVideoElement::Setup blend mode', blendModeValue, this.data.bm, elem);
+// };
+
 THRVideoElement.prototype.createContent = function () {
   // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
+
+  const axesHelper = new AxesHelper(50);
+  this.baseElement.add(axesHelper);
 
   this.video = this.globalData.videoLoader.getAsset(this.assetData);
   this.video.pause();
   this._canPlay = true;
 
   // Create a plane geometry
-  var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h);
-
-  // Load the PNG image as a texture
-  var textureLoader = new TextureLoader();
-
-  console.log('THRVideoElement::createContent()', this.video, this.assetData, textureLoader);
-  console.log('THRVideoElement::createContent()', this.globalData.renderConfig.assetsPath, 'video:', this.video);
-  // var texture = textureLoader.load(assetPath);
+  var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
   var texture = new VideoTexture(this.video);
-  // texture.minFilter = LinearFilter;
-  // texture.magFilter = LinearFilter;
-  // texture.colorSpace = LinearSRGBColorSpace;
   texture.encoding = sRGBEncoding;
   texture.format = RGBAFormat;
 
@@ -60,19 +61,29 @@ THRVideoElement.prototype.createContent = function () {
   this.material = material;
   var plane = new Mesh(geometry, material);
   plane.name = this.assetData.id;
-  // plane.rotation.order = 'ZYX';
-  // console.log('THRVideoElement::Assets loading >>>', `${assetPath}`, texture, this.layerElement, this.assetData);
-  // if (this.data.hasMask) {
-  //   this.imageElem = createNS('image');
-  //   this.imageElem.setAttribute('width', this.assetData.w + 'px');
-  //   this.imageElem.setAttribute('height', this.assetData.h + 'px');
-  //   this.imageElem.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetPath);
-  //   this.layerElement.appendChild(this.imageElem);
-  //   this.baseElement.setAttribute('width', this.assetData.w);
-  //   this.baseElement.setAttribute('height', this.assetData.h);
-  // } else {
   this.baseElement.add(plane);
-  this.transformedElement = plane;
+
+  // var debugMaterial = new MeshBasicMaterial({
+  //   side: DoubleSide,
+  //   transparent: true,
+  //   toneMapped: false,
+  //   wireframe: false,
+  //   color: new Color(0.0, 0.0, 1.0),
+  // });
+  // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+  // var debugPlane = new Mesh(debugGeometry, debugMaterial);
+  // this.baseElement.add(debugPlane);
+  // this.transformedElement = plane;
+
+  // var debugGeometry = new BoxGeometry(this.assetData.w, this.assetData.h, 10);
+  // var debugMaterial = new MeshBasicMaterial({
+  //   color: 0x00ff00,
+  //   transparent: true,
+  //   opacity: 0.5,
+  // });
+  // var cube = new Mesh(debugGeometry, debugMaterial);
+  // this.baseElement.add(cube);
+  this.transformedElement = this.baseElement; // plane;
 
   // const elem = this;
   // const data = this.data.ks;
@@ -82,6 +93,10 @@ THRVideoElement.prototype.createContent = function () {
 
   if (this.data.nm) {
     this.baseElement.name = `${this.data.nm}_pivot`;
+  }
+
+  if (this.data.bm !== 0) {
+    this.setBlendMode();
   }
 };
 
@@ -145,6 +160,7 @@ THRVideoElement.prototype.renderFrame = function () {
       this.video.pause();
       this.video.currentTime = 0;
       this._isPlaying = false;
+      console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
     }
   } else {
     const asset = this.globalData.videoLoader.getAsset(this.assetData);
@@ -160,11 +176,29 @@ THRVideoElement.prototype.isPlaying = function () {
 
 THRVideoElement.prototype.show = function () {
   // this.audio.play()
+  // console.log('THRVideoElement::show() ok need to play!');
+
+  if (this.isInRange) {
+    if (this.video) this.video.play();
+    if (!this.data.hd) {
+      var elem = this.baseElement || this.layerElement;
+      elem.visible = true;
+    }
+    this.hidden = false;
+    this._isFirstFrame = true;
+  }
 };
 
 THRVideoElement.prototype.hide = function () {
   if (this.video) this.video.pause();
   this._isPlaying = false;
+
+  // console.log('THRVideoElement::hide() ok need to hide, so we destory??');
+  if (!this.hidden && !this.isInRange) {
+    var elem = this.baseElement || this.layerElement;
+    elem.visible = false;
+    this.hidden = true;
+  }
 };
 
 THRVideoElement.prototype.pause = function () {

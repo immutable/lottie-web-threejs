@@ -129,6 +129,10 @@
           if (value && camera) {
                // Capture the camera position from the AE values
                console.log('Current Camera Position', camera.ks);
+
+               anim.stop();
+               anim.gotoFrame(0);
+
                myObject.cameraX = camera.ks.p.k[0].s[0];
                myObject.cameraY = camera.ks.p.k[0].s[1];
                myObject.cameraZ = camera.ks.p.k[0].s[2];
@@ -170,6 +174,7 @@
      });
 
      gui.onChange((value) => {
+          console.log('Editing camera', myObject.isEditingCamera, camera);
           if (myObject.isEditingCamera && camera) {
 
                // Pos x
@@ -184,7 +189,9 @@
                camera.ks.p.k[0].s[2] = myObject.cameraZ;
                camera.ks.p.k[1].s[2] = myObject.cameraZ;
 
-               threeData.camera.lookAt(new Vector3(myObject.lookX, myObject.lookY, myObject.lookZ));
+               // threeData.camera.lookAt(new Vector3(myObject.lookX, myObject.lookY, myObject.lookZ));
+
+               threeData.camera.position.set(myObject.cameraX, myObject.cameraY, -myObject.cameraZ);
           }
 
           if (myObject.isEditingTarget && myObject.targetItem && myObject.targetX !== 0) {
@@ -221,12 +228,13 @@
         animType: 'threejs',
         loop: true,
         prerender: true,
-        autoplay: true,
-        path: '/demo/threejs/bg_camera/data.json',
+        autoplay: false,
+        // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
+        path: '/demo/threejs/pack2/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/bg_camera/',
+             assetsPath: '/demo/threejs/pack2/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData
         }
@@ -344,7 +352,7 @@
          if (!initPack) {
               initPack = true;
               camera = anim.animationData.layers.find((layer) => {
-                   return layer.nm === 'Camera 1';
+                   return layer.nm === 'Camera';
               });
 
               // clouds = anim.renderer.elements.find((item) => {
