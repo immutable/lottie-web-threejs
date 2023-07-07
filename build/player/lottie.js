@@ -18719,23 +18719,27 @@
     var axesHelper = new three.AxesHelper(50);
     this.baseElement.add(axesHelper);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
-    this.video.pause();
-    this._canPlay = true;
+    if (this.video) {
+      this.video.pause();
+      this._canPlay = true;
 
-    // Create a plane geometry
-    var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
-    var texture = new three.VideoTexture(this.video);
-    texture.encoding = three.sRGBEncoding;
-    texture.format = three.RGBAFormat;
-    var material = new three.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      toneMapped: false
-    });
-    this.material = material;
-    var plane = new three.Mesh(geometry, material);
-    plane.name = this.assetData.id;
-    this.baseElement.add(plane);
+      // Create a plane geometry
+      var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+      var texture = new three.VideoTexture(this.video);
+      texture.encoding = three.sRGBEncoding;
+      texture.format = three.RGBAFormat;
+      var material = new three.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        toneMapped: false
+      });
+      this.material = material;
+      var plane = new three.Mesh(geometry, material);
+      plane.name = this.assetData.id;
+      this.baseElement.add(plane);
+    } else {
+      console.warn('Video not available', this.assetData);
+    }
 
     // var debugMaterial = new MeshBasicMaterial({
     //   side: DoubleSide,
