@@ -18716,8 +18716,8 @@
   THRVideoElement.prototype.createContent = function () {
     // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
-    var axesHelper = new three.AxesHelper(50);
-    this.baseElement.add(axesHelper);
+    var pivotDebug = new three.AxesHelper(50);
+    this.pivotElement.add(pivotDebug);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     if (this.video) {
       this.video.pause();
@@ -18736,7 +18736,7 @@
       this.material = material;
       var plane = new three.Mesh(geometry, material);
       plane.name = this.assetData.id;
-      this.baseElement.add(plane);
+      this.pivotElement.add(plane);
     } else {
       console.warn('Video not available', this.assetData);
     }
