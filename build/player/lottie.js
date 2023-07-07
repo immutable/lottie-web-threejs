@@ -18430,8 +18430,10 @@
     // var debugPlane = new Mesh(debugGeometry, debugMaterial);
     // this.baseElement.add(debugPlane);
     this.transformedElement = this.baseElement;
-    this.helper = new three.BoxHelper(plane, 0xffff00);
-    this.pivotElement.add(this.helper);
+
+    // this.helper = new BoxHelper(plane, 0xffff00);
+    // this.pivotElement.add(this.helper);
+
     if (this.data.nm) {
       this.baseElement.name = "".concat(this.data.nm, "_pivot");
     }

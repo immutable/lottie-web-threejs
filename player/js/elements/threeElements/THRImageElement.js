@@ -1,8 +1,6 @@
 import {
   AxesHelper,
-  BoxHelper,
   DoubleSide,
-  // FrontSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
 import {
