@@ -17962,6 +17962,9 @@
     initRendererElement: function initRendererElement() {
       this.material = null;
       this.baseElement = new three.Object3D(); // This base element acts as an anchor/pivot point as required
+
+      this.pivotElement = new three.Object3D();
+      this.baseElement.add(this.pivotElement);
       // this.baseElement.rotation.order = 'ZYX';
 
       // Create a red cube
@@ -17970,7 +17973,7 @@
       // const material = new MeshBasicMaterial({ color: 0xff0000 }); // red color
       // const cube = new Mesh(geometry, material);
       // this.baseElement.add(cube);
-
+      this.assetData = this.globalData.getAssetData(this.data.refId);
       if (this.data.hasMask) {
         // TODO: setup mask support
       }
@@ -18117,6 +18120,12 @@
         //   console.log('**', this.baseElement.name, this.hierarchy.length, 'a_x', this.a.v[1], this.p.v[1], this.p.v[2], this.transformedElement);
         // }
 
+        // Anchor
+        if (this.a) {
+          var pivotOffset = new three.Vector3(-this.a.v[0], this.a.v[1], this.a.v[2]);
+          this.pivotElement.position.copy(pivotOffset);
+        }
+
         // Position
         // const data = this.data.ks;
         // if (data.p.s) {
@@ -18127,8 +18136,20 @@
         //   }
         // } else {
         // }
+
         if (this.p) {
-          this.transformedElement.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
+          var newPosition = new three.Vector3(this.p.v[0], -this.p.v[1], -this.p.v[2]);
+
+          // Convert ThreeJS object center to Lottie object center
+          var scaleX = 1;
+          var scaleY = 1;
+          if (this.s) {
+            scaleX = this.s.v[0];
+            scaleY = this.s.v[1];
+          }
+          newPosition.x += this.assetData.w * 0.5 * scaleX;
+          newPosition.y -= this.assetData.h * 0.5 * scaleY;
+          this.transformedElement.position.copy(newPosition);
         }
 
         // Scale
@@ -18201,6 +18222,10 @@
         //   matProps[13]
         // );
         // console.log('renderElement >> ', this.finalTransform.mat.props, transformedElement);
+
+        if (this.helper) {
+          this.helper.update();
+        }
       }
 
       // Opacity
@@ -18378,7 +18403,8 @@
     texture.encoding = three.sRGBEncoding;
     var material = new three.MeshBasicMaterial({
       map: texture,
-      side: three.FrontSide,
+      side: three.DoubleSide,
+      // FrontSide,
       transparent: true,
       toneMapped: false,
       wireframe: false
@@ -18388,8 +18414,9 @@
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
-    // plane.rotation.order = 'ZYX';
-    this.baseElement.add(plane);
+    this.pivotElement.add(plane);
+    var pivotDebug = new three.AxesHelper(50);
+    this.pivotElement.add(pivotDebug);
 
     // var debugMaterial = new MeshBasicMaterial({
     //   side: DoubleSide,
@@ -18399,10 +18426,12 @@
     //   color: new Color(1.0, 0.0, 1.0),
     //   blending: AdditiveBlending,
     // });
-    // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+    // var debugGeometry = new PlaneGeometry(10, 10, 3, 3);
     // var debugPlane = new Mesh(debugGeometry, debugMaterial);
     // this.baseElement.add(debugPlane);
-    this.transformedElement = plane;
+    this.transformedElement = this.baseElement;
+    this.helper = new three.BoxHelper(plane, 0xffff00);
+    this.pivotElement.add(this.helper);
     if (this.data.nm) {
       this.baseElement.name = "".concat(this.data.nm, "_pivot");
     }
@@ -18578,11 +18607,18 @@
           comp = this.comp.threeDElements[i];
           if (comp.type === '3d') {
             if (hasMatrixChanged) {
+              var newPosition = new three.Vector3();
               if (this.p) {
-                camera.position.set(this.p.v[0] * renderScale, this.p.v[1] * renderScale, -this.p.v[2] * renderScale);
+                newPosition.set(this.p.v[0] * renderScale, -this.p.v[1] * renderScale, -this.p.v[2] * renderScale);
               } else {
-                camera.position.set(this.px.v * renderScale, this.py.v * renderScale, -this.pz.v * renderScale);
+                newPosition.set(this.px.v * renderScale, -this.py.v * renderScale, -this.pz.v * renderScale);
               }
+              camera.position.copy(newPosition);
+
+              // if (this.a) {
+              //   const cameraLookAt = new Vector3(this.a.v[0], this.a.v[0], -this.a.v[0]);
+              //   camera.lookAt(cameraLookAt);
+              // }
               // console.log('comp.container', comp.container, comp.container.position.z);
               // var matValue = this.mat.toCSS();
               // containerStyle = comp.container.style;

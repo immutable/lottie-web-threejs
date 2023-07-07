@@ -1,7 +1,7 @@
 import {
   AddEquation,
   AdditiveBlending, CustomBlending, DstColorFactor, MultiplyBlending,
-  Object3D, OneFactor,
+  Object3D, OneFactor, Vector3,
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
@@ -17,6 +17,9 @@ THRBaseElement.prototype = {
   initRendererElement: function () {
     this.material = null;
     this.baseElement = new Object3D(); // This base element acts as an anchor/pivot point as required
+
+    this.pivotElement = new Object3D();
+    this.baseElement.add(this.pivotElement);
     // this.baseElement.rotation.order = 'ZYX';
 
     // Create a red cube
@@ -25,7 +28,7 @@ THRBaseElement.prototype = {
     // const material = new MeshBasicMaterial({ color: 0xff0000 }); // red color
     // const cube = new Mesh(geometry, material);
     // this.baseElement.add(cube);
-
+    this.assetData = this.globalData.getAssetData(this.data.refId);
     if (this.data.hasMask) {
       // TODO: setup mask support
     }
@@ -167,6 +170,12 @@ THRBaseElement.prototype = {
       //   console.log('**', this.baseElement.name, this.hierarchy.length, 'a_x', this.a.v[1], this.p.v[1], this.p.v[2], this.transformedElement);
       // }
 
+      // Anchor
+      if (this.a) {
+        const pivotOffset = new Vector3(-this.a.v[0], this.a.v[1], this.a.v[2]);
+        this.pivotElement.position.copy(pivotOffset);
+      }
+
       // Position
       // const data = this.data.ks;
       // if (data.p.s) {
@@ -177,8 +186,20 @@ THRBaseElement.prototype = {
       //   }
       // } else {
       // }
+
       if (this.p) {
-        this.transformedElement.position.set(this.p.v[0], this.p.v[1], -this.p.v[2]);
+        const newPosition = new Vector3(this.p.v[0], -this.p.v[1], -this.p.v[2]);
+
+        // Convert ThreeJS object center to Lottie object center
+        let scaleX = 1;
+        let scaleY = 1;
+        if (this.s) {
+          scaleX = this.s.v[0];
+          scaleY = this.s.v[1];
+        }
+        newPosition.x += ((this.assetData.w * 0.5) * scaleX);
+        newPosition.y -= ((this.assetData.h * 0.5) * scaleY);
+        this.transformedElement.position.copy(newPosition);
       }
 
       // Scale
@@ -251,6 +272,10 @@ THRBaseElement.prototype = {
       //   matProps[13]
       // );
       // console.log('renderElement >> ', this.finalTransform.mat.props, transformedElement);
+
+      if (this.helper) {
+        this.helper.update();
+      }
     }
 
     // Opacity

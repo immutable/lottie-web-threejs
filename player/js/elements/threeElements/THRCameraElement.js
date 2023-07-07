@@ -1,4 +1,5 @@
 // import { Matrix4 } from 'three';
+import { Vector3 } from 'three';
 import {
   degToRads,
 } from '../../utils/common';
@@ -163,19 +164,26 @@ THRCameraElement.prototype.renderFrame = function () {
         comp = this.comp.threeDElements[i];
         if (comp.type === '3d') {
           if (hasMatrixChanged) {
+            const newPosition = new Vector3();
             if (this.p) {
-              camera.position.set(
+              newPosition.set(
                 this.p.v[0] * renderScale,
-                this.p.v[1] * renderScale,
+                -this.p.v[1] * renderScale,
                 -this.p.v[2] * renderScale
               );
             } else {
-              camera.position.set(
+              newPosition.set(
                 this.px.v * renderScale,
-                this.py.v * renderScale,
+                -this.py.v * renderScale,
                 -this.pz.v * renderScale
               );
             }
+            camera.position.copy(newPosition);
+
+            // if (this.a) {
+            //   const cameraLookAt = new Vector3(this.a.v[0], this.a.v[0], -this.a.v[0]);
+            //   camera.lookAt(cameraLookAt);
+            // }
             // console.log('comp.container', comp.container, comp.container.position.z);
             // var matValue = this.mat.toCSS();
             // containerStyle = comp.container.style;

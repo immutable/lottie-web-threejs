@@ -1,5 +1,8 @@
 import {
-  FrontSide,
+  AxesHelper,
+  BoxHelper,
+  DoubleSide,
+  // FrontSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
 import {
@@ -43,7 +46,7 @@ THRImageElement.prototype.createContent = function () {
 
   var material = new MeshBasicMaterial({
     map: texture,
-    side: FrontSide,
+    side: DoubleSide, // FrontSide,
     transparent: true,
     toneMapped: false,
     wireframe: false,
@@ -55,8 +58,10 @@ THRImageElement.prototype.createContent = function () {
   var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
   var plane = new Mesh(geometry, material);
   plane.name = this.assetData.id;
-  // plane.rotation.order = 'ZYX';
-  this.baseElement.add(plane);
+  this.pivotElement.add(plane);
+
+  const pivotDebug = new AxesHelper(50);
+  this.pivotElement.add(pivotDebug);
 
   // var debugMaterial = new MeshBasicMaterial({
   //   side: DoubleSide,
@@ -66,10 +71,13 @@ THRImageElement.prototype.createContent = function () {
   //   color: new Color(1.0, 0.0, 1.0),
   //   blending: AdditiveBlending,
   // });
-  // var debugGeometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
+  // var debugGeometry = new PlaneGeometry(10, 10, 3, 3);
   // var debugPlane = new Mesh(debugGeometry, debugMaterial);
   // this.baseElement.add(debugPlane);
-  this.transformedElement = plane;
+  this.transformedElement = this.baseElement;
+
+  // this.helper = new BoxHelper(plane, 0xffff00);
+  // this.pivotElement.add(this.helper);
 
   if (this.data.nm) {
     this.baseElement.name = `${this.data.nm}_pivot`;

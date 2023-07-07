@@ -2,25 +2,6 @@
 <html style="width: 100%;height: 100%">
 <head>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js"></script>
-<!--     <script src="https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js"></script>-->
-<!--     <script type="importmap">-->
-<!--       {-->
-<!--         "imports": {-->
-<!--           "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js",-->
-<!--           "three/addons/": "https://cdn.jsdelivr.net/npm/three-orbit-controls@82.1.0/index.min.js",-->
-<!--         }-->
-<!--       }-->
-<!--     </script>-->
-
-<!--     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>-->
-<!--     <script type="importmap">-->
-<!--       {-->
-<!--         "imports": {-->
-<!--           "three": "https://unpkg.com/three@0.151.3/build/three.module.js",-->
-<!--           "three/addons/": "https://unpkg.com/three@0.151.3/examples/jsm/"-->
-<!--         }-->
-<!--       }-->
-<!--     </script>-->
      <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
      <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
      <script type="importmap">
@@ -49,7 +30,7 @@
      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
-     import { LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
+     import { CameraHelper, LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
 
      var threeData = initThree({width: 1920, height: 720, scale: 0.5});
 
@@ -64,11 +45,11 @@
           near: 10,
           far: 10000,
           ortho: false,
-          cameraX: 1704,
-          cameraY: 1152,
-          cameraZ: -2270,
-          lookX: 977,
-          lookY: 540,
+          cameraX: 0,
+          cameraY: 0,
+          cameraZ: 0,
+          lookX: 0,
+          lookY: 0,
           lookZ: 0,
           cameraRotX: 0.0,
           cameraRotY: 0.0,
@@ -125,25 +106,14 @@
 
      const cameraFolder = gui.addFolder('Camera');
      const editingCameraController = cameraFolder.add(myObject, 'isEditingCamera');
-     editingCameraController.onChange((value) => {
-          if (value && camera) {
-               // Capture the camera position from the AE values
-               console.log('Current Camera Position', camera.ks);
-
-               anim.stop();
-               anim.gotoFrame(0);
-
-               myObject.cameraX = camera.ks.p.k[0].s[0];
-               myObject.cameraY = camera.ks.p.k[0].s[1];
-               myObject.cameraZ = camera.ks.p.k[0].s[2];
-          }
-     });
      cameraFolder.add(myObject, 'cameraX', -1000, 2000).listen();
      cameraFolder.add(myObject, 'cameraY', -1000, 2000).listen();
      cameraFolder.add(myObject, 'cameraZ', -7800, 7000).listen();
-     cameraFolder.add( myObject, 'lookX' ).listen();
-     cameraFolder.add( myObject, 'lookY' ).listen();
-     cameraFolder.add( myObject, 'lookZ' ).listen();
+     cameraFolder.add(myObject, 'lookX' ).listen();
+     cameraFolder.add(myObject, 'lookY' ).listen();
+     cameraFolder.add(myObject, 'lookZ' ).listen();
+     cameraFolder.add(myObject, 'fov' ).listen();
+     cameraFolder.add(myObject, 'focus' ).listen();
 
      var controller = gui.add( myObject, 'exposure' );   // Number Field
      controller.onChange((value) => {
@@ -173,9 +143,29 @@
           }
      });
 
+     var getLottieKeyFrameValue = (keys, time) => {
+          const keyframe = keys.find((key) => key.t === time);
+          return keyframe.s;
+     };
+
      gui.onChange((value) => {
           console.log('Editing camera', myObject.isEditingCamera, camera);
           if (myObject.isEditingCamera && camera) {
+               if (value.property === 'isEditingCamera') {
+                    anim.stop();
+                    anim.gotoFrame(0);
+
+                    console.log('Resetting camera to', camera.ks.p.k[0].s);
+                    const lookAtValue = getLottieKeyFrameValue(camera.ks.a.k, 0);
+                    myObject.lookX = lookAtValue[0];
+                    myObject.lookY = lookAtValue[1];
+                    myObject.lookZ = lookAtValue[2];
+
+                    const positionValue = getLottieKeyFrameValue(camera.ks.p.k, 0);
+                    myObject.cameraX = positionValue[0];
+                    myObject.cameraY = positionValue[1];
+                    myObject.cameraZ = positionValue[2];
+               }
 
                // Pos x
                camera.ks.p.k[0].s[0] = myObject.cameraX;
@@ -189,9 +179,12 @@
                camera.ks.p.k[0].s[2] = myObject.cameraZ;
                camera.ks.p.k[1].s[2] = myObject.cameraZ;
 
-               // threeData.camera.lookAt(new Vector3(myObject.lookX, myObject.lookY, myObject.lookZ));
-
+               threeData.camera.lookAt(new Vector3(myObject.lookX, myObject.lookY, myObject.lookZ));
                threeData.camera.position.set(myObject.cameraX, myObject.cameraY, -myObject.cameraZ);
+
+               threeData.camera.fov = myObject.fov;
+               threeData.camera.focus = myObject.focus;
+               threeData.camera.updateProjectionMatrix();
           }
 
           if (myObject.isEditingTarget && myObject.targetItem && myObject.targetX !== 0) {
@@ -231,10 +224,10 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/pack2/data.json',
+        path: '/demo/threejs/bg_camera/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/pack2/',
+             assetsPath: '/demo/threejs/bg_camera/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData
         }
@@ -313,6 +306,9 @@
           three.camera.focus = 10;
           three.camera.updateProjectionMatrix();
 
+          const helper = new CameraHelper(three.camera);
+          three.scene.add(helper);
+
           THREE.ColorManagement.enabled = false;
           three.renderer.useLegacyLights = false;
           three.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -336,6 +332,15 @@
           // three.controls = new OrbitControls(three.camera, three.renderer.domElement);
           // three.controls.listenToKeyEvents(window); // optional
           // }
+
+          const controls = new OrbitControls(three.camera, three.renderer.domElement);
+          three.camera.position.set( 0, 20, 100 );
+          controls.update();
+
+          function animate() {
+               requestAnimationFrame(animate);
+               controls.update();
+          }
 
           return three;
      }
