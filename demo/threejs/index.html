@@ -32,7 +32,7 @@
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
      import { CameraHelper, LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
 
-     var threeData = initThree({width: 1920, height: 720, scale: 0.5});
+     var threeData = initThree({width: 1920, height: 720, scale: 1});
 
      var GUI = lil.GUI;
      const gui = new GUI();
@@ -65,7 +65,7 @@
           targetRotationY: 0,
           targetRotationZ: 0,
           targetItem: {},
-          targetName: '',
+          targetName: 'background_mountains.png_pivot',
           objX: 1000,
           objY: 1000,
           objZ: 1000,
@@ -81,7 +81,15 @@
      targetFolder.add(myObject, 'targetName').listen();
      const editingTargetController = targetFolder.add(myObject, 'isEditingTarget');
      editingTargetController.onChange((value) => {
-          console.log('Toggle isEditingTarget()', value, myObject.targetItem);
+          console.log('Toggle isEditingTarget()', value, myObject.targetItem, myObject.targetName, threeData);
+
+          threeData.scene.children[1].traverse((obj) => {
+               if (obj.name === myObject.targetName) {
+                    myObject.targetItem = obj;
+                    console.log('Found Item', obj.name, obj);
+               }
+          });
+
           if (value && myObject.targetItem) {
                myObject.targetX = myObject.targetItem.position.x;
                myObject.targetY = myObject.targetItem.position.y;
@@ -226,10 +234,10 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/bg/data.json',
+        path: '/demo/threejs/pack2/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/bg/',
+             assetsPath: '/demo/threejs/pack2/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData
         }
@@ -335,6 +343,11 @@
           // three.controls.listenToKeyEvents(window); // optional
           // }
 
+          // const geometry = new THREE.PlaneGeometry(100, 100);
+          // const material = new THREE.MeshBasicMaterial({ color: 0xff00ff, side: THREE.DoubleSide });
+          // const plane = new THREE.Mesh(geometry, material);
+          // three.scene.add(plane);
+
           const controls = new OrbitControls(three.camera, three.renderer.domElement);
           three.camera.position.set( 0, 20, 100 );
           controls.update();
@@ -365,7 +378,7 @@
               // clouds = anim.renderer.elements.find((item) => {
               //      return item.data.nm === 'clouds';
               // })
-              myObject.targetName = 'Shiny Pack';
+              // myObject.targetName = 'Shiny Pack';
               // clouds = anim.animationData.layers.find((layer) => {
               //      return layer.nm === myObject.targetName;
               // });

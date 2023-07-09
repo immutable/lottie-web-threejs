@@ -1,5 +1,5 @@
 import {
-  AxesHelper,
+  AxesHelper, BoxHelper,
   Mesh,
   MeshBasicMaterial,
   PlaneGeometry,
@@ -63,6 +63,9 @@ THRVideoElement.prototype.createContent = function () {
     var plane = new Mesh(geometry, material);
     plane.name = this.assetData.id;
     this.pivotElement.add(plane);
+
+    this.helper = new BoxHelper(plane, 0xff00ff);
+    this.pivotElement.add(this.helper);
   } else {
     console.warn('Video not available', this.assetData);
   }
@@ -89,14 +92,9 @@ THRVideoElement.prototype.createContent = function () {
   // this.baseElement.add(cube);
   this.transformedElement = this.baseElement; // plane;
 
-  // const elem = this;
-  // const data = this.data.ks;
-  // this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, this);
-  // this.baseElement.position.set(this.a.v[0], this.a.v[1], this.a.v[2]);
-  // console.log('THRVideoElement::Anchor properties', this.data, this.data.nm, this.a.v);
-
   if (this.data.nm) {
-    this.baseElement.name = `${this.data.nm}_pivot`;
+    this.baseElement.name = `${this.data.nm}`;
+    this.pivotElement.name = `${this.data.nm}_pivot`;
   }
 
   if (this.data.bm !== 0) {
@@ -129,11 +127,6 @@ THRVideoElement.prototype.renderFrame = function () {
     return;
   }
 
-  // Anchor
-  if (this.a) {
-    this.baseElement.position.set(this.a.v[0], this.a.v[1], this.a.v[2]);
-  }
-
   this.renderTransform();
   this.renderRenderable();
   this.renderElement();
@@ -144,7 +137,7 @@ THRVideoElement.prototype.renderFrame = function () {
 
   if (this._canPlay && this.video) {
     if (this.isInRange) {
-      // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
+      console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
       if (!this._isPlaying) {
         this.video.play();
         this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
@@ -169,6 +162,7 @@ THRVideoElement.prototype.renderFrame = function () {
   } else {
     const asset = this.globalData.videoLoader.getAsset(this.assetData);
     this.video = asset;
+    this._isPlaying = false;
     this._canPlay = true;
     console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
   }

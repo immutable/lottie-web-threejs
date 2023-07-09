@@ -1,7 +1,6 @@
 import {
-  AddEquation,
-  AdditiveBlending, CustomBlending, DstColorFactor, MultiplyBlending,
-  Object3D, OneFactor, Vector3,
+  AdditiveBlending, MultiplyBlending,
+  Object3D, Vector3,
 } from 'three';
 import BaseRenderer from '../../renderers/BaseRenderer';
 import SVGBaseElement from '../svgElements/SVGBaseElement';
@@ -35,13 +34,13 @@ THRBaseElement.prototype = {
     this.layerElement = this.baseElement;
   },
   createContainerElements: function () {
-    console.log('THRBaseElement::createContainerElements()', this.data.bm);
+    // console.log('THRBaseElement::createContainerElements()', this.data.bm);
     // this.renderableEffectsManager = new CVEffects(this);
     // this.baseElement;
     this.maskedElement = this.layerElement;
-    if (this.data.nm) {
-      this.baseElement.name = `${this.data.nm}_pivot`;
-    }
+    // if (this.data.nm) {
+    //   this.baseElement.name = `${this.data.nm}_pivot`;
+    // }
     if (this.data.bm !== 0) {
       this.setBlendMode();
     }
@@ -52,6 +51,7 @@ THRBaseElement.prototype = {
     if (material) {
       switch (blendModeValue) {
         case 'add':
+        case 'lighten':
           material.blending = AdditiveBlending;
           material.needsUpdate = true;
           break;
@@ -61,13 +61,43 @@ THRBaseElement.prototype = {
           material.needsUpdate = true;
           break;
 
-        case 'lighten':
-          material.blending = CustomBlending;
-          material.blendEquation = AddEquation; // This is default
-          material.blendSrc = DstColorFactor; // Setting source color factor
-          material.blendDst = OneFactor; // Setting destination color factor
-          material.needsUpdate = true;
-          break;
+          // case 'lighten':
+          //   material = new ShaderMaterial({
+          //     map: material.texture,
+          //     transparent: true,
+          //     toneMapped: false,
+          //     side: FrontSide,
+          //     uniforms: {
+          //       map: { value: material.map },
+          //       blend: { value: null },
+          //     },
+          //     vertexShader: `
+          //       varying vec2 vUv;
+          //       void main () {
+          //         vUv = uv;
+          //         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          //       }
+          //     `,
+          //     fragmentShader: `
+          //       varying vec2 vUv;
+          //       uniform sampler2D map;
+          //       uniform sampler2D blend;
+          //
+          //       void main () {
+          //         vec4 base = texture2D(map, vUv);
+          //         gl_FragColor = base;
+          //
+          //         // Encodings
+          //         gl_FragColor = linearToOutputTexel(gl_FragColor);
+          //
+          //         // Get normal blending with premultipled, use with CustomBlending, OneFactor, OneMinusSrcAlphaFactor, AddEquation.
+          //         gl_FragColor.rgb *= gl_FragColor.a;
+          //       }
+          //     `,
+          //   });
+          //   material.blending = AdditiveBlending;
+          //   material.needsUpdate = true;
+          //   break;
 
         default:
           console.log('THRBaseElement::setBlendMode() no blend:', this.data.bm, blendModeValue);
@@ -162,49 +192,32 @@ THRBaseElement.prototype = {
       // }
       // this.transformedElement.applyMatrix4(mat);
 
-      // TODO: iterateDynamicProperties ??
+      // Scale
+      let scaleX = 1;
+      let scaleY = 1;
+      let scaleZ = 1;
+      if (this.s) {
+        scaleX = this.s.v[0];
+        scaleY = this.s.v[1];
+        scaleZ = this.s.v[2];
+        this.transformedElement.scale.set(scaleX, scaleY, scaleZ);
+      }
 
-      // TODO: investigate heiarchy or using matrix??
-
-      // if (this.baseElement.name === 'image_1' || this.baseElement.name === 'clouds') {
-      //   console.log('**', this.baseElement.name, this.hierarchy.length, 'a_x', this.a.v[1], this.p.v[1], this.p.v[2], this.transformedElement);
-      // }
-
-      // Anchor
+      // Anchor / Pivot
       if (this.a) {
-        const pivotOffset = new Vector3(-this.a.v[0], this.a.v[1], this.a.v[2]);
+        const pivotOffset = new Vector3(
+          -(this.a.v[0]),
+          (this.a.v[1]),
+          (this.a.v[2])
+        );
         this.pivotElement.position.copy(pivotOffset);
       }
 
-      // Position
-      // const data = this.data.ks;
-      // if (data.p.s) {
-      //   if (data.p.z) {
-      //     this.transformedElement.position.set(this.px.v, this.py.v, -this.pz.v);
-      //   } else {
-      //     this.transformedElement.position.set(this.px.v, this.py.v, 0);
-      //   }
-      // } else {
-      // }
-
       if (this.p) {
         const newPosition = new Vector3(this.p.v[0], -this.p.v[1], -this.p.v[2]);
-
-        // Convert ThreeJS object center to Lottie object center
-        let scaleX = 1;
-        let scaleY = 1;
-        if (this.s) {
-          scaleX = this.s.v[0];
-          scaleY = this.s.v[1];
-        }
         newPosition.x += ((this.assetData.w * 0.5) * scaleX);
         newPosition.y -= ((this.assetData.h * 0.5) * scaleY);
         this.transformedElement.position.copy(newPosition);
-      }
-
-      // Scale
-      if (this.s) {
-        this.transformedElement.scale.set(this.s.v[0], this.s.v[1], this.s.v[2]);
       }
 
       // Skew

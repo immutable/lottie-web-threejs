@@ -130,7 +130,6 @@ THRCameraElement.prototype.renderFrame = function () {
       this.mat.translate(-this.px.v, -this.py.v, this.pz.v);
     }
 
-    // console.log('CAMERA::a', this.a);
     if (this.a) {
       var diffVector;
       if (this.p) {
@@ -180,27 +179,11 @@ THRCameraElement.prototype.renderFrame = function () {
             }
             camera.position.copy(newPosition);
 
-            // if (this.a) {
-            //   const cameraLookAt = new Vector3(this.a.v[0], this.a.v[0], -this.a.v[0]);
-            //   camera.lookAt(cameraLookAt);
-            // }
-            // console.log('comp.container', comp.container, comp.container.position.z);
-            // var matValue = this.mat.toCSS();
-            // containerStyle = comp.container.style;
-            // containerStyle.transform = matValue;
-            // containerStyle.webkitTransform = matValue;
-            // var matrix = new Matrix4();
-            // matrix.set(...this.mat.props);
-            // comp.container.applyMatrix4(matrix);
-            // const {
-            //   tz, tx, ty, sx, sy, sz, // xRot, yRot, zRot,
-            // } = decomposeMatrix(this.mat);
-            //
-            // camera.position.set(tx, tx, myObject.cameraZ);
-            // camera.position.set(tz, ty, tx);
-            // camera.scale.set(sx, sy, sz);
-
-            // TODO: Translate the camera
+            // LookAt
+            if (this.a) {
+              const cameraLookAt = new Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
+              camera.lookAt(cameraLookAt);
+            }
           }
           if (this.pe._mdf) {
             // console.log('comp.perspectiveElem', comp.perspectiveElem);
