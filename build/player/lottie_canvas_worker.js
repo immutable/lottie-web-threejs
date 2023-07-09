@@ -18776,7 +18776,7 @@
 
   // import { Matrix4 } from 'three';
   function THRCameraElement(data, globalData, comp) {
-    console.log('THRCameraElement::constructor()', this, comp);
+    // console.log('THRCameraElement::constructor()', this, comp);
     this.initFrame();
     this.initBaseData(data, globalData, comp);
     this.initHierarchy();
@@ -18857,7 +18857,7 @@
   THRCameraElement.prototype.createElements = function () {};
   THRCameraElement.prototype.hide = function () {};
   THRCameraElement.prototype.renderFrame = function () {
-    console.log('THRCameraElement::renderFrame()', this, this.comp);
+    // console.log('THRCameraElement::renderFrame()', this, this.comp);
     var _mdf = this._isFirstFrame;
     var i;
     var len;
