@@ -13,6 +13,7 @@ import FrameElement from '../helpers/FrameElement';
 import Matrix from '../../3rd_party/transformation-matrix';
 
 function THRCameraElement(data, globalData, comp) {
+  console.log('THRCameraElement::constructor()', this, comp);
   this.initFrame();
   this.initBaseData(data, globalData, comp);
   this.initHierarchy();
@@ -101,6 +102,7 @@ THRCameraElement.prototype.hide = function () {
 };
 
 THRCameraElement.prototype.renderFrame = function () {
+  console.log('THRCameraElement::renderFrame()', this, this.comp);
   var _mdf = this._isFirstFrame;
   var i;
   var len;
@@ -178,6 +180,14 @@ THRCameraElement.prototype.renderFrame = function () {
               );
             }
             camera.position.copy(newPosition);
+
+            // Camera Adjustments
+            const cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
+            if (cameraModifier) {
+              if (cameraModifier.position) {
+                camera.position.add(cameraModifier.position);
+              }
+            }
 
             // LookAt
             if (this.a) {

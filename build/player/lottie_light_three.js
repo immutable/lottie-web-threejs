@@ -12835,6 +12835,7 @@
 
   // import { Matrix4 } from 'three';
   function THRCameraElement(data, globalData, comp) {
+    console.log('THRCameraElement::constructor()', this, comp);
     this.initFrame();
     this.initBaseData(data, globalData, comp);
     this.initHierarchy();
@@ -12915,6 +12916,7 @@
   THRCameraElement.prototype.createElements = function () {};
   THRCameraElement.prototype.hide = function () {};
   THRCameraElement.prototype.renderFrame = function () {
+    console.log('THRCameraElement::renderFrame()', this, this.comp);
     var _mdf = this._isFirstFrame;
     var i;
     var len;
@@ -12981,6 +12983,14 @@
                 newPosition.set(this.px.v * renderScale, -this.py.v * renderScale, -this.pz.v * renderScale);
               }
               camera.position.copy(newPosition);
+
+              // Camera Adjustments
+              var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
+              if (cameraModifier) {
+                if (cameraModifier.position) {
+                  camera.position.add(cameraModifier.position);
+                }
+              }
 
               // LookAt
               if (this.a) {
@@ -13539,17 +13549,21 @@
      * Try to keep this as tight as possible for performance.
      */
     function render() {
-      if (three$1.controls) {
-        three$1.controls.update();
-      }
-      if (three$1.interaction) {
-        three$1.interaction.update();
-      }
-      // console.log('render() >>', globalData.renderConfig.renderer, three);
-      if (globalData.renderConfig.renderer.composer) {
-        globalData.renderConfig.renderer.composer.render();
+      // Check for render override
+      if (globalData.renderConfig.render) {
+        globalData.renderConfig.render();
       } else {
-        three$1.renderer.render(three$1.scene, three$1.camera);
+        if (three$1.controls) {
+          three$1.controls.update();
+        }
+        if (three$1.interaction) {
+          three$1.interaction.update();
+        }
+        if (globalData.renderConfig.renderer.composer) {
+          globalData.renderConfig.renderer.composer.render();
+        } else {
+          three$1.renderer.render(three$1.scene, three$1.camera);
+        }
       }
     }
     this.data = animData;

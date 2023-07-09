@@ -375,18 +375,22 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
    * Try to keep this as tight as possible for performance.
    */
   function render() {
-    if (three.controls) {
-      three.controls.update();
-    }
-
-    if (three.interaction) {
-      three.interaction.update();
-    }
-    // console.log('render() >>', globalData.renderConfig.renderer, three);
-    if (globalData.renderConfig.renderer.composer) {
-      globalData.renderConfig.renderer.composer.render();
+    // Check for render override
+    if (globalData.renderConfig.render) {
+      globalData.renderConfig.render();
     } else {
-      three.renderer.render(three.scene, three.camera);
+      if (three.controls) {
+        three.controls.update();
+      }
+
+      if (three.interaction) {
+        three.interaction.update();
+      }
+      if (globalData.renderConfig.renderer.composer) {
+        globalData.renderConfig.renderer.composer.render();
+      } else {
+        three.renderer.render(three.scene, three.camera);
+      }
     }
   }
 
