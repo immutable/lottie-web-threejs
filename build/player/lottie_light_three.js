@@ -12916,7 +12916,6 @@
   THRCameraElement.prototype.createElements = function () {};
   THRCameraElement.prototype.hide = function () {};
   THRCameraElement.prototype.renderFrame = function () {
-    console.log('THRCameraElement::renderFrame2()', this, this.comp, this.globalData);
     var _mdf = this._isFirstFrame;
     var i;
     var len;
@@ -13230,6 +13229,24 @@
 
   var VERSION = '4.1';
 
+  function THRNullElement(data, globalData, comp) {
+    console.info('THRNullElement::constructor()', data, comp);
+    this.assetData = globalData.getAssetData(data.refId);
+    this.initElement(data, globalData, comp);
+  }
+  extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRNullElement);
+  THRNullElement.prototype.createContent = function () {
+    console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
+    var pivotDebug = new three.AxesHelper(50);
+    pivotDebug.name = "".concat(this.assetData.id, "_axes");
+    this.pivotElement.add(pivotDebug);
+    this.transformedElement = this.baseElement;
+    if (this.data.nm) {
+      this.baseElement.name = "".concat(this.data.nm);
+      this.pivotElement.name = "".concat(this.data.nm, "_pivot");
+    }
+  };
+
   function ThreeRendererBase(animationItem, config) {
     console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
     this.animationItem = animationItem;
@@ -13308,6 +13325,9 @@
     } else {
       this.addTo3dContainer(newDOMElement, pos);
     }
+  };
+  ThreeRendererBase.prototype.createNull = function (data) {
+    return new THRNullElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createShape = function (data) {
     console.log('ThreeRendererBase::createShape()', data);

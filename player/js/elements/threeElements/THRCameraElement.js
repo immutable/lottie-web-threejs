@@ -102,7 +102,6 @@ THRCameraElement.prototype.hide = function () {
 };
 
 THRCameraElement.prototype.renderFrame = function () {
-  console.log('THRCameraElement::renderFrame2()', this, this.comp, this.globalData);
   var _mdf = this._isFirstFrame;
   var i;
   var len;
