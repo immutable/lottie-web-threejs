@@ -13241,13 +13241,11 @@
   THRNullElement.prototype.createContent = function () {
     // console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
     var pivotDebug = new three.AxesHelper(50);
-    pivotDebug.name = "".concat(this.assetData.id, "_axes");
+    pivotDebug.name = "".concat(this.data.nm, "_axes");
     this.pivotElement.add(pivotDebug);
     this.transformedElement = this.baseElement;
-    if (this.data.nm) {
-      this.baseElement.name = "".concat(this.data.nm);
-      this.pivotElement.name = "".concat(this.data.nm, "_pivot");
-    }
+    this.baseElement.name = "".concat(this.data.nm);
+    this.pivotElement.name = "".concat(this.data.nm, "_pivot");
   };
 
   function ThreeRendererBase(animationItem, config) {
