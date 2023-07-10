@@ -18884,7 +18884,7 @@
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRNullElement);
   THRNullElement.prototype.createContent = function () {
-    console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
+    // console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
     var pivotDebug = new three.AxesHelper(50);
     pivotDebug.name = "".concat(this.assetData.id, "_axes");
     this.pivotElement.add(pivotDebug);
