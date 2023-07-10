@@ -111,6 +111,7 @@ ThreeRendererBase.prototype.appendElementInPos = function (element, pos) {
 };
 
 ThreeRendererBase.prototype.createNull = function (data) {
+  console.log('ThreeRendererBase::createNull()', data);
   return new THRNullElement(data, this.globalData, this);
 };
 

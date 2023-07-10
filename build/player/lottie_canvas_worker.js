@@ -19174,6 +19174,8 @@
     console.info('THRNullElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
+    this.initRendererElement();
+    this.createContent();
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRNullElement);
   THRNullElement.prototype.createContent = function () {
@@ -19268,6 +19270,7 @@
     }
   };
   ThreeRendererBase.prototype.createNull = function (data) {
+    console.log('ThreeRendererBase::createNull()', data);
     return new THRNullElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createShape = function (data) {

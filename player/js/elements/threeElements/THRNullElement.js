@@ -15,6 +15,8 @@ function THRNullElement(data, globalData, comp) {
   console.info('THRNullElement::constructor()', data, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
+  this.initRendererElement();
+  this.createContent();
 }
 
 extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRNullElement);
