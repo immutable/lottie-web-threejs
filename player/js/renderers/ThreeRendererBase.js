@@ -149,8 +149,6 @@ ThreeRendererBase.prototype.createSolid = function (data) {
   return new THRSolidElement(data, this.globalData, this);
 };
 
-ThreeRendererBase.prototype.createNull = SVGRenderer.prototype.createNull;
-
 ThreeRendererBase.prototype.getThreeDContainerByPos = function (pos) {
   var i = 0;
   var len = this.threeDElements.length;

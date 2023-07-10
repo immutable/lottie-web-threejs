@@ -7050,6 +7050,7 @@
     this.checkPendingElements();
   };
   BaseRenderer.prototype.createItem = function (layer) {
+    // console.log('BaseRenderer::createItem()', layer.ty);
     switch (layer.ty) {
       case 2:
         return this.createImage(layer);

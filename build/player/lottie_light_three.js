@@ -8119,6 +8119,7 @@
     this.checkPendingElements();
   };
   BaseRenderer.prototype.createItem = function (layer) {
+    // console.log('BaseRenderer::createItem()', layer.ty);
     switch (layer.ty) {
       case 2:
         return this.createImage(layer);
@@ -13161,7 +13162,7 @@
     }
     if (this._canPlay && this.video) {
       if (this.isInRange) {
-        console.log('THRVideoElement::renderFrame() time:', this.renderedFrame / this.globalData.frameRate, 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
+        // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
         if (!this._isPlaying) {
           this.video.play();
           this.video.currentTime = this.renderedFrame / this.globalData.frameRate;
@@ -13360,7 +13361,6 @@
     console.log('ThreeRendererBase::createSolid()', data);
     return new THRSolidElement(data, this.globalData, this);
   };
-  ThreeRendererBase.prototype.createNull = SVGRenderer.prototype.createNull;
   ThreeRendererBase.prototype.getThreeDContainerByPos = function (pos) {
     var i = 0;
     var len = this.threeDElements.length;
