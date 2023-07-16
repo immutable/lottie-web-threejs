@@ -19102,7 +19102,7 @@
       this._isFirstFrame = false;
     }
     if (this._canPlay && this.video) {
-      if (this.isInRange) {
+      if (this.isInRange || !this.animationItem.isPaused) {
         // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
         if (!this._isPlaying) {
           this.video.play();

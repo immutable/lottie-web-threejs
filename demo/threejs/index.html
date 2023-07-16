@@ -30,7 +30,15 @@
      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
      import { TransformControls } from 'three/addons/controls/TransformControls.js';
-     import { CameraHelper, LinearSRGBColorSpace, SRGBColorSpace, sRGBEncoding, Vector3 } from 'three';
+     import {
+          CameraHelper,
+          Color,
+          DoubleSide,
+          LinearSRGBColorSpace,
+          SRGBColorSpace,
+          sRGBEncoding,
+          Vector3
+     } from 'three';
 
      var threeData = initThree({width: 1920, height: 720, scale: 1});
 
@@ -234,10 +242,10 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/pack4/data.json',
+        path: '/demo/threejs/pack/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/pack4/',
+             assetsPath: '/demo/threejs/pack/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData
         }
@@ -248,6 +256,7 @@
     anim.onError = (error) => {
          console.error(error);
     };
+    var realVideo;
     var cameraElement;
     var camera;
     var clouds;
@@ -262,7 +271,8 @@
     var playBtn = document.getElementById('playBtn');
     playBtn.addEventListener('click', () => {
        console.log('play me');
-         anim.play();
+         // anim.play();
+         realVideo.play();
     });
 
     // function moveCamera(){
@@ -343,10 +353,55 @@
           // three.controls.listenToKeyEvents(window); // optional
           // }
 
-          // const geometry = new THREE.PlaneGeometry(100, 100);
-          // const material = new THREE.MeshBasicMaterial({ color: 0xff00ff, side: THREE.DoubleSide });
-          // const plane = new THREE.Mesh(geometry, material);
-          // three.scene.add(plane);
+          // const geometry1 = new THREE.PlaneGeometry(60, 60, 10, 10);
+          // const material1 = new THREE.MeshBasicMaterial({
+          //      olor: 0xff00ff,
+          //      side: THREE.DoubleSide,
+          // });
+          // const plane1 = new THREE.Mesh(geometry1, material1);
+          // three.scene.add(plane1);
+
+          // Create the video element and load the video
+          const video = document.createElement('video');
+          video.src = '/demo/threejs/rings/rings.mp4'; // Replace with your video file
+          video.load();
+          realVideo = video;
+
+          // Create video texture and plane geometry
+          console.log('Adding the Video Rings');
+          const videoTexture = new THREE.VideoTexture(video);
+          const geometry = new THREE.PlaneGeometry(40, 30, 4, 4);
+          // const material = new THREE.MeshBasicMaterial({
+          //      map: texture,
+          //      color: new Color(1, 1, 0),
+          //      side: THREE.DoubleSide,
+          // });
+
+          // Create the shader material
+          var shaderMaterial = new THREE.ShaderMaterial({
+               transparent: true,
+               uniforms: {
+                    u_texture: { value: videoTexture }
+               },
+               vertexShader: `
+                  varying vec2 vUv;
+                  void main() {
+                      vUv = uv;
+                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                  }
+              `,
+               fragmentShader: `
+                  uniform sampler2D u_texture;
+                  varying vec2 vUv;
+                  void main() {
+                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));
+                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;
+                      gl_FragColor = vec4(color.rgb, alpha);
+                  }
+              `,
+          });
+          const mesh = new THREE.Mesh(geometry, shaderMaterial);
+          three.scene.add(mesh);
 
           const controls = new OrbitControls(three.camera, three.renderer.domElement);
           three.camera.position.set( 0, 20, 100 );
