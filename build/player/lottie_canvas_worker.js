@@ -18723,9 +18723,10 @@
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
     this.pivotElement.add(plane);
-    var pivotDebug = new three.AxesHelper(50);
-    pivotDebug.name = "".concat(plane.name, "_axes");
-    this.pivotElement.add(pivotDebug);
+
+    // const pivotDebug = new AxesHelper(50);
+    // pivotDebug.name = `${plane.name}_axes`;
+    // this.pivotElement.add(pivotDebug);
 
     // var debugMaterial = new MeshBasicMaterial({
     //   side: DoubleSide,
@@ -18739,9 +18740,11 @@
     // var debugPlane = new Mesh(debugGeometry, debugMaterial);
     // this.baseElement.add(debugPlane);
     this.transformedElement = this.baseElement;
-    this.helper = new three.BoxHelper(plane, 0xffff00);
-    this.helper.name = "".concat(plane.name, "_bounds");
-    this.pivotElement.add(this.helper);
+
+    // this.helper = new BoxHelper(plane, 0xffff00);
+    // this.helper.name = `${plane.name}_bounds`;
+    // this.pivotElement.add(this.helper);
+
     if (this.data.nm) {
       this.baseElement.name = "".concat(this.data.nm);
       this.pivotElement.name = "".concat(this.data.nm, "_pivot");
@@ -19048,8 +19051,9 @@
       var plane = new three.Mesh(geometry, material);
       plane.name = this.assetData.id;
       this.pivotElement.add(plane);
-      this.helper = new three.BoxHelper(plane, 0xff00ff);
-      this.pivotElement.add(this.helper);
+
+      // this.helper = new BoxHelper(plane, 0xff00ff);
+      // this.pivotElement.add(this.helper);
     } else {
       console.warn('Video not available', this.assetData);
     }

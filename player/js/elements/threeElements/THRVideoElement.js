@@ -1,5 +1,5 @@
 import {
-  AxesHelper, BoxHelper,
+  AxesHelper,
   Mesh,
   PlaneGeometry,
   RGBAFormat, ShaderMaterial,
@@ -86,8 +86,8 @@ THRVideoElement.prototype.createContent = function () {
     plane.name = this.assetData.id;
     this.pivotElement.add(plane);
 
-    this.helper = new BoxHelper(plane, 0xff00ff);
-    this.pivotElement.add(this.helper);
+    // this.helper = new BoxHelper(plane, 0xff00ff);
+    // this.pivotElement.add(this.helper);
   } else {
     console.warn('Video not available', this.assetData);
   }

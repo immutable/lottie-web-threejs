@@ -1,5 +1,4 @@
 import {
-  AxesHelper, BoxHelper,
   DoubleSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
@@ -58,9 +57,9 @@ THRImageElement.prototype.createContent = function () {
   plane.name = this.assetData.id;
   this.pivotElement.add(plane);
 
-  const pivotDebug = new AxesHelper(50);
-  pivotDebug.name = `${plane.name}_axes`;
-  this.pivotElement.add(pivotDebug);
+  // const pivotDebug = new AxesHelper(50);
+  // pivotDebug.name = `${plane.name}_axes`;
+  // this.pivotElement.add(pivotDebug);
 
   // var debugMaterial = new MeshBasicMaterial({
   //   side: DoubleSide,
@@ -75,9 +74,9 @@ THRImageElement.prototype.createContent = function () {
   // this.baseElement.add(debugPlane);
   this.transformedElement = this.baseElement;
 
-  this.helper = new BoxHelper(plane, 0xffff00);
-  this.helper.name = `${plane.name}_bounds`;
-  this.pivotElement.add(this.helper);
+  // this.helper = new BoxHelper(plane, 0xffff00);
+  // this.helper.name = `${plane.name}_bounds`;
+  // this.pivotElement.add(this.helper);
 
   if (this.data.nm) {
     this.baseElement.name = `${this.data.nm}`;
