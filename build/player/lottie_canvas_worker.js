@@ -19027,10 +19027,22 @@
       var texture = new three.VideoTexture(this.video);
       texture.encoding = three.sRGBEncoding;
       texture.format = three.RGBAFormat;
-      var material = new three.MeshBasicMaterial({
-        map: texture,
+
+      // var material = new MeshBasicMaterial({
+      //   map: texture,
+      //   transparent: true,
+      //   toneMapped: false,
+      // });
+
+      var material = new three.ShaderMaterial({
         transparent: true,
-        toneMapped: false
+        uniforms: {
+          u_texture: {
+            value: texture
+          }
+        },
+        vertexShader: "\n                  varying vec2 vUv;\n                  void main() {\n                      vUv = uv;\n                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n                  }\n              ",
+        fragmentShader: "\n                  uniform sampler2D u_texture;\n                  varying vec2 vUv;\n                  void main() {\n                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));\n                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;\n                      gl_FragColor = vec4(color.rgb, alpha);\n                  }\n              "
       });
       this.material = material;
       var plane = new three.Mesh(geometry, material);

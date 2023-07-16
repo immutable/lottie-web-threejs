@@ -1,9 +1,8 @@
 import {
   AxesHelper, BoxHelper,
   Mesh,
-  MeshBasicMaterial,
   PlaneGeometry,
-  RGBAFormat,
+  RGBAFormat, ShaderMaterial,
   sRGBEncoding,
   VideoTexture,
 } from 'three';
@@ -54,10 +53,33 @@ THRVideoElement.prototype.createContent = function () {
     texture.encoding = sRGBEncoding;
     texture.format = RGBAFormat;
 
-    var material = new MeshBasicMaterial({
-      map: texture,
+    // var material = new MeshBasicMaterial({
+    //   map: texture,
+    //   transparent: true,
+    //   toneMapped: false,
+    // });
+
+    var material = new ShaderMaterial({
       transparent: true,
-      toneMapped: false,
+      uniforms: {
+        u_texture: { value: texture },
+      },
+      vertexShader: `
+                  varying vec2 vUv;
+                  void main() {
+                      vUv = uv;
+                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                  }
+              `,
+      fragmentShader: `
+                  uniform sampler2D u_texture;
+                  varying vec2 vUv;
+                  void main() {
+                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));
+                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;
+                      gl_FragColor = vec4(color.rgb, alpha);
+                  }
+              `,
     });
     this.material = material;
     var plane = new Mesh(geometry, material);
