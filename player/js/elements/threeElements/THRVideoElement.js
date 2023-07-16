@@ -1,5 +1,4 @@
 import {
-  AxesHelper,
   Mesh,
   PlaneGeometry,
   RGBAFormat, ShaderMaterial,
@@ -39,8 +38,8 @@ extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement
 THRVideoElement.prototype.createContent = function () {
   // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
-  const pivotDebug = new AxesHelper(50);
-  this.pivotElement.add(pivotDebug);
+  // const pivotDebug = new AxesHelper(50);
+  // this.pivotElement.add(pivotDebug);
 
   this.video = this.globalData.videoLoader.getAsset(this.assetData);
   if (this.video) {

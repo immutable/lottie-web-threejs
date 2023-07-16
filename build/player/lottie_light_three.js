@@ -13077,8 +13077,9 @@
   THRVideoElement.prototype.createContent = function () {
     // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
-    var pivotDebug = new three.AxesHelper(50);
-    this.pivotElement.add(pivotDebug);
+    // const pivotDebug = new AxesHelper(50);
+    // this.pivotElement.add(pivotDebug);
+
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     if (this.video) {
       this.video.pause();
@@ -13256,9 +13257,10 @@
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRNullElement);
   THRNullElement.prototype.createContent = function () {
     // console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
-    var pivotDebug = new three.AxesHelper(50);
-    pivotDebug.name = "".concat(this.data.nm, "_axes");
-    this.pivotElement.add(pivotDebug);
+    // const pivotDebug = new AxesHelper(50);
+    // pivotDebug.name = `${this.data.nm}_axes`;
+    // this.pivotElement.add(pivotDebug);
+
     this.transformedElement = this.baseElement;
     this.baseElement.name = "".concat(this.data.nm);
     this.pivotElement.name = "".concat(this.data.nm, "_pivot");

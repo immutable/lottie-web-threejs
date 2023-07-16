@@ -1,7 +1,4 @@
 import {
-  AxesHelper,
-} from 'three';
-import {
   extendPrototype,
 } from '../../utils/functionExtensions';
 import BaseElement from '../BaseElement';
@@ -23,9 +20,9 @@ extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement
 
 THRNullElement.prototype.createContent = function () {
   // console.log('THRNullElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
-  const pivotDebug = new AxesHelper(50);
-  pivotDebug.name = `${this.data.nm}_axes`;
-  this.pivotElement.add(pivotDebug);
+  // const pivotDebug = new AxesHelper(50);
+  // pivotDebug.name = `${this.data.nm}_axes`;
+  // this.pivotElement.add(pivotDebug);
 
   this.transformedElement = this.baseElement;
   this.baseElement.name = `${this.data.nm}`;
