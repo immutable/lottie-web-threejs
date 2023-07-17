@@ -7,6 +7,10 @@ const CameraManager = (function () {
     return this.cameras;
   }
 
+  function resetCameraElement() {
+    this.activeCameraElement = null;
+  }
+
   function trackCameraElement(name) {
     const cameraData = this.cameras.find((item) => item.layer.nm === name);
     if (cameraData) {
@@ -90,6 +94,7 @@ const CameraManager = (function () {
     isTracking,
     addCameraElement,
     updateCameraAspect,
+    resetCameraElement,
     trackCameraElement,
     trackCameraElementByLayer,
     destroy,

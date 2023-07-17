@@ -1904,6 +1904,9 @@
     function getCameras() {
       return this.cameras;
     }
+    function resetCameraElement() {
+      this.activeCameraElement = null;
+    }
     function trackCameraElement(name) {
       var cameraData = this.cameras.find(function (item) {
         return item.layer.nm === name;
@@ -1981,6 +1984,7 @@
       isTracking: isTracking,
       addCameraElement: addCameraElement,
       updateCameraAspect: updateCameraAspect,
+      resetCameraElement: resetCameraElement,
       trackCameraElement: trackCameraElement,
       trackCameraElementByLayer: trackCameraElementByLayer,
       destroy: destroy
@@ -2622,6 +2626,9 @@
   };
   AnimationItem.prototype.trackCameraElement = function (name) {
     return this.cameraManager.trackCameraElement(name);
+  };
+  AnimationItem.prototype.resetCameraElement = function () {
+    return this.cameraManager.resetCameraElement();
   };
   AnimationItem.prototype.hide = function () {
     this.renderer.hide();

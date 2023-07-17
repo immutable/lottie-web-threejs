@@ -754,6 +754,10 @@ AnimationItem.prototype.trackCameraElement = function (name) {
   return this.cameraManager.trackCameraElement(name);
 };
 
+AnimationItem.prototype.resetCameraElement = function () {
+  return this.cameraManager.resetCameraElement();
+};
+
 AnimationItem.prototype.hide = function () {
   this.renderer.hide();
 };
