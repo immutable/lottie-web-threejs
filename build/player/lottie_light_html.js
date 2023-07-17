@@ -1600,6 +1600,98 @@
     return '';
   }
 
+  var CameraManager = function () {
+    // function cameraEvent(event) {
+    //   console.log('VideoPreloader::videoEvent()', event.type, event);
+    // }
+
+    function getCameras() {
+      return this.cameras;
+    }
+    function trackCameraElement(name) {
+      var cameraData = this.cameras.find(function (item) {
+        return item.layer.nm === name;
+      });
+      if (cameraData) {
+        this.activeCameraElement = cameraData.element;
+        this.activeCameraElement.refresh();
+        this.activeCameraElement.renderFrame();
+      }
+      return cameraData;
+    }
+    function trackCameraElementByLayer(layer) {
+      var cameraData = this.cameras.find(function (item) {
+        return item.layer === layer;
+      });
+      if (cameraData) {
+        this.activeCameraElement = cameraData.element;
+        this.activeCameraElement.refresh();
+        this.activeCameraElement.renderFrame();
+      }
+    }
+
+    /**
+     * Adds a Lottie layer and Camera Element used for tracking to a renderer camera instance as activeCamera.
+     * @param layer
+     * @param element
+     */
+    function addCameraElement(layer, element) {
+      console.log('CameraManager::AddCamera()', layer, element);
+      this.cameras.push({
+        layer: layer,
+        element: element
+      });
+      if (this.cameras.length === 1) {
+        this.trackCameraElementByLayer(layer);
+      }
+    }
+    function isTracking(element) {
+      return this.activeCameraElement === element;
+    }
+
+    /**
+     * Sets the renderer camera. Any Lottie camera layer can be used to update the renderer camera by using:
+     * trackCameraElementByLayer or trackCameraElement
+     */
+    function setActiveCamera(camera) {
+      this.activeCamera = camera;
+    }
+    function getActiveCamera() {
+      return this.activeCamera;
+    }
+    function getActiveCameraElement() {
+      return this.activeCameraElement;
+    }
+    function updateCameraAspect(aspect) {
+      if (this.activeCamera) {
+        var camera = this.activeCamera;
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+      }
+    }
+    function destroy() {
+      this.cameras.length = 0;
+    }
+    function CameraManagerFactory() {
+      this.activeCameraElement = null; // Used for tracking to a renderer camera
+      this.activeCamera = null;
+      this.cameras = [];
+    }
+    CameraManagerFactory.prototype = {
+      setActiveCamera: setActiveCamera,
+      getCameras: getCameras,
+      getActiveCamera: getActiveCamera,
+      getActiveCameraElement: getActiveCameraElement,
+      isTracking: isTracking,
+      addCameraElement: addCameraElement,
+      updateCameraAspect: updateCameraAspect,
+      trackCameraElement: trackCameraElement,
+      trackCameraElementByLayer: trackCameraElementByLayer,
+      destroy: destroy
+    };
+    return CameraManagerFactory;
+  }();
+
   function _typeof$1(obj) { "@babel/helpers - typeof"; return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof$1(obj); }
   var AnimationItem = function AnimationItem() {
     this._cbs = [];
@@ -1632,6 +1724,7 @@
     this.projectInterface = ProjectInterface();
     this.imagePreloader = new ImagePreloader();
     this.videoPreloader = new VideoPreloader();
+    this.cameraManager = new CameraManager();
     this.audioController = audioControllerFactory();
     this.markers = [];
     this.configAnimation = this.configAnimation.bind(this);
@@ -2143,6 +2236,7 @@
     this.renderer.destroy();
     this.imagePreloader.destroy();
     this.videoPreloader.destroy();
+    this.cameraManager.destroy();
     this.trigger('destroy');
     this._cbs = null;
     this.onEnterFrame = null;
@@ -2226,6 +2320,12 @@
       i += 1;
     }
     return null;
+  };
+  AnimationItem.prototype.getCameras = function () {
+    return this.cameraManager.getCameras();
+  };
+  AnimationItem.prototype.trackCameraElement = function (name) {
+    return this.cameraManager.trackCameraElement(name);
   };
   AnimationItem.prototype.hide = function () {
     this.renderer.hide();

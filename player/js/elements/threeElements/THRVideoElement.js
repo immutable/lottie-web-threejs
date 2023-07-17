@@ -77,6 +77,12 @@ THRVideoElement.prototype.createContent = function () {
                       vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));
                       float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;
                       gl_FragColor = vec4(color.rgb, alpha);
+                      
+                      // Encodings
+                      gl_FragColor = linearToOutputTexel(gl_FragColor);
+                    
+                      // Get get normal blending with premultipled, use with CustomBlending, OneFactor, OneMinusSrcAlphaFactor, AddEquation.
+                      gl_FragColor.rgb *= gl_FragColor.a;
                   }
               `,
     });

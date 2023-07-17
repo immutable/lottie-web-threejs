@@ -22,6 +22,7 @@ import dataManager from '../utils/DataManager';
 import markerParser from '../utils/markers/markerParser';
 import ProjectInterface from '../utils/expressions/ProjectInterface';
 import { getRenderer, getRegisteredRenderer } from '../renderers/renderersManager';
+import CameraManager from '../utils/CameraManager';
 
 const AnimationItem = function () {
   this._cbs = [];
@@ -54,6 +55,7 @@ const AnimationItem = function () {
   this.projectInterface = ProjectInterface();
   this.imagePreloader = new ImagePreloader();
   this.videoPreloader = new VideoPreloader();
+  this.cameraManager = new CameraManager();
   this.audioController = audioControllerFactory();
   this.markers = [];
   this.configAnimation = this.configAnimation.bind(this);
@@ -646,6 +648,7 @@ AnimationItem.prototype.destroy = function (name) {
   this.renderer.destroy();
   this.imagePreloader.destroy();
   this.videoPreloader.destroy();
+  this.cameraManager.destroy();
   this.trigger('destroy');
   this._cbs = null;
   this.onEnterFrame = null;
@@ -741,6 +744,14 @@ AnimationItem.prototype.getAssetData = function (id) {
     i += 1;
   }
   return null;
+};
+
+AnimationItem.prototype.getCameras = function () {
+  return this.cameraManager.getCameras();
+};
+
+AnimationItem.prototype.trackCameraElement = function (name) {
+  return this.cameraManager.trackCameraElement(name);
 };
 
 AnimationItem.prototype.hide = function () {

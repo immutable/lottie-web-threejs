@@ -13,7 +13,7 @@ import FrameElement from '../helpers/FrameElement';
 import Matrix from '../../3rd_party/transformation-matrix';
 
 function THRCameraElement(data, globalData, comp) {
-  // console.log('THRCameraElement::constructor()', this, comp);
+  // console.log('THRCameraElement::constructor()', this, comp, globalData);
   this.initFrame();
   this.initBaseData(data, globalData, comp);
   this.initHierarchy();
@@ -85,13 +85,17 @@ THRCameraElement.prototype.setup = function () {
 };
 
 THRCameraElement.prototype.refresh = function () {
-  if (this.globalData.renderConfig.renderer) {
-    const camera = this.globalData.renderConfig.renderer.camera;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+  const cameraManager = this.globalData.cameraManager;
+  if (cameraManager && cameraManager.isTracking(this)) {
+    cameraManager.updateCameraAspect(window.innerWidth / window.innerHeight);
 
     const renderer = this.globalData.renderConfig.renderer.renderer;
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Reset previous transform matrix
+    if (this._prevMat) {
+      this._prevMat.reset();
+    }
   }
 };
 
@@ -119,8 +123,12 @@ THRCameraElement.prototype.renderFrame = function () {
       for (i = len; i >= 0; i -= 1) {
         var mTransf = this.hierarchy[i].finalTransform.mProp;
         this.mat.translate(-mTransf.p.v[0], -mTransf.p.v[1], mTransf.p.v[2]);
-        this.mat.rotateX(-mTransf.or.v[0]).rotateY(-mTransf.or.v[1]).rotateZ(mTransf.or.v[2]);
-        this.mat.rotateX(-mTransf.rx.v).rotateY(-mTransf.ry.v).rotateZ(mTransf.rz.v);
+        this.mat.rotateX(-mTransf.or.v[0])
+          .rotateY(-mTransf.or.v[1])
+          .rotateZ(mTransf.or.v[2]);
+        this.mat.rotateX(-mTransf.rx.v)
+          .rotateY(-mTransf.ry.v)
+          .rotateZ(mTransf.rz.v);
         this.mat.scale(1 / mTransf.s.v[0], 1 / mTransf.s.v[1], 1 / mTransf.s.v[2]);
         this.mat.translate(mTransf.a.v[0], mTransf.a.v[1], mTransf.a.v[2]);
       }
@@ -144,65 +152,73 @@ THRCameraElement.prototype.renderFrame = function () {
       var lookLengthOnXZ = Math.sqrt(lookDir[2] * lookDir[2] + lookDir[0] * lookDir[0]);
       var mRotationX = (Math.atan2(lookDir[1], lookLengthOnXZ));
       var mRotationY = (Math.atan2(lookDir[0], -lookDir[2]));
-      this.mat.rotateY(mRotationY).rotateX(-mRotationX);
+      this.mat.rotateY(mRotationY)
+        .rotateX(-mRotationX);
     }
-    this.mat.rotateX(-this.rx.v).rotateY(-this.ry.v).rotateZ(this.rz.v);
-    this.mat.rotateX(-this.or.v[0]).rotateY(-this.or.v[1]).rotateZ(this.or.v[2]);
+    this.mat.rotateX(-this.rx.v)
+      .rotateY(-this.ry.v)
+      .rotateZ(this.rz.v);
+    this.mat.rotateX(-this.or.v[0])
+      .rotateY(-this.or.v[1])
+      .rotateZ(this.or.v[2]);
     this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
     this.mat.translate(0, 0, this.pe.v);
 
-    const camera = this.globalData.renderConfig.renderer.camera;
-    const renderScale = this.globalData.renderConfig.renderer.scale || 1.0;
-    // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
-    var hasMatrixChanged = !this._prevMat.equals(this.mat);
-    if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
-      len = this.comp.threeDElements.length;
-      var comp;
-      // var perspectiveStyle;
-      // var containerStyle;
-      for (i = 0; i < len; i += 1) {
-        comp = this.comp.threeDElements[i];
-        if (comp.type === '3d') {
-          if (hasMatrixChanged) {
-            const newPosition = new Vector3();
-            if (this.p) {
-              newPosition.set(
-                this.p.v[0] * renderScale,
-                -this.p.v[1] * renderScale,
-                -this.p.v[2] * renderScale
-              );
-            } else {
-              newPosition.set(
-                this.px.v * renderScale,
-                -this.py.v * renderScale,
-                -this.pz.v * renderScale
-              );
-            }
-            camera.position.copy(newPosition);
+    const cameraManager = this.globalData.cameraManager;
+    if (cameraManager && cameraManager.isTracking(this)) {
+      const camera = cameraManager.getActiveCamera(); // this.globalData.renderConfig.renderer.camera;
+      const renderScale = this.globalData.renderConfig.renderer.scale || 1.0;
+      // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
+      var hasMatrixChanged = !this._prevMat.equals(this.mat);
+      if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
+        len = this.comp.threeDElements.length;
+        var comp;
+        // var perspectiveStyle;
+        // var containerStyle;
+        for (i = 0; i < len; i += 1) {
+          comp = this.comp.threeDElements[i];
+          if (comp.type === '3d') {
+            if (hasMatrixChanged) {
+              const newPosition = new Vector3();
+              if (this.p) {
+                newPosition.set(
+                  this.p.v[0] * renderScale,
+                  -this.p.v[1] * renderScale,
+                  -this.p.v[2] * renderScale
+                );
+              } else {
+                newPosition.set(
+                  this.px.v * renderScale,
+                  -this.py.v * renderScale,
+                  -this.pz.v * renderScale
+                );
+              }
+              camera.position.copy(newPosition);
 
-            // Camera Adjustments
-            const cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
-            if (cameraModifier) {
-              if (cameraModifier.position) {
-                camera.position.add(cameraModifier.position);
+              // Camera Adjustments
+              const cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
+              if (cameraModifier) {
+                if (cameraModifier.position) {
+                  camera.position.add(cameraModifier.position);
+                }
+              }
+
+              // LookAt
+              if (this.a) {
+                const cameraLookAt = new Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
+                camera.lookAt(cameraLookAt);
               }
             }
-
-            // LookAt
-            if (this.a) {
-              const cameraLookAt = new Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
-              camera.lookAt(cameraLookAt);
+            if (this.pe._mdf) {
+              // console.log('comp.perspectiveElem', comp.perspectiveElem);
+              // perspectiveStyle = comp.perspectiveElem.style;
+              // perspectiveStyle.perspective = this.pe.v + 'px';
+              // perspectiveStyle.webkitPerspective = this.pe.v + 'px';
             }
           }
-          if (this.pe._mdf) {
-            // console.log('comp.perspectiveElem', comp.perspectiveElem);
-            // perspectiveStyle = comp.perspectiveElem.style;
-            // perspectiveStyle.perspective = this.pe.v + 'px';
-            // perspectiveStyle.webkitPerspective = this.pe.v + 'px';
-          }
         }
+        this.mat.clone(this._prevMat);
       }
-      this.mat.clone(this._prevMat);
     }
   }
   this._isFirstFrame = false;
@@ -213,6 +229,7 @@ THRCameraElement.prototype.prepareFrame = function (num) {
 };
 
 THRCameraElement.prototype.destroy = function () {
+  window.removeEventListener('resize');
 };
 THRCameraElement.prototype.getBaseElement = function () { return null; };
 

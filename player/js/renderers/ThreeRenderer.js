@@ -33,6 +33,7 @@ function ThreeRenderer(animationItem, config) {
     frameNum: -1,
     renderConfig: this.renderConfig,
     isAssetsLoaded: false,
+    cameraManager: this.animationItem.cameraManager,
   };
   this.pendingElements = [];
   this.elements = [];

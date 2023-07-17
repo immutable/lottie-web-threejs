@@ -56,6 +56,8 @@
           cameraX: 0,
           cameraY: 0,
           cameraZ: 0,
+          activeCamera: 'Select',
+          cameras: [],
           lookX: 0,
           lookY: 0,
           lookZ: 0,
@@ -167,7 +169,10 @@
      };
 
      gui.onChange((value) => {
-          console.log('Editing camera', myObject.isEditingCamera, camera);
+          console.log('Editing camera', myObject.isEditingCamera, camera, 'value:', value);
+          if (value.property === 'activeCamera') {
+               anim.trackCameraElement(value.value);
+          }
           if (myObject.isEditingCamera && camera) {
                if (value.property === 'isEditingCamera') {
                     anim.stop();
@@ -242,10 +247,10 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/pack/data.json',
+        path: '/demo/threejs/bg_camera/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/pack/',
+             assetsPath: '/demo/threejs/bg_camera/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData
         }
@@ -444,8 +449,9 @@
                    myObject.targetItem = clouds.transformedElement;
               }
 
-
-              console.log('*** Anim::DOMLoaded() found target', clouds);
+              console.log('*** Anim::DOMLoaded() found target', anim.getCameras());
+              myObject.cameras = anim.getCameras().map((cameraItem) => cameraItem.layer.nm);
+              cameraFolder.add(myObject, 'activeCamera', myObject.cameras).listen();
 
               // camera.ks.p.k[0].s[0] = myObject.cameraX;
               // camera.ks.p.k[1].s[0] = myObject.cameraX;

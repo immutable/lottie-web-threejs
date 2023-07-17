@@ -1896,6 +1896,98 @@
     return '';
   }
 
+  var CameraManager = function () {
+    // function cameraEvent(event) {
+    //   console.log('VideoPreloader::videoEvent()', event.type, event);
+    // }
+
+    function getCameras() {
+      return this.cameras;
+    }
+    function trackCameraElement(name) {
+      var cameraData = this.cameras.find(function (item) {
+        return item.layer.nm === name;
+      });
+      if (cameraData) {
+        this.activeCameraElement = cameraData.element;
+        this.activeCameraElement.refresh();
+        this.activeCameraElement.renderFrame();
+      }
+      return cameraData;
+    }
+    function trackCameraElementByLayer(layer) {
+      var cameraData = this.cameras.find(function (item) {
+        return item.layer === layer;
+      });
+      if (cameraData) {
+        this.activeCameraElement = cameraData.element;
+        this.activeCameraElement.refresh();
+        this.activeCameraElement.renderFrame();
+      }
+    }
+
+    /**
+     * Adds a Lottie layer and Camera Element used for tracking to a renderer camera instance as activeCamera.
+     * @param layer
+     * @param element
+     */
+    function addCameraElement(layer, element) {
+      console.log('CameraManager::AddCamera()', layer, element);
+      this.cameras.push({
+        layer: layer,
+        element: element
+      });
+      if (this.cameras.length === 1) {
+        this.trackCameraElementByLayer(layer);
+      }
+    }
+    function isTracking(element) {
+      return this.activeCameraElement === element;
+    }
+
+    /**
+     * Sets the renderer camera. Any Lottie camera layer can be used to update the renderer camera by using:
+     * trackCameraElementByLayer or trackCameraElement
+     */
+    function setActiveCamera(camera) {
+      this.activeCamera = camera;
+    }
+    function getActiveCamera() {
+      return this.activeCamera;
+    }
+    function getActiveCameraElement() {
+      return this.activeCameraElement;
+    }
+    function updateCameraAspect(aspect) {
+      if (this.activeCamera) {
+        var camera = this.activeCamera;
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+      }
+    }
+    function destroy() {
+      this.cameras.length = 0;
+    }
+    function CameraManagerFactory() {
+      this.activeCameraElement = null; // Used for tracking to a renderer camera
+      this.activeCamera = null;
+      this.cameras = [];
+    }
+    CameraManagerFactory.prototype = {
+      setActiveCamera: setActiveCamera,
+      getCameras: getCameras,
+      getActiveCamera: getActiveCamera,
+      getActiveCameraElement: getActiveCameraElement,
+      isTracking: isTracking,
+      addCameraElement: addCameraElement,
+      updateCameraAspect: updateCameraAspect,
+      trackCameraElement: trackCameraElement,
+      trackCameraElementByLayer: trackCameraElementByLayer,
+      destroy: destroy
+    };
+    return CameraManagerFactory;
+  }();
+
   function _typeof$4(obj) { "@babel/helpers - typeof"; return _typeof$4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof$4(obj); }
   var AnimationItem = function AnimationItem() {
     this._cbs = [];
@@ -1928,6 +2020,7 @@
     this.projectInterface = ProjectInterface();
     this.imagePreloader = new ImagePreloader();
     this.videoPreloader = new VideoPreloader();
+    this.cameraManager = new CameraManager();
     this.audioController = audioControllerFactory();
     this.markers = [];
     this.configAnimation = this.configAnimation.bind(this);
@@ -2439,6 +2532,7 @@
     this.renderer.destroy();
     this.imagePreloader.destroy();
     this.videoPreloader.destroy();
+    this.cameraManager.destroy();
     this.trigger('destroy');
     this._cbs = null;
     this.onEnterFrame = null;
@@ -2522,6 +2616,12 @@
       i += 1;
     }
     return null;
+  };
+  AnimationItem.prototype.getCameras = function () {
+    return this.cameraManager.getCameras();
+  };
+  AnimationItem.prototype.trackCameraElement = function (name) {
+    return this.cameraManager.trackCameraElement(name);
   };
   AnimationItem.prototype.hide = function () {
     this.renderer.hide();
@@ -18780,7 +18880,7 @@
 
   // import { Matrix4 } from 'three';
   function THRCameraElement(data, globalData, comp) {
-    // console.log('THRCameraElement::constructor()', this, comp);
+    // console.log('THRCameraElement::constructor()', this, comp, globalData);
     this.initFrame();
     this.initBaseData(data, globalData, comp);
     this.initHierarchy();
@@ -18850,12 +18950,16 @@
     });
   };
   THRCameraElement.prototype.refresh = function () {
-    if (this.globalData.renderConfig.renderer) {
-      var camera = this.globalData.renderConfig.renderer.camera;
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+    var cameraManager = this.globalData.cameraManager;
+    if (cameraManager && cameraManager.isTracking(this)) {
+      cameraManager.updateCameraAspect(window.innerWidth / window.innerHeight);
       var renderer = this.globalData.renderConfig.renderer.renderer;
       renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // Reset previous transform matrix
+      if (this._prevMat) {
+        this._prevMat.reset();
+      }
     }
   };
   THRCameraElement.prototype.createElements = function () {};
@@ -18907,50 +19011,53 @@
       this.mat.rotateX(-this.or.v[0]).rotateY(-this.or.v[1]).rotateZ(this.or.v[2]);
       this.mat.translate(this.globalData.compSize.w / 2, this.globalData.compSize.h / 2, 0);
       this.mat.translate(0, 0, this.pe.v);
-      var camera = this.globalData.renderConfig.renderer.camera;
-      var renderScale = this.globalData.renderConfig.renderer.scale || 1.0;
-      // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
-      var hasMatrixChanged = !this._prevMat.equals(this.mat);
-      if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
-        len = this.comp.threeDElements.length;
-        var comp;
-        // var perspectiveStyle;
-        // var containerStyle;
-        for (i = 0; i < len; i += 1) {
-          comp = this.comp.threeDElements[i];
-          if (comp.type === '3d') {
-            if (hasMatrixChanged) {
-              var newPosition = new three.Vector3();
-              if (this.p) {
-                newPosition.set(this.p.v[0] * renderScale, -this.p.v[1] * renderScale, -this.p.v[2] * renderScale);
-              } else {
-                newPosition.set(this.px.v * renderScale, -this.py.v * renderScale, -this.pz.v * renderScale);
-              }
-              camera.position.copy(newPosition);
+      var cameraManager = this.globalData.cameraManager;
+      if (cameraManager && cameraManager.isTracking(this)) {
+        var camera = cameraManager.getActiveCamera(); // this.globalData.renderConfig.renderer.camera;
+        var renderScale = this.globalData.renderConfig.renderer.scale || 1.0;
+        // console.log('THRCameraElement::renderFrame()', renderScale, this.globalData.renderConfig);
+        var hasMatrixChanged = !this._prevMat.equals(this.mat);
+        if ((hasMatrixChanged || this.pe._mdf) && this.comp.threeDElements) {
+          len = this.comp.threeDElements.length;
+          var comp;
+          // var perspectiveStyle;
+          // var containerStyle;
+          for (i = 0; i < len; i += 1) {
+            comp = this.comp.threeDElements[i];
+            if (comp.type === '3d') {
+              if (hasMatrixChanged) {
+                var newPosition = new three.Vector3();
+                if (this.p) {
+                  newPosition.set(this.p.v[0] * renderScale, -this.p.v[1] * renderScale, -this.p.v[2] * renderScale);
+                } else {
+                  newPosition.set(this.px.v * renderScale, -this.py.v * renderScale, -this.pz.v * renderScale);
+                }
+                camera.position.copy(newPosition);
 
-              // Camera Adjustments
-              var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
-              if (cameraModifier) {
-                if (cameraModifier.position) {
-                  camera.position.add(cameraModifier.position);
+                // Camera Adjustments
+                var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
+                if (cameraModifier) {
+                  if (cameraModifier.position) {
+                    camera.position.add(cameraModifier.position);
+                  }
+                }
+
+                // LookAt
+                if (this.a) {
+                  var cameraLookAt = new three.Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
+                  camera.lookAt(cameraLookAt);
                 }
               }
-
-              // LookAt
-              if (this.a) {
-                var cameraLookAt = new three.Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
-                camera.lookAt(cameraLookAt);
+              if (this.pe._mdf) {
+                // console.log('comp.perspectiveElem', comp.perspectiveElem);
+                // perspectiveStyle = comp.perspectiveElem.style;
+                // perspectiveStyle.perspective = this.pe.v + 'px';
+                // perspectiveStyle.webkitPerspective = this.pe.v + 'px';
               }
             }
-            if (this.pe._mdf) {
-              // console.log('comp.perspectiveElem', comp.perspectiveElem);
-              // perspectiveStyle = comp.perspectiveElem.style;
-              // perspectiveStyle.perspective = this.pe.v + 'px';
-              // perspectiveStyle.webkitPerspective = this.pe.v + 'px';
-            }
           }
+          this.mat.clone(this._prevMat);
         }
-        this.mat.clone(this._prevMat);
       }
     }
     this._isFirstFrame = false;
@@ -18958,7 +19065,9 @@
   THRCameraElement.prototype.prepareFrame = function (num) {
     this.prepareProperties(num, true);
   };
-  THRCameraElement.prototype.destroy = function () {};
+  THRCameraElement.prototype.destroy = function () {
+    window.removeEventListener('resize');
+  };
   THRCameraElement.prototype.getBaseElement = function () {
     return null;
   };
@@ -19046,7 +19155,7 @@
           }
         },
         vertexShader: "\n                  varying vec2 vUv;\n                  void main() {\n                      vUv = uv;\n                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n                  }\n              ",
-        fragmentShader: "\n                  uniform sampler2D u_texture;\n                  varying vec2 vUv;\n                  void main() {\n                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));\n                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;\n                      gl_FragColor = vec4(color.rgb, alpha);\n                  }\n              "
+        fragmentShader: "\n                  uniform sampler2D u_texture;\n                  varying vec2 vUv;\n                  void main() {\n                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));\n                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;\n                      gl_FragColor = vec4(color.rgb, alpha);\n                      \n                      // Encodings\n                      gl_FragColor = linearToOutputTexel(gl_FragColor);\n                    \n                      // Get get normal blending with premultipled, use with CustomBlending, OneFactor, OneMinusSrcAlphaFactor, AddEquation.\n                      gl_FragColor.rgb *= gl_FragColor.a;\n                  }\n              "
       });
       this.material = material;
       var plane = new three.Mesh(geometry, material);
@@ -19229,7 +19338,8 @@
       _mdf: false,
       frameNum: -1,
       renderConfig: this.renderConfig,
-      isAssetsLoaded: false
+      isAssetsLoaded: false,
+      cameraManager: this.animationItem.cameraManager
     };
     this.pendingElements = [];
     this.elements = [];
@@ -19303,8 +19413,12 @@
   };
   ThreeRendererBase.prototype.createCamera = function (data) {
     console.log('ThreeRendererBase::createCamera()', data);
-    this.camera = new THRCameraElement(data, this.globalData, this);
-    return this.camera;
+    var newCamera = new THRCameraElement(data, this.globalData, this);
+    this.globalData.cameraManager.addCameraElement(data, newCamera);
+    if (!this.camera) {
+      this.camera = newCamera;
+    }
+    return newCamera;
   };
   ThreeRendererBase.prototype.createVideo = function (data) {
     console.log('ThreeRendererBase::createVideo()', data);
@@ -19432,6 +19546,7 @@
       three$1.camera.updateProjectionMatrix();
       console.log('** creating new three camera');
     }
+    this.globalData.cameraManager.setActiveCamera(three$1.camera);
     if (!three$1.renderer) {
       three$1.renderer = new three.WebGLRenderer();
       three$1.renderer.setPixelRatio(window.devicePixelRatio);
@@ -19759,7 +19874,8 @@
       _mdf: false,
       frameNum: -1,
       renderConfig: this.renderConfig,
-      isAssetsLoaded: false
+      isAssetsLoaded: false,
+      cameraManager: this.animationItem.cameraManager
     };
     this.pendingElements = [];
     this.elements = [];

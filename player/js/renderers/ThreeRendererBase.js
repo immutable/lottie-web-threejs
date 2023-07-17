@@ -49,6 +49,7 @@ function ThreeRendererBase(animationItem, config) {
     frameNum: -1,
     renderConfig: this.renderConfig,
     isAssetsLoaded: false,
+    cameraManager: this.animationItem.cameraManager,
   };
   this.pendingElements = [];
   this.elements = [];
@@ -130,8 +131,13 @@ ThreeRendererBase.prototype.createText = function (data) {
 
 ThreeRendererBase.prototype.createCamera = function (data) {
   console.log('ThreeRendererBase::createCamera()', data);
-  this.camera = new THRCameraElement(data, this.globalData, this);
-  return this.camera;
+  const newCamera = new THRCameraElement(data, this.globalData, this);
+  this.globalData.cameraManager.addCameraElement(data, newCamera);
+
+  if (!this.camera) {
+    this.camera = newCamera;
+  }
+  return newCamera;
 };
 
 ThreeRendererBase.prototype.createVideo = function (data) {
@@ -268,6 +274,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     three.camera.updateProjectionMatrix();
     console.log('** creating new three camera');
   }
+  this.globalData.cameraManager.setActiveCamera(three.camera);
 
   if (!three.renderer) {
     three.renderer = new WebGLRenderer();
