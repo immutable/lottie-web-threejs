@@ -1,5 +1,5 @@
 import {
-  Mesh,
+  Mesh, MeshBasicMaterial,
   PlaneGeometry,
   RGBAFormat, ShaderMaterial,
   sRGBEncoding,
@@ -15,6 +15,7 @@ import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 import PropertyFactory from '../../utils/PropertyFactory';
+import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRVideoElement(data, globalData, comp) {
   this.assetData = globalData.getAssetData(data.refId);
@@ -52,25 +53,30 @@ THRVideoElement.prototype.createContent = function () {
     texture.encoding = sRGBEncoding;
     texture.format = RGBAFormat;
 
-    // var material = new MeshBasicMaterial({
-    //   map: texture,
-    //   transparent: true,
-    //   toneMapped: false,
-    // });
-
-    var material = new ShaderMaterial({
-      transparent: true,
-      uniforms: {
-        u_texture: { value: texture },
-      },
-      vertexShader: `
+    var blendModeValue = getBlendMode(this.data.bm);
+    var material;
+    console.log('Video Blend Mode::', blendModeValue, this.data.bm);
+    if (this.data.bm !== 0) {
+      material = new MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        toneMapped: false,
+      });
+    } else {
+      // Custom Alpha hstack support
+      material = new ShaderMaterial({
+        transparent: true,
+        uniforms: {
+          u_texture: { value: texture },
+        },
+        vertexShader: `
                   varying vec2 vUv;
                   void main() {
                       vUv = uv;
                       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                   }
               `,
-      fragmentShader: `
+        fragmentShader: `
                   uniform sampler2D u_texture;
                   varying vec2 vUv;
                   void main() {
@@ -85,7 +91,8 @@ THRVideoElement.prototype.createContent = function () {
                       // gl_FragColor.rgb *= gl_FragColor.a;
                   }
               `,
-    });
+      });
+    }
     this.material = material;
     var plane = new Mesh(geometry, material);
     plane.name = this.assetData.id;

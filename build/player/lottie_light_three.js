@@ -13212,23 +13212,28 @@
       var texture = new three.VideoTexture(this.video);
       texture.encoding = three.sRGBEncoding;
       texture.format = three.RGBAFormat;
-
-      // var material = new MeshBasicMaterial({
-      //   map: texture,
-      //   transparent: true,
-      //   toneMapped: false,
-      // });
-
-      var material = new three.ShaderMaterial({
-        transparent: true,
-        uniforms: {
-          u_texture: {
-            value: texture
-          }
-        },
-        vertexShader: "\n                  varying vec2 vUv;\n                  void main() {\n                      vUv = uv;\n                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n                  }\n              ",
-        fragmentShader: "\n                  uniform sampler2D u_texture;\n                  varying vec2 vUv;\n                  void main() {\n                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));\n                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;\n                      gl_FragColor = vec4(color.rgb, alpha);\n                      \n                      // Encodings\n                      // gl_FragColor = linearToOutputTexel(gl_FragColor);\n                    \n                      // Get get normal blending with premultipled, use with CustomBlending, OneFactor, OneMinusSrcAlphaFactor, AddEquation.\n                      // gl_FragColor.rgb *= gl_FragColor.a;\n                  }\n              "
-      });
+      var blendModeValue = getBlendMode(this.data.bm);
+      var material;
+      console.log('Video Blend Mode::', blendModeValue, this.data.bm);
+      if (this.data.bm !== 0) {
+        material = new three.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          toneMapped: false
+        });
+      } else {
+        // Custom Alpha hstack support
+        material = new three.ShaderMaterial({
+          transparent: true,
+          uniforms: {
+            u_texture: {
+              value: texture
+            }
+          },
+          vertexShader: "\n                  varying vec2 vUv;\n                  void main() {\n                      vUv = uv;\n                      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n                  }\n              ",
+          fragmentShader: "\n                  uniform sampler2D u_texture;\n                  varying vec2 vUv;\n                  void main() {\n                      vec4 color = texture2D(u_texture, vec2(vUv.x * 0.5, vUv.y));\n                      float alpha = texture2D(u_texture, vec2(0.5 + vUv.x * 0.5, vUv.y)).r;\n                      gl_FragColor = vec4(color.rgb, alpha);\n                      \n                      // Encodings\n                      // gl_FragColor = linearToOutputTexel(gl_FragColor);\n                    \n                      // Get get normal blending with premultipled, use with CustomBlending, OneFactor, OneMinusSrcAlphaFactor, AddEquation.\n                      // gl_FragColor.rgb *= gl_FragColor.a;\n                  }\n              "
+        });
+      }
       this.material = material;
       var plane = new three.Mesh(geometry, material);
       plane.name = this.assetData.id;
