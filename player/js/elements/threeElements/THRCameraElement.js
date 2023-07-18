@@ -196,6 +196,7 @@ THRCameraElement.prototype.renderFrame = function () {
               camera.position.copy(newPosition);
 
               // Camera Adjustments
+              console.log('THRCameraElement::renderFrame()', this.globalData);
               const cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
               if (cameraModifier) {
                 if (cameraModifier.position) {
