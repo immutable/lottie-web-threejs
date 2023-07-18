@@ -2331,6 +2331,12 @@
   AnimationItem.prototype.trackCameraElement = function (name) {
     return this.cameraManager.trackCameraElement(name);
   };
+  AnimationItem.prototype.getActiveCameraElement = function () {
+    return this.cameraManager.getActiveCameraElement();
+  };
+  AnimationItem.prototype.getActiveCamera = function () {
+    return this.cameraManager.getActiveCamera();
+  };
   AnimationItem.prototype.resetCameraElement = function () {
     return this.cameraManager.resetCameraElement();
   };
@@ -13101,7 +13107,6 @@
                 camera.position.copy(newPosition);
 
                 // Camera Adjustments
-                console.log('THRCameraElement::renderFrame()', this.globalData);
                 var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
                 if (cameraModifier) {
                   if (cameraModifier.position) {
