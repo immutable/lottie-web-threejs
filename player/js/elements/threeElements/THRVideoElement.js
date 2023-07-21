@@ -15,7 +15,6 @@ import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 import PropertyFactory from '../../utils/PropertyFactory';
-import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRVideoElement(data, globalData, comp) {
   this.assetData = globalData.getAssetData(data.refId);
@@ -53,9 +52,7 @@ THRVideoElement.prototype.createContent = function () {
     texture.encoding = sRGBEncoding;
     texture.format = RGBAFormat;
 
-    var blendModeValue = getBlendMode(this.data.bm);
     var material;
-    console.log('Video Blend Mode::', blendModeValue, this.data.bm);
     if (this.data.bm !== 0) {
       material = new MeshBasicMaterial({
         map: texture,

@@ -44,14 +44,18 @@ AudioElement.prototype.prepareFrame = function (num) {
 extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
 
 AudioElement.prototype.renderFrame = function () {
+  console.log('***Test Audio', this.isInRange, this._canPlay, this._isPlaying);
+
   if (this.isInRange && this._canPlay) {
     if (!this._isPlaying) {
+      console.log('***Test Audio Play', this.isInRange, this._canPlay, (this._currentTime / this.globalData.frameRate));
       this.audio.play();
       this.audio.seek(this._currentTime / this.globalData.frameRate);
       this._isPlaying = true;
     } else if (!this.audio.playing()
       || Math.abs(this._currentTime / this.globalData.frameRate - this.audio.seek()) > 0.1
     ) {
+      console.log('***Test Audio Seek', this.isInRange, this._canPlay, this._isPlaying);
       this.audio.seek(this._currentTime / this.globalData.frameRate);
     }
   }

@@ -413,9 +413,11 @@ AnimationItem.prototype.renderFrame = function () {
 };
 
 AnimationItem.prototype.play = function (name) {
+  console.log('***AnimationItem::play()', name, this.isPaused);
   if (name && this.name !== name) {
     return;
   }
+
   if (this.isPaused === true) {
     this.isPaused = false;
     this.trigger('_pause');

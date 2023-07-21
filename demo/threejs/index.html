@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html style="width: 100%;height: 100%">
 <head>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.151.3/three.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
      <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -8,7 +9,8 @@
        {
          "imports": {
            "three": "https://unpkg.com/three@v0.151.3/build/three.module.js",
-           "three/addons/": "https://unpkg.com/three@v0.151.3/examples/jsm/"
+           "three/addons/": "https://unpkg.com/three@v0.151.3/examples/jsm/",
+           "howler": "https://cdn.jsdelivr.net/npm/howler@2.2.3/+esm"
          }
        }
      </script>
@@ -26,6 +28,7 @@
 <div style="width:100%;height:100%;background-color:#333;" id="bodymovin"></div>
 <script type="module">
 
+     import { Howl } from 'howler';
      import * as THREE from 'three';
      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -41,6 +44,7 @@
      } from 'three';
 
      var threeData = initThree({width: 1920, height: 720, scale: 1});
+     var sounds = [];
 
      var GUI = lil.GUI;
      const gui = new GUI();
@@ -238,7 +242,55 @@
      // gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
      // gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
 
+     var createAudio = (assetPath) => {
+          console.log('***New audio', assetPath, Howler.codecs('mp3'), Howler.codecs('webm'));
 
+          var sound = new Howl({
+               src: [assetPath],
+               html5: false,
+               preload: true,
+               autoplay: false,
+               autoUnlock: true,
+               // mute: true,
+               onload: (res) => console.log('***Audio loaded', res),
+               onplay: (res) => console.log('***Audio play', res),
+               onplayerror: (res) => console.log('***Audio play error', res),
+               onpause: (res) => console.log('***Audio pause', res),
+               onmute: (res) => console.log('***Audio mute', res),
+          });
+          // sound.play();
+
+          sounds.push(sound);
+          return {
+               isPlaying: sound.isPlaying,
+               play: () => {
+                    sound = new Howl({
+                         src: [assetPath],
+                         autoplay: true,
+                         // mute: true,
+                         onload: (res) => console.log('***>Audio loaded', res),
+                         onplay: (res) => console.log('***>Audio play', res),
+                         onplayerror: (res) => console.log('***>Audio play error', res),
+                         onpause: (res) => console.log('***>Audio pause', res),
+                         onmute: (res) => console.log('***>Audio mute', res),
+                    });
+               },
+               seek: (res) => {
+                    sound.seek(res);
+               },
+               playing: () => {
+                    return sound.playing();
+               },
+               rate: function () {},
+               setVolume: function () {},
+          };
+          // sound.play();
+     //      return new Howl({
+     //           src: [assetPath]
+     //      });
+     }
+
+     Howler.volume(1);
      var animData = {
         wrapper: document.getElementById('bodymovin'),
         animType: 'threejs',
@@ -247,13 +299,14 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/bg_camera/data.json',
+        path: '/demo/threejs/botw/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/bg_camera/',
+             assetsPath: '/demo/threejs/botw/',
              // assetsPath: '/demo/threejs/bg/',
-             renderer: threeData
-        }
+             renderer: threeData,
+        },
+        audioFactory: createAudio,
     };
     var anim = bodymovin.loadAnimation(animData);
     // anim.resize(500, 500);
@@ -275,9 +328,31 @@
 
     var playBtn = document.getElementById('playBtn');
     playBtn.addEventListener('click', () => {
-       console.log('play me');
-         // anim.play();
-         realVideo.play();
+       console.log('***play me', sounds);
+       // sounds.forEach((sound) => {
+       //      sound.play();
+       //      // sound.pause();
+       // });
+
+         // var sound = new Howl({
+         //      src: ['/demo/threejs/botw/images/aud_0.mp3'],
+         //      html5: false,
+         //      preload: true,
+         //      autoplay: false,
+         //      autoUnlock: false,
+         //      // mute: true,
+         //      pool: 10,
+         //      onload: (res) => console.log('***Audio loaded', res),
+         //      onplay: (res) => console.log('***Audio play', res),
+         //      onplayerror: (res) => console.log('***Audio play error', res),
+         //      onpause: (res) => console.log('***Audio pause', res),
+         //      onmute: (res) => console.log('***Audio mute', res),
+         // });
+         // setTimeout(() => {
+         //  sound.play();
+         // }, 2000);
+       anim.goToAndPlay(0, true);
+       realVideo.play();
     });
 
     // function moveCamera(){
@@ -428,7 +503,8 @@
     calculateSize();
 
     anim.addEventListener('DOMLoaded', function() {
-         console.log('Example::DOMLoaded');
+         console.log('Example::DOMLoaded, creating sound');
+
          if (!initPack) {
               initPack = true;
               camera = anim.animationData.layers.find((layer) => {

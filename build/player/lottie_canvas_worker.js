@@ -2312,6 +2312,7 @@
     }
   };
   AnimationItem.prototype.play = function (name) {
+    console.log('***AnimationItem::play()', name, this.isPaused);
     if (name && this.name !== name) {
       return;
     }
@@ -7401,12 +7402,15 @@
   };
   extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
   AudioElement.prototype.renderFrame = function () {
+    console.log('***Test Audio', this.isInRange, this._canPlay, this._isPlaying);
     if (this.isInRange && this._canPlay) {
       if (!this._isPlaying) {
+        console.log('***Test Audio Play', this.isInRange, this._canPlay, this._currentTime / this.globalData.frameRate);
         this.audio.play();
         this.audio.seek(this._currentTime / this.globalData.frameRate);
         this._isPlaying = true;
       } else if (!this.audio.playing() || Math.abs(this._currentTime / this.globalData.frameRate - this.audio.seek()) > 0.1) {
+        console.log('***Test Audio Seek', this.isInRange, this._canPlay, this._isPlaying);
         this.audio.seek(this._currentTime / this.globalData.frameRate);
       }
     }
@@ -19153,9 +19157,7 @@
       var texture = new three.VideoTexture(this.video);
       texture.encoding = three.sRGBEncoding;
       texture.format = three.RGBAFormat;
-      var blendModeValue = getBlendMode(this.data.bm);
       var material;
-      console.log('Video Blend Mode::', blendModeValue, this.data.bm);
       if (this.data.bm !== 0) {
         material = new three.MeshBasicMaterial({
           map: texture,
