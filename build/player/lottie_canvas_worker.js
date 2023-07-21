@@ -2367,6 +2367,22 @@
     }
     return null;
   };
+  AnimationItem.prototype.goTo = function (value, isFrame, name) {
+    if (name && this.name !== name) {
+      return;
+    }
+    var numValue = Number(value);
+    if (isNaN(numValue)) {
+      var marker = this.getMarkerData(value);
+      if (marker) {
+        this.goTo(marker.time, true);
+      }
+    } else if (isFrame) {
+      this.setCurrentRawFrameValue(value);
+    } else {
+      this.setCurrentRawFrameValue(value * this.frameModifier);
+    }
+  };
   AnimationItem.prototype.goToAndStop = function (value, isFrame, name) {
     if (name && this.name !== name) {
       return;
