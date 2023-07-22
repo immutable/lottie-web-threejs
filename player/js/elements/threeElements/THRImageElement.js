@@ -1,5 +1,4 @@
 import {
-  AxesHelper,
   DoubleSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
@@ -12,10 +11,9 @@ import HierarchyElement from '../helpers/HierarchyElement';
 import FrameElement from '../helpers/FrameElement';
 import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
-import getBlendMode from '../../utils/helpers/blendModes';
 
 function THRImageElement(data, globalData, comp) {
-  console.info('THRImageElement::constructor()', data, comp);
+  // console.info('THRImageElement::constructor()', data, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }
@@ -23,12 +21,10 @@ function THRImageElement(data, globalData, comp) {
 extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRImageElement);
 
 // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
-THRImageElement.prototype.setBlendMode = function () {
-  var blendModeValue = getBlendMode(this.data.bm);
-  var elem = this.baseElement || this.layerElement;
-
-  console.log('THRImageElement::Setup blend mode', blendModeValue, this.data.bm, elem);
-};
+// THRImageElement.prototype.setBlendMode = function () {
+//   var blendModeValue = getBlendMode(this.data.bm);
+//   var elem = this.baseElement || this.layerElement;
+// };
 
 THRImageElement.prototype.createContent = function () {
   // Create a plane geometry
@@ -52,15 +48,15 @@ THRImageElement.prototype.createContent = function () {
 
   this.material = material;
 
-  console.log('THRImageElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
+  // console.log('THRImageElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
   var geometry = new PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
   var plane = new Mesh(geometry, material);
   plane.name = this.assetData.id;
   this.pivotElement.add(plane);
 
-  const pivotDebug = new AxesHelper(100);
+  // const pivotDebug = new AxesHelper(100);
   // pivotDebug.name = `${plane.name}_axes`;
-  this.pivotElement.add(pivotDebug);
+  // this.pivotElement.add(pivotDebug);
 
   // var debugMaterial = new MeshBasicMaterial({
   //   side: DoubleSide,

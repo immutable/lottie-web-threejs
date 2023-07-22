@@ -12872,18 +12872,18 @@
   })();
 
   function THRImageElement(data, globalData, comp) {
-    console.info('THRImageElement::constructor()', data, comp);
+    // console.info('THRImageElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRImageElement);
 
   // THRImageElement.prototype.initElement = RenderableObjectElement.prototype.initElement;
-  THRImageElement.prototype.setBlendMode = function () {
-    var blendModeValue = getBlendMode(this.data.bm);
-    var elem = this.baseElement || this.layerElement;
-    console.log('THRImageElement::Setup blend mode', blendModeValue, this.data.bm, elem);
-  };
+  // THRImageElement.prototype.setBlendMode = function () {
+  //   var blendModeValue = getBlendMode(this.data.bm);
+  //   var elem = this.baseElement || this.layerElement;
+  // };
+
   THRImageElement.prototype.createContent = function () {
     // Create a plane geometry
     var textureLoader = new three.TextureLoader();
@@ -12904,14 +12904,16 @@
       wireframe: false
     });
     this.material = material;
-    console.log('THRImageElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
+
+    // console.log('THRImageElement::createContent() data:', this.assetData, this.assetData.w, this.assetData.h);
     var geometry = new three.PlaneGeometry(this.assetData.w, this.assetData.h, 3, 3);
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
     this.pivotElement.add(plane);
-    var pivotDebug = new three.AxesHelper(100);
+
+    // const pivotDebug = new AxesHelper(100);
     // pivotDebug.name = `${plane.name}_axes`;
-    this.pivotElement.add(pivotDebug);
+    // this.pivotElement.add(pivotDebug);
 
     // var debugMaterial = new MeshBasicMaterial({
     //   side: DoubleSide,
@@ -13203,9 +13205,9 @@
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
   THRVideoElement.prototype.createContent = function () {
     // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
+    // const pivotDebug = new AxesHelper(100);
+    // this.pivotElement.add(pivotDebug);
 
-    var pivotDebug = new three.AxesHelper(100);
-    this.pivotElement.add(pivotDebug);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     if (this.video) {
       this.video.pause();
