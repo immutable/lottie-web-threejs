@@ -144,7 +144,7 @@ THRBaseElement.prototype = {
     this.s = PropertyFactory.getProp(elem, data.s || { k: [100, 100, 100] }, 1, 0.01, this);
   },
   renderElement: function () {
-    // console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement);
+    console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement, this);
 
     var transformedElement = this.transformedElement;
     if (transformedElement && this.finalTransform._matMdf) {
@@ -200,6 +200,7 @@ THRBaseElement.prototype = {
         scaleX = this.s.v[0];
         scaleY = this.s.v[1];
         scaleZ = this.s.v[2];
+        console.log('BaseElement::scale', this.baseElement.name, scaleX, scaleY, scaleZ);
         this.transformedElement.scale.set(scaleX, scaleY, scaleZ);
       }
 
@@ -210,6 +211,7 @@ THRBaseElement.prototype = {
           (this.a.v[1]),
           (this.a.v[2])
         );
+        console.log('BaseElement::pivot,this.a', this.baseElement.name, pivotOffset);
         this.pivotElement.position.copy(pivotOffset);
       }
 
@@ -218,6 +220,7 @@ THRBaseElement.prototype = {
         newPosition.x += ((this.assetData.w * 0.5) * scaleX);
         newPosition.y -= ((this.assetData.h * 0.5) * scaleY);
         this.transformedElement.position.copy(newPosition);
+        console.log('BaseElement::position,this.p', this.baseElement.name, newPosition);
       }
 
       // Skew

@@ -1,4 +1,5 @@
 import {
+  AxesHelper,
   DoubleSide,
   Mesh, MeshBasicMaterial, PlaneGeometry, sRGBEncoding, TextureLoader,
 } from 'three';
@@ -57,9 +58,9 @@ THRImageElement.prototype.createContent = function () {
   plane.name = this.assetData.id;
   this.pivotElement.add(plane);
 
-  // const pivotDebug = new AxesHelper(50);
+  const pivotDebug = new AxesHelper(100);
   // pivotDebug.name = `${plane.name}_axes`;
-  // this.pivotElement.add(pivotDebug);
+  this.pivotElement.add(pivotDebug);
 
   // var debugMaterial = new MeshBasicMaterial({
   //   side: DoubleSide,

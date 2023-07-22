@@ -243,51 +243,10 @@
      // gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
 
      var createAudio = (assetPath) => {
-          console.log('***New audio', assetPath, Howler.codecs('mp3'), Howler.codecs('webm'));
-
-          var sound = new Howl({
-               src: [assetPath],
-               html5: false,
-               preload: true,
-               autoplay: false,
-               autoUnlock: true,
-               // mute: true,
-               onload: (res) => console.log('***Audio loaded', res),
-               onplay: (res) => console.log('***Audio play', res),
-               onplayerror: (res) => console.log('***Audio play error', res),
-               onpause: (res) => console.log('***Audio pause', res),
-               onmute: (res) => console.log('***Audio mute', res),
-          });
-          // sound.play();
-
-          sounds.push(sound);
-          return {
-               isPlaying: sound.isPlaying,
-               play: () => {
-                    sound = new Howl({
+          return new Howl({
                          src: [assetPath],
-                         autoplay: true,
-                         // mute: true,
-                         onload: (res) => console.log('***>Audio loaded', res),
-                         onplay: (res) => console.log('***>Audio play', res),
-                         onplayerror: (res) => console.log('***>Audio play error', res),
-                         onpause: (res) => console.log('***>Audio pause', res),
-                         onmute: (res) => console.log('***>Audio mute', res),
-                    });
-               },
-               seek: (res) => {
-                    sound.seek(res);
-               },
-               playing: () => {
-                    return sound.playing();
-               },
-               rate: function () {},
-               setVolume: function () {},
-          };
-          // sound.play();
-     //      return new Howl({
-     //           src: [assetPath]
-     //      });
+                         autoplay: true
+          });
      }
 
      Howler.volume(1);
@@ -299,10 +258,10 @@
         autoplay: false,
         // path: '/demo/threejs/bg_camera/data.json',
         // path: '/demo/threejs/bg/data.json',
-        path: '/demo/threejs/botw/data.json',
+        path: '/demo/threejs/pack/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/botw/',
+             assetsPath: '/demo/threejs/pack/',
              // assetsPath: '/demo/threejs/bg/',
              renderer: threeData,
         },
@@ -328,7 +287,6 @@
 
     var playBtn = document.getElementById('playBtn');
     playBtn.addEventListener('click', () => {
-       console.log('***play me', sounds);
        // sounds.forEach((sound) => {
        //      sound.play();
        //      // sound.pause();
@@ -351,8 +309,8 @@
          // setTimeout(() => {
          //  sound.play();
          // }, 2000);
-       anim.goToAndPlay(0, true);
-       realVideo.play();
+       anim.goToAndPlay('reveal', true);
+       // realVideo.play();
     });
 
     // function moveCamera(){

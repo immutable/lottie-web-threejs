@@ -55,8 +55,6 @@ ThreeRenderer.prototype.createComp = function (data) {
 };
 
 ThreeRenderer.prototype.checkLoaded = function () {
-  console.log('AnimationItem::checkLoaded() ****', this, this.renderer);
-
   if (!this.isLoaded
     && this.renderer.globalData.fontManager.isLoaded
     && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas')

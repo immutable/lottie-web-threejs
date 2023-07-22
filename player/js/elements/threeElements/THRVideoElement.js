@@ -1,4 +1,5 @@
 import {
+  AxesHelper,
   Mesh, MeshBasicMaterial,
   PlaneGeometry,
   RGBAFormat, ShaderMaterial,
@@ -28,18 +29,11 @@ function THRVideoElement(data, globalData, comp) {
 
 extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
 
-// THRVideoElement.prototype.setBlendMode = function () {
-//   var blendModeValue = getBlendMode(this.data.bm);
-//   var elem = this.baseElement || this.layerElement;
-//
-//   console.log('THRVideoElement::Setup blend mode', blendModeValue, this.data.bm, elem);
-// };
-
 THRVideoElement.prototype.createContent = function () {
   // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
-  // const pivotDebug = new AxesHelper(50);
-  // this.pivotElement.add(pivotDebug);
+  const pivotDebug = new AxesHelper(100);
+  this.pivotElement.add(pivotDebug);
 
   this.video = this.globalData.videoLoader.getAsset(this.assetData);
   if (this.video) {
@@ -93,6 +87,8 @@ THRVideoElement.prototype.createContent = function () {
     this.material = material;
     var plane = new Mesh(geometry, material);
     plane.name = this.assetData.id;
+    plane.x = -(this.assetData.w * 0.5);
+    plane.y = -(this.assetData.h * 0.5);
     this.pivotElement.add(plane);
 
     // this.helper = new BoxHelper(plane, 0xff00ff);
@@ -120,7 +116,7 @@ THRVideoElement.prototype.createContent = function () {
   //   opacity: 0.5,
   // });
   // var cube = new Mesh(debugGeometry, debugMaterial);
-  // this.baseElement.add(cube);
+  // this.pivotElement.add(cube);
   this.transformedElement = this.baseElement; // plane;
 
   if (this.data.nm) {

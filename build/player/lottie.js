@@ -2016,7 +2016,6 @@
     }
   };
   AnimationItem.prototype.play = function (name) {
-    console.log('***AnimationItem::play()', name, this.isPaused);
     if (name && this.name !== name) {
       return;
     }
@@ -7122,15 +7121,12 @@
   };
   extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
   AudioElement.prototype.renderFrame = function () {
-    console.log('***Test Audio', this.isInRange, this._canPlay, this._isPlaying);
     if (this.isInRange && this._canPlay) {
       if (!this._isPlaying) {
-        console.log('***Test Audio Play', this.isInRange, this._canPlay, this._currentTime / this.globalData.frameRate);
         this.audio.play();
         this.audio.seek(this._currentTime / this.globalData.frameRate);
         this._isPlaying = true;
       } else if (!this.audio.playing() || Math.abs(this._currentTime / this.globalData.frameRate - this.audio.seek()) > 0.1) {
-        console.log('***Test Audio Seek', this.isInRange, this._canPlay, this._isPlaying);
         this.audio.seek(this._currentTime / this.globalData.frameRate);
       }
     }
@@ -18231,8 +18227,7 @@
       }, 1, 0.01, this);
     },
     renderElement: function renderElement() {
-      // console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement);
-
+      console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement, this);
       var transformedElement = this.transformedElement;
       if (transformedElement && this.finalTransform._matMdf) {
         // var matrix = new Matrix4();
@@ -18287,12 +18282,14 @@
           scaleX = this.s.v[0];
           scaleY = this.s.v[1];
           scaleZ = this.s.v[2];
+          console.log('BaseElement::scale', this.baseElement.name, scaleX, scaleY, scaleZ);
           this.transformedElement.scale.set(scaleX, scaleY, scaleZ);
         }
 
         // Anchor / Pivot
         if (this.a) {
           var pivotOffset = new three.Vector3(-this.a.v[0], this.a.v[1], this.a.v[2]);
+          console.log('BaseElement::pivot,this.a', this.baseElement.name, pivotOffset);
           this.pivotElement.position.copy(pivotOffset);
         }
         if (this.p) {
@@ -18300,6 +18297,7 @@
           newPosition.x += this.assetData.w * 0.5 * scaleX;
           newPosition.y -= this.assetData.h * 0.5 * scaleY;
           this.transformedElement.position.copy(newPosition);
+          console.log('BaseElement::position,this.p', this.baseElement.name, newPosition);
         }
 
         // Skew
@@ -18560,10 +18558,9 @@
     var plane = new three.Mesh(geometry, material);
     plane.name = this.assetData.id;
     this.pivotElement.add(plane);
-
-    // const pivotDebug = new AxesHelper(50);
+    var pivotDebug = new three.AxesHelper(100);
     // pivotDebug.name = `${plane.name}_axes`;
-    // this.pivotElement.add(pivotDebug);
+    this.pivotElement.add(pivotDebug);
 
     // var debugMaterial = new MeshBasicMaterial({
     //   side: DoubleSide,
@@ -18853,20 +18850,12 @@
     };
   }
   extendPrototype([BaseElement, TransformElement, THRBaseElement, HierarchyElement, FrameElement, RenderableObjectElement], THRVideoElement);
-
-  // THRVideoElement.prototype.setBlendMode = function () {
-  //   var blendModeValue = getBlendMode(this.data.bm);
-  //   var elem = this.baseElement || this.layerElement;
-  //
-  //   console.log('THRVideoElement::Setup blend mode', blendModeValue, this.data.bm, elem);
-  // };
-
   THRVideoElement.prototype.createContent = function () {
     // var assetPath = `${this.globalData.renderConfig.assetsPath}${this.assetData.u}${this.assetData.p}`;
 
-    // const pivotDebug = new AxesHelper(50);
-    // this.pivotElement.add(pivotDebug);
-
+    var pivotDebug = new three.AxesHelper(100);
+    this.pivotElement.add(pivotDebug);
+    console.log('***VideoElement::createContent() in ', this, this.assetData.w, this.assetData.h);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     if (this.video) {
       this.video.pause();
@@ -18878,6 +18867,7 @@
       texture.encoding = three.sRGBEncoding;
       texture.format = three.RGBAFormat;
       var material;
+      console.log('***VideoElement::createContent() blend:', this.data.bm);
       if (this.data.bm !== 0) {
         material = new three.MeshBasicMaterial({
           map: texture,
@@ -18900,6 +18890,8 @@
       this.material = material;
       var plane = new three.Mesh(geometry, material);
       plane.name = this.assetData.id;
+      plane.x = -(this.assetData.w * 0.5);
+      plane.y = -(this.assetData.h * 0.5);
       this.pivotElement.add(plane);
 
       // this.helper = new BoxHelper(plane, 0xff00ff);
@@ -18927,7 +18919,7 @@
     //   opacity: 0.5,
     // });
     // var cube = new Mesh(debugGeometry, debugMaterial);
-    // this.baseElement.add(cube);
+    // this.pivotElement.add(cube);
     this.transformedElement = this.baseElement; // plane;
 
     if (this.data.nm) {
@@ -19634,7 +19626,6 @@
     return new THRCompElement(data, this.globalData, this);
   };
   ThreeRenderer.prototype.checkLoaded = function () {
-    console.log('AnimationItem::checkLoaded() ****', this, this.renderer);
     if (!this.isLoaded && this.renderer.globalData.fontManager.isLoaded && (this.imagePreloader.loadedImages() || this.renderer.rendererType !== 'canvas') && this.imagePreloader.loadedFootages() && this.videoPreloader.loadedVideos()) {
       this.isLoaded = true;
       var expressionsPlugin = getExpressionsPlugin();

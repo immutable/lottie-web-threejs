@@ -413,7 +413,6 @@ AnimationItem.prototype.renderFrame = function () {
 };
 
 AnimationItem.prototype.play = function (name) {
-  console.log('***AnimationItem::play()', name, this.isPaused);
   if (name && this.name !== name) {
     return;
   }
