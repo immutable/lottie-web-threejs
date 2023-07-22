@@ -18523,7 +18523,6 @@
       }, 1, 0.01, this);
     },
     renderElement: function renderElement() {
-      console.log('THRBaseElement::renderElement()', this.finalTransform._matMdf, this.baseElement, this);
       var transformedElement = this.transformedElement;
       if (transformedElement && this.finalTransform._matMdf) {
         // var matrix = new Matrix4();
@@ -18578,14 +18577,12 @@
           scaleX = this.s.v[0];
           scaleY = this.s.v[1];
           scaleZ = this.s.v[2];
-          console.log('BaseElement::scale', this.baseElement.name, scaleX, scaleY, scaleZ);
           this.transformedElement.scale.set(scaleX, scaleY, scaleZ);
         }
 
         // Anchor / Pivot
         if (this.a) {
           var pivotOffset = new three.Vector3(-this.a.v[0], this.a.v[1], this.a.v[2]);
-          console.log('BaseElement::pivot,this.a', this.baseElement.name, pivotOffset);
           this.pivotElement.position.copy(pivotOffset);
         }
         if (this.p) {
@@ -18593,7 +18590,6 @@
           newPosition.x += this.assetData.w * 0.5 * scaleX;
           newPosition.y -= this.assetData.h * 0.5 * scaleY;
           this.transformedElement.position.copy(newPosition);
-          console.log('BaseElement::position,this.p', this.baseElement.name, newPosition);
         }
 
         // Skew
@@ -19151,7 +19147,6 @@
 
     var pivotDebug = new three.AxesHelper(100);
     this.pivotElement.add(pivotDebug);
-    console.log('***VideoElement::createContent() in ', this, this.assetData.w, this.assetData.h);
     this.video = this.globalData.videoLoader.getAsset(this.assetData);
     if (this.video) {
       this.video.pause();
@@ -19163,7 +19158,6 @@
       texture.encoding = three.sRGBEncoding;
       texture.format = three.RGBAFormat;
       var material;
-      console.log('***VideoElement::createContent() blend:', this.data.bm);
       if (this.data.bm !== 0) {
         material = new three.MeshBasicMaterial({
           map: texture,
