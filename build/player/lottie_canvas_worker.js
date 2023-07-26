@@ -2840,6 +2840,12 @@
         registeredAnimations[i].animation.pause(animation);
       }
     }
+    function goTo(value, isFrame, animation) {
+      var i;
+      for (i = 0; i < len; i += 1) {
+        registeredAnimations[i].animation.goTo(value, isFrame, animation);
+      }
+    }
     function goToAndStop(value, isFrame, animation) {
       var i;
       for (i = 0; i < len; i += 1) {
@@ -2938,6 +2944,7 @@
     moduleOb.searchAnimations = searchAnimations;
     moduleOb.resize = resize;
     // moduleOb.start = start;
+    moduleOb.goTo = goTo;
     moduleOb.goToAndStop = goToAndStop;
     moduleOb.destroy = destroy;
     moduleOb.freeze = freeze;

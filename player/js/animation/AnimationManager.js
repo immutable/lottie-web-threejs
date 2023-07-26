@@ -123,6 +123,13 @@ const animationManager = (function () {
     }
   }
 
+  function goTo(value, isFrame, animation) {
+    var i;
+    for (i = 0; i < len; i += 1) {
+      registeredAnimations[i].animation.goTo(value, isFrame, animation);
+    }
+  }
+
   function goToAndStop(value, isFrame, animation) {
     var i;
     for (i = 0; i < len; i += 1) {
@@ -234,6 +241,7 @@ const animationManager = (function () {
   moduleOb.searchAnimations = searchAnimations;
   moduleOb.resize = resize;
   // moduleOb.start = start;
+  moduleOb.goTo = goTo;
   moduleOb.goToAndStop = goToAndStop;
   moduleOb.destroy = destroy;
   moduleOb.freeze = freeze;
