@@ -79,9 +79,7 @@ THRCameraElement.prototype.setup = function () {
     }
   }
 
-  window.addEventListener('resize', () => {
-    this.refresh();
-  });
+  window.addEventListener('resize', this.refresh);
 };
 
 THRCameraElement.prototype.refresh = function () {
@@ -229,7 +227,7 @@ THRCameraElement.prototype.prepareFrame = function (num) {
 };
 
 THRCameraElement.prototype.destroy = function () {
-  window.removeEventListener('resize');
+  window.removeEventListener('resize', this.refresh);
 };
 THRCameraElement.prototype.getBaseElement = function () { return null; };
 

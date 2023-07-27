@@ -18659,7 +18659,6 @@
   }
   extendPrototype([BaseElement, FrameElement, HierarchyElement], THRCameraElement);
   THRCameraElement.prototype.setup = function () {
-    var _this = this;
     var i;
     var len = this.comp.threeDElements.length;
     var comp;
@@ -18684,9 +18683,7 @@
         this.refresh();
       }
     }
-    window.addEventListener('resize', function () {
-      _this.refresh();
-    });
+    window.addEventListener('resize', this.refresh);
   };
   THRCameraElement.prototype.refresh = function () {
     var cameraManager = this.globalData.cameraManager;
@@ -18805,7 +18802,7 @@
     this.prepareProperties(num, true);
   };
   THRCameraElement.prototype.destroy = function () {
-    window.removeEventListener('resize');
+    window.removeEventListener('resize', this.refresh);
   };
   THRCameraElement.prototype.getBaseElement = function () {
     return null;
