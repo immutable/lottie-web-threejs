@@ -13038,19 +13038,24 @@
         this.refresh();
       }
     }
-    window.addEventListener('resize', this.refresh);
+    this.refreshListener = this.refresh.bind(this);
+    window.addEventListener('resize', this.refreshListener);
   };
   THRCameraElement.prototype.refresh = function () {
-    var cameraManager = this.globalData.cameraManager;
-    if (cameraManager && cameraManager.isTracking(this)) {
-      cameraManager.updateCameraAspect(window.innerWidth / window.innerHeight);
-      var renderer = this.globalData.renderConfig.renderer.renderer;
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.globalData) {
+      var cameraManager = this.globalData.cameraManager;
+      if (cameraManager && cameraManager.isTracking(this)) {
+        cameraManager.updateCameraAspect(window.innerWidth / window.innerHeight);
+        var renderer = this.globalData.renderConfig.renderer.renderer;
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-      // Reset previous transform matrix
-      if (this._prevMat) {
-        this._prevMat.reset();
+        // Reset previous transform matrix
+        if (this._prevMat) {
+          this._prevMat.reset();
+        }
       }
+    } else {
+      console.warn('Camera has been detached');
     }
   };
   THRCameraElement.prototype.createElements = function () {};
@@ -13157,7 +13162,7 @@
     this.prepareProperties(num, true);
   };
   THRCameraElement.prototype.destroy = function () {
-    window.removeEventListener('resize', this.refresh);
+    window.removeEventListener('resize', this.refreshListener);
   };
   THRCameraElement.prototype.getBaseElement = function () {
     return null;
