@@ -13130,16 +13130,6 @@
                 }
                 camera.position.copy(newPosition);
 
-                // Camera Adjustments
-                console.log('Camera::position.global', this.globalData.renderConfig.renderer.cameraModifier);
-                var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
-                if (cameraModifier) {
-                  if (cameraModifier.position) {
-                    camera.position.add(cameraModifier.position);
-                    console.log('Camera::position.add', cameraModifier.position);
-                  }
-                }
-
                 // LookAt
                 if (this.a) {
                   var cameraLookAt = new three.Vector3(this.a.v[0], -this.a.v[1], -this.a.v[2]);
@@ -13155,6 +13145,16 @@
             }
           }
           this.mat.clone(this._prevMat);
+        }
+
+        // Camera Adjustments
+        console.log('Camera::position.global', this.globalData.renderConfig.renderer.cameraModifier);
+        var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
+        if (cameraModifier) {
+          if (cameraModifier.position) {
+            camera.position.add(cameraModifier.position);
+            console.log('Camera::position.add', cameraModifier.position);
+          }
         }
       }
     }

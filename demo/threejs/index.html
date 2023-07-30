@@ -68,6 +68,7 @@
           cameraRotX: 0.0,
           cameraRotY: 0.0,
           cameraRotZ: 0.0,
+          cameraModifierZ: 0,
           target: '',
           targetX: 0,
           targetY: 0,
@@ -193,6 +194,8 @@
                     myObject.cameraY = positionValue[1];
                     myObject.cameraZ = positionValue[2];
                }
+
+               threeData.cameraModifier.position.set(myObject.cameraModifierZ);
 
                // Pos x
                camera.ks.p.k[0].s[0] = myObject.cameraX;
