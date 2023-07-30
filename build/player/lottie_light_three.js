@@ -13131,10 +13131,12 @@
                 camera.position.copy(newPosition);
 
                 // Camera Adjustments
+                console.log('Camera::position.global', this.globalData.renderConfig.renderer.cameraModifier);
                 var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
                 if (cameraModifier) {
                   if (cameraModifier.position) {
                     camera.position.add(cameraModifier.position);
+                    console.log('Camera::position.add', cameraModifier.position);
                   }
                 }
 
