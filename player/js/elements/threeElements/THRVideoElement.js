@@ -167,11 +167,11 @@ THRVideoElement.prototype.renderFrame = function () {
         this.video.play();
         this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
         this._isPlaying = true;
-        console.log('THRVideoElement:renderFrame() Play', (this.renderedFrame / this.globalData.frameRate));
+        // console.log('THRVideoElement:renderFrame() Play', (this.renderedFrame / this.globalData.frameRate));
       } else if (!this.isPlaying()
         && Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime) > 0.2
       ) {
-        console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
+        // console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
         // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
         this.video.play();
         this.video.currentTime = (this.renderedFrame / this.globalData.frameRate) + 0.05;
@@ -182,14 +182,14 @@ THRVideoElement.prototype.renderFrame = function () {
       this.video.pause();
       this.video.currentTime = 0;
       this._isPlaying = false;
-      console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
+      // console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
     }
   } else {
     const asset = this.globalData.videoLoader.getAsset(this.assetData);
     this.video = asset;
     this._isPlaying = false;
     this._canPlay = true;
-    console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
+    // console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
   }
 };
 

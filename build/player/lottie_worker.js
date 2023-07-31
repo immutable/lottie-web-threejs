@@ -1615,8 +1615,8 @@
       ctx.fillRect(0, 0, 1, 1);
       return canvas;
     }();
-    function videoLoaded(event) {
-      console.log('VideoPreloader::videoLoaded()', event);
+    function videoLoaded() {
+      // console.log('VideoPreloader::videoLoaded()', event);
       this.loadedAssets += 1;
       if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
         if (this.videosLoadedCb) {
@@ -1665,7 +1665,7 @@
       video.crossOrigin = 'anonymous';
       video.autoplay = 'autoplay';
       video.preload = 'auto';
-      video.muted = 'true';
+      // video.muted = 'false';
       video.addEventListener('play', this._videoEvent, false);
       video.addEventListener('playing', this._videoEvent, false);
       video.addEventListener('waiting', this._videoEvent, false);
@@ -1699,7 +1699,7 @@
       return regex.test(filename);
     }
     function loadAssets(assets, callback) {
-      console.log('VideoPreloader::loadAssets()', assets);
+      // console.log('VideoPreloader::loadAssets()', assets);
       this.videosLoadedCb = callback;
       var i;
       var len = assets.length;
@@ -1713,8 +1713,9 @@
         }
       }
       this.totalVideos = this.videos.length;
-      console.log('VideoPreloader::loadAssets() found:', this.videos);
+      // console.log('VideoPreloader::loadAssets() found:', this.videos);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
@@ -19072,7 +19073,7 @@
                 camera.position.copy(newPosition);
 
                 // Camera Adjustments
-                console.log('Camera::renderFrame()', this);
+                // console.log('Camera::renderFrame()', this);
                 var cameraModifier = this.globalData.renderConfig.renderer.cameraModifier;
                 if (cameraModifier) {
                   if (cameraModifier.position) {
@@ -19268,9 +19269,9 @@
           this.video.play();
           this.video.currentTime = this.renderedFrame / this.globalData.frameRate;
           this._isPlaying = true;
-          console.log('THRVideoElement:renderFrame() Play', this.renderedFrame / this.globalData.frameRate);
+          // console.log('THRVideoElement:renderFrame() Play', (this.renderedFrame / this.globalData.frameRate));
         } else if (!this.isPlaying() && Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime) > 0.2) {
-          console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
+          // console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
           // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
           this.video.play();
           this.video.currentTime = this.renderedFrame / this.globalData.frameRate + 0.05;
@@ -19281,16 +19282,17 @@
         this.video.pause();
         this.video.currentTime = 0;
         this._isPlaying = false;
-        console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
+        // console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
       }
     } else {
       var asset = this.globalData.videoLoader.getAsset(this.assetData);
       this.video = asset;
       this._isPlaying = false;
       this._canPlay = true;
-      console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
+      // console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
     }
   };
+
   THRVideoElement.prototype.isPlaying = function () {
     return this.video && !this.video.paused && !this.video.ended && this.video.readyState > 2;
   };

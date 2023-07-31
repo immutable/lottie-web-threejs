@@ -14,8 +14,8 @@ const VideoPreloader = (function () {
     return canvas;
   }());
 
-  function videoLoaded(event) {
-    console.log('VideoPreloader::videoLoaded()', event);
+  function videoLoaded() {
+    // console.log('VideoPreloader::videoLoaded()', event);
     this.loadedAssets += 1;
     if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
       if (this.videosLoadedCb) {
@@ -66,7 +66,7 @@ const VideoPreloader = (function () {
     video.crossOrigin = 'anonymous';
     video.autoplay = 'autoplay';
     video.preload = 'auto';
-    video.muted = 'true';
+    // video.muted = 'false';
     video.addEventListener('play', this._videoEvent, false);
     video.addEventListener('playing', this._videoEvent, false);
     video.addEventListener('waiting', this._videoEvent, false);
@@ -103,7 +103,7 @@ const VideoPreloader = (function () {
   }
 
   function loadAssets(assets, callback) {
-    console.log('VideoPreloader::loadAssets()', assets);
+    // console.log('VideoPreloader::loadAssets()', assets);
     this.videosLoadedCb = callback;
     var i;
     var len = assets.length;
@@ -117,7 +117,7 @@ const VideoPreloader = (function () {
       }
     }
     this.totalVideos = this.videos.length;
-    console.log('VideoPreloader::loadAssets() found:', this.videos);
+    // console.log('VideoPreloader::loadAssets() found:', this.videos);
   }
 
   function setPath(path) {

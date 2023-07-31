@@ -87,10 +87,124 @@
           exposure: 0.4,
           roughness: 0.2,
           lightDirect: 10,
-          lightAmbient: 10
+          lightAmbient: 10,
+          selectPack: () => {
+               console.log('Reveal Pack');
+
+               var animation = anim;
+               const totalDuration =
+                       (animation.totalFrames / animation.frameRate) * 1000;
+               const target = { frame: 0 };
+               const animationTimeline = gsap.timeline({
+                    id: 'anim',
+                    paused: true,
+                    repeat: false,
+               });
+
+               // Define tween for animation frame
+               animationTimeline.to(target, {
+                    ease: 'Linear.easeNone',
+                    duration: totalDuration / 1000,
+                    frame: animation.totalFrames,
+                    onStart: () => {
+                         animation.play();
+                    },
+                    onUpdateParams: [animation],
+                    onUpdate: function (targetAnimation) {
+                         // const nextMoment = Math.floor(totalDuration * this['progress']());
+                         const nextFrame = Math.round(targetAnimation.totalFrames * this['progress']());
+                         targetAnimation.setCurrentRawFrameValue(nextFrame);
+                         targetAnimation.gotoFrame();
+                    },
+                    onCompleteParams: [animation],
+                    onComplete: function (targetAnimation) {
+                         const nextMoment = Math.round(totalDuration * this['progress']());
+                         targetAnimation.goToAndStop(nextMoment); // in milliseconds
+                         console.log('Animation complete');
+                    },
+               });
+
+               var marker = 'reveal';
+               var markerItem = anim.markers.find((animationMarker) => animationMarker.payload.name === marker);
+               markerItem.payload.time = 0;
+               console.log('markerItem', markerItem);
+               if (markerItem.duration) {
+                    const markerStartTime = markerItem.payload.time;
+                    const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
+                    // animation.instance.audioController.play();
+
+                    console.log('anim marker play', markerStartTime);
+                    return animationTimeline.tweenFromTo(markerStartTime, markerEndTime).then(() => {
+                         anim.pause();
+                    });
+               } else {
+                    // animation.instance.play();
+                    // animation.instance.audioController.play();
+                    return animationTimeline.play(markerItem.payload.name).then(() => {
+                         animation.instance.pause();
+                    });
+               }
+          },
+          openPack: () => {
+               var animation = anim;
+               const totalDuration =
+                       (animation.totalFrames / animation.frameRate) * 1000;
+               const target = { frame: 0 };
+               const animationTimeline = gsap.timeline({
+                    id: 'anim',
+                    paused: true,
+                    repeat: false,
+               });
+
+               // Define tween for animation frame
+               animationTimeline.to(target, {
+                    ease: 'Linear.easeNone',
+                    duration: totalDuration / 1000,
+                    frame: animation.totalFrames,
+                    onStart: () => {
+                         animation.play();
+                    },
+                    onUpdateParams: [animation],
+                    onUpdate: function (targetAnimation) {
+                         // const nextMoment = Math.floor(totalDuration * this['progress']());
+                         const nextFrame = Math.floor(targetAnimation.totalFrames * this['progress']());
+                         targetAnimation.setCurrentRawFrameValue(nextFrame);
+                         targetAnimation.gotoFrame();
+                    },
+                    onCompleteParams: [animation],
+                    onComplete: function (targetAnimation) {
+                         const nextMoment = Math.floor(totalDuration * this['progress']());
+                         targetAnimation.goToAndStop(nextMoment); // in milliseconds
+                         console.log('Animation complete');
+                    },
+               });
+
+               var marker = 'open';
+               var markerItem = anim.markers.find((animationMarker) => animationMarker.payload.name === marker);
+               console.log('open Pack', markerItem);
+               markerItem.payload.time = Math.round(markerItem.time / anim.frameRate);
+               if (markerItem.duration) {
+                    const markerStartTime = markerItem.payload.time;
+                    const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
+                    // animation.instance.audioController.play();
+
+                    console.log('anim marker play', markerStartTime, markerEndTime);
+                    return animationTimeline.tweenFromTo(markerStartTime, markerEndTime).then(() => {
+                         anim.pause();
+                    });
+               } else {
+                    // animation.instance.play();
+                    // animation.instance.audioController.play();
+                    return animationTimeline.play(markerItem.payload.name).then(() => {
+                         animation.instance.pause();
+                    });
+               }
+          },
      };
 
-     gui.add( myObject, 'isFollowing' );
+     gui.add(myObject, 'isFollowing');
+     gui.add(myObject, 'selectPack');
+     gui.add(myObject, 'openPack');
 
      const targetFolder = gui.addFolder('Target');
      targetFolder.add(myObject, 'targetName').listen();
@@ -228,27 +342,24 @@
           }
      })
 
-     // gui.hide();
-
-     // gui.add( myObject, 'fov' );   // Number Field
-     // gui.add( myObject, 'focus' );   // Number Field
-     // gui.add( myObject, 'near' );   // Number Field
-     // gui.add( myObject, 'far' );   // Number Field
-     // gui.add( myObject, 'ortho' );   // Number Field
-     // gui.add( myObject, 'cameraX' );   // Number Field
-     // gui.add( myObject, 'cameraY' );   // Number Field
-     // gui.add( myObject, 'cameraZ' );   // Number Field
-     // gui.add( myObject, 'lookX' );   // Number Field
-     // gui.add( myObject, 'lookY' );   // Number Field
-     // gui.add( myObject, 'lookZ' );   // Number Field
-     // gui.add( myObject, 'cameraRotX', -360.0, 360.0 );   // Number Field
-     // gui.add( myObject, 'cameraRotY', -360.0, 360.0 );   // Number Field
-     // gui.add( myObject, 'cameraRotZ', -360.0, 360.0 );   // Number Field
-
      var createAudio = (assetPath) => {
+          // var audio = new Howl({
+          //      src: [assetPath],
+          //      preload: true,
+          //      autoplay: false
+          // });
+          // return {
+          //      play: audio.play,
+          //      seek: audio.seek,
+          //      playing: audio.playing,
+          //      rate: audio.rate,
+          //      volume: audio.volume,
+          //      setVolume: function(){},
+          // }
           return new Howl({
                          src: [assetPath],
-                         autoplay: true
+                         preload: true,
+                         autoplay: false
           });
      }
 
@@ -259,10 +370,10 @@
         loop: true,
         prerender: true,
         autoplay: false,
-        path: '/demo/threejs/bg/data.json',
+        path: '/demo/threejs/botw/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/bg/',
+             assetsPath: '/demo/threejs/botw/',
              renderer: threeData,
         },
         audioFactory: createAudio,
@@ -309,7 +420,7 @@
          // setTimeout(() => {
          //  sound.play();
          // }, 2000);
-       anim.goToAndPlay('reveal', true);
+       // anim.goToAndPlay('reveal', true);
        // realVideo.play();
     });
 

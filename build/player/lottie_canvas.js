@@ -1319,8 +1319,8 @@
       ctx.fillRect(0, 0, 1, 1);
       return canvas;
     }();
-    function videoLoaded(event) {
-      console.log('VideoPreloader::videoLoaded()', event);
+    function videoLoaded() {
+      // console.log('VideoPreloader::videoLoaded()', event);
       this.loadedAssets += 1;
       if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
         if (this.videosLoadedCb) {
@@ -1369,7 +1369,7 @@
       video.crossOrigin = 'anonymous';
       video.autoplay = 'autoplay';
       video.preload = 'auto';
-      video.muted = 'true';
+      // video.muted = 'false';
       video.addEventListener('play', this._videoEvent, false);
       video.addEventListener('playing', this._videoEvent, false);
       video.addEventListener('waiting', this._videoEvent, false);
@@ -1403,7 +1403,7 @@
       return regex.test(filename);
     }
     function loadAssets(assets, callback) {
-      console.log('VideoPreloader::loadAssets()', assets);
+      // console.log('VideoPreloader::loadAssets()', assets);
       this.videosLoadedCb = callback;
       var i;
       var len = assets.length;
@@ -1417,8 +1417,9 @@
         }
       }
       this.totalVideos = this.videos.length;
-      console.log('VideoPreloader::loadAssets() found:', this.videos);
+      // console.log('VideoPreloader::loadAssets() found:', this.videos);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
