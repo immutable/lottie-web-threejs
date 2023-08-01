@@ -45,7 +45,8 @@
 
      var threeData = initThree({width: 1920, height: 720, scale: 1});
      var sounds = [];
-
+     var animationTimeline;
+     var animator;
      var GUI = lil.GUI;
      const gui = new GUI();
      const myObject = {
@@ -88,14 +89,23 @@
           roughness: 0.2,
           lightDirect: 10,
           lightAmbient: 10,
+          stopAnim: () => {
+               console.log('>>> Stop Pack', anim, bodymovin, animator);
+               anim.pause();
+               animator.pause();
+          },
           selectPack: () => {
-               console.log('Reveal Pack');
-
+               console.log('Reveal Pack', animator);
+               anim.pause();
+               if (animator) {
+                    animator.pause();
+                    animator.kill();
+               }
                var animation = anim;
                const totalDuration =
                        (animation.totalFrames / animation.frameRate) * 1000;
                const target = { frame: 0 };
-               const animationTimeline = gsap.timeline({
+               animationTimeline = gsap.timeline({
                     id: 'anim',
                     paused: true,
                     repeat: false,
@@ -146,11 +156,17 @@
                }
           },
           openPack: () => {
+               anim.pause();
+               console.log('Open pack', animator);
+               if (animator) {
+                    animator.pause();
+                    animator.kill();
+               }
                var animation = anim;
                const totalDuration =
                        (animation.totalFrames / animation.frameRate) * 1000;
                const target = { frame: 0 };
-               const animationTimeline = gsap.timeline({
+               animationTimeline = gsap.timeline({
                     id: 'anim',
                     paused: true,
                     repeat: false,
@@ -166,6 +182,7 @@
                     },
                     onUpdateParams: [animation],
                     onUpdate: function (targetAnimation) {
+                         console.log('Timeline>>onUpdate()');
                          // const nextMoment = Math.floor(totalDuration * this['progress']());
                          const nextFrame = Math.floor(targetAnimation.totalFrames * this['progress']());
                          targetAnimation.setCurrentRawFrameValue(nextFrame);
@@ -189,20 +206,25 @@
                     // animation.instance.audioController.play();
 
                     console.log('anim marker play', markerStartTime, markerEndTime);
-                    return animationTimeline.tweenFromTo(markerStartTime, markerEndTime).then(() => {
+                    animator = animationTimeline.tweenFromTo(markerStartTime, markerEndTime);
+                    animator.then(() => {
                          anim.pause();
                     });
+                    return animator;
                } else {
                     // animation.instance.play();
                     // animation.instance.audioController.play();
-                    return animationTimeline.play(markerItem.payload.name).then(() => {
+                    animator = animationTimeline.play(markerItem.payload.name);
+                    animator.then(() => {
                          animation.instance.pause();
                     });
+                    return animator;
                }
           },
      };
 
      gui.add(myObject, 'isFollowing');
+     gui.add(myObject, 'stopAnim');
      gui.add(myObject, 'selectPack');
      gui.add(myObject, 'openPack');
 
@@ -370,10 +392,10 @@
         loop: true,
         prerender: true,
         autoplay: false,
-        path: '/demo/threejs/botw/data.json',
+        path: '/demo/threejs/sound/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/botw/',
+             assetsPath: '/demo/threejs/sound/',
              renderer: threeData,
         },
         audioFactory: createAudio,

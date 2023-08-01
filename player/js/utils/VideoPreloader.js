@@ -15,7 +15,6 @@ const VideoPreloader = (function () {
   }());
 
   function videoLoaded() {
-    // console.log('VideoPreloader::videoLoaded()', event);
     this.loadedAssets += 1;
     if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
       if (this.videosLoadedCb) {
@@ -80,6 +79,11 @@ const VideoPreloader = (function () {
       ob.video = proxyVideo;
       this._videoLoaded();
     }.bind(this), false);
+
+    video.addEventListener('loadedmetadata', () => {
+      // Pause the video once it has loaded
+      video.pause();
+    });
 
     video.src = path;
     video.load();
@@ -149,6 +153,12 @@ const VideoPreloader = (function () {
     return this.totalVideos === this.loadedAssets;
   }
 
+  function pause() {
+    this.videos.forEach((videoItem) => {
+      videoItem.video.pause();
+    });
+  }
+
   function setCacheType(type, elementHelper) {
     this._elementHelper = elementHelper;
     this._createVideoData = createVideoData.bind(this);
@@ -163,6 +173,7 @@ const VideoPreloader = (function () {
     this.loadedAssets = 0;
     this.videosLoadedCb = null;
     this.videos = [];
+    this.pause = pause.bind(this);
   }
 
   VideoPreloaderFactory.prototype = {

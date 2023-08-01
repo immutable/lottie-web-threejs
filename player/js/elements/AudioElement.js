@@ -91,6 +91,7 @@ AudioElement.prototype.getBaseElement = function () {
 };
 
 AudioElement.prototype.destroy = function () {
+  this.audio.pause();
 };
 
 AudioElement.prototype.sourceRectAtTime = function () {

@@ -1320,7 +1320,6 @@
       return canvas;
     }();
     function videoLoaded() {
-      // console.log('VideoPreloader::videoLoaded()', event);
       this.loadedAssets += 1;
       if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
         if (this.videosLoadedCb) {
@@ -1383,6 +1382,10 @@
         ob.video = proxyVideo;
         this._videoLoaded();
       }.bind(this), false);
+      video.addEventListener('loadedmetadata', function () {
+        // Pause the video once it has loaded
+        video.pause();
+      });
       video.src = path;
       video.load();
       video.pause();
@@ -1444,6 +1447,11 @@
     function loadedVideos() {
       return this.totalVideos === this.loadedAssets;
     }
+    function pause() {
+      this.videos.forEach(function (videoItem) {
+        videoItem.video.pause();
+      });
+    }
     function setCacheType(type, elementHelper) {
       this._elementHelper = elementHelper;
       this._createVideoData = createVideoData.bind(this);
@@ -1457,6 +1465,7 @@
       this.loadedAssets = 0;
       this.videosLoadedCb = null;
       this.videos = [];
+      this.pause = pause.bind(this);
     }
     VideoPreloaderFactory.prototype = {
       loadAssets: loadAssets,
@@ -1952,6 +1961,7 @@
       this.waitForFontsLoaded();
       if (this.isPaused) {
         this.audioController.pause();
+        this.videoPreloader.pause();
       }
     } catch (error) {
       console.error('AnimationItem::configAnimation failed', error);
@@ -2040,6 +2050,7 @@
       this._idle = true;
       this.trigger('_idle');
       this.audioController.pause();
+      this.videoPreloader.pause();
     }
   };
   AnimationItem.prototype.togglePause = function (name) {
@@ -7165,7 +7176,9 @@
   AudioElement.prototype.getBaseElement = function () {
     return null;
   };
-  AudioElement.prototype.destroy = function () {};
+  AudioElement.prototype.destroy = function () {
+    this.audio.pause();
+  };
   AudioElement.prototype.sourceRectAtTime = function () {};
   AudioElement.prototype.initExpressions = function () {};
 

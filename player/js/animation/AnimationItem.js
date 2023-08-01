@@ -336,6 +336,7 @@ AnimationItem.prototype.configAnimation = function (animData) {
     this.waitForFontsLoaded();
     if (this.isPaused) {
       this.audioController.pause();
+      this.videoPreloader.pause();
     }
   } catch (error) {
     console.error('AnimationItem::configAnimation failed', error);
@@ -438,6 +439,7 @@ AnimationItem.prototype.pause = function (name) {
     this._idle = true;
     this.trigger('_idle');
     this.audioController.pause();
+    this.videoPreloader.pause();
   }
 };
 
