@@ -1368,6 +1368,7 @@
       video.crossOrigin = 'anonymous';
       video.autoplay = 'autoplay';
       video.preload = 'auto';
+      video.muted = this.isMuted;
       // video.muted = 'false';
       video.addEventListener('play', this._videoEvent, false);
       video.addEventListener('playing', this._videoEvent, false);
@@ -1441,6 +1442,7 @@
       return null;
     }
     function destroy() {
+      this.pause();
       this.videosLoadedCb = null;
       this.videos.length = 0;
     }
@@ -1450,6 +1452,13 @@
     function pause() {
       this.videos.forEach(function (videoItem) {
         videoItem.video.pause();
+      });
+    }
+    function setVolume(volume) {
+      var _this = this;
+      this.isMuted = volume <= 0;
+      this.videos.forEach(function (videoItem) {
+        videoItem.video.mute = _this.isMuted;
       });
     }
     function setCacheType(type, elementHelper) {
@@ -1465,7 +1474,9 @@
       this.loadedAssets = 0;
       this.videosLoadedCb = null;
       this.videos = [];
+      this.isMuted = false;
       this.pause = pause.bind(this);
+      this.setVolume = setVolume.bind(this);
     }
     VideoPreloaderFactory.prototype = {
       loadAssets: loadAssets,
@@ -2302,6 +2313,7 @@
       return;
     }
     this.audioController.setVolume(val);
+    this.videoPreloader.setVolume(val);
   };
   AnimationItem.prototype.getVolume = function () {
     return this.audioController.getVolume();

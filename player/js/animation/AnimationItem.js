@@ -707,6 +707,7 @@ AnimationItem.prototype.setVolume = function (val, name) {
     return;
   }
   this.audioController.setVolume(val);
+  this.videoPreloader.setVolume(val);
 };
 
 AnimationItem.prototype.getVolume = function () {

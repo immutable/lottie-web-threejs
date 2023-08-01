@@ -65,6 +65,7 @@ const VideoPreloader = (function () {
     video.crossOrigin = 'anonymous';
     video.autoplay = 'autoplay';
     video.preload = 'auto';
+    video.muted = this.isMuted;
     // video.muted = 'false';
     video.addEventListener('play', this._videoEvent, false);
     video.addEventListener('playing', this._videoEvent, false);
@@ -145,6 +146,7 @@ const VideoPreloader = (function () {
   }
 
   function destroy() {
+    this.pause();
     this.videosLoadedCb = null;
     this.videos.length = 0;
   }
@@ -156,6 +158,13 @@ const VideoPreloader = (function () {
   function pause() {
     this.videos.forEach((videoItem) => {
       videoItem.video.pause();
+    });
+  }
+
+  function setVolume(volume) {
+    this.isMuted = volume <= 0;
+    this.videos.forEach((videoItem) => {
+      videoItem.video.mute = this.isMuted;
     });
   }
 
@@ -173,7 +182,9 @@ const VideoPreloader = (function () {
     this.loadedAssets = 0;
     this.videosLoadedCb = null;
     this.videos = [];
+    this.isMuted = false;
     this.pause = pause.bind(this);
+    this.setVolume = setVolume.bind(this);
   }
 
   VideoPreloaderFactory.prototype = {
