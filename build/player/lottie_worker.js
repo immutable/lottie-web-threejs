@@ -2055,7 +2055,7 @@
   };
   extendPrototype([BaseEvent], AnimationItem);
   AnimationItem.prototype.setParams = function (params) {
-    console.log('AnimationItem::setParams()', params);
+    // console.log('AnimationItem::setParams()', params);
     if (params.wrapper || params.container) {
       this.wrapper = params.wrapper || params.container;
     }
@@ -2222,7 +2222,7 @@
     this.checkLoaded();
   };
   AnimationItem.prototype.preloadImages = function () {
-    console.log('AnimationItem::preloadImages()', this.animationData);
+    // console.log('AnimationItem::preloadImages()', this.animationData);
     this.imagePreloader.setAssetsPath(this.assetsPath);
     this.imagePreloader.setPath(this.path);
     this.imagePreloader.loadAssets(this.animationData.assets, this.imagesLoaded.bind(this));
@@ -2232,13 +2232,13 @@
     this.checkLoaded();
   };
   AnimationItem.prototype.preloadVideos = function () {
-    console.log('AnimationItem::preloadVideos()', this.animationData);
+    // console.log('AnimationItem::preloadVideos()', this.animationData);
     this.videoPreloader.setAssetsPath(this.assetsPath);
     this.videoPreloader.setPath(this.path);
     this.videoPreloader.loadAssets(this.animationData.assets, this.videosLoaded.bind(this));
   };
   AnimationItem.prototype.configAnimation = function (animData) {
-    console.log('AnimationItem::configAnimation()', this.renderer, animData);
+    // console.log('AnimationItem::configAnimation()', this.renderer, animData);
     if (!this.renderer) {
       return;
     }
@@ -7448,7 +7448,7 @@
   };
   extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
   AudioElement.prototype.renderFrame = function () {
-    console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
+    // console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
     if (this.isInRange && this._canPlay) {
       if (!this._isPlaying) {
         this.audio.play();
@@ -7462,21 +7462,22 @@
   AudioElement.prototype.show = function () {
     // this.audio.play()
     this._canPlay = true;
-    console.log('AudioElement::show()', this.assetData.id);
+    // console.log('AudioElement::show()', this.assetData.id);
   };
+
   AudioElement.prototype.hide = function () {
-    console.log('AudioElement::hide()', this.assetData.id);
+    // console.log('AudioElement::hide()', this.assetData.id);
     this.audio.pause();
     this._isPlaying = false;
   };
   AudioElement.prototype.pause = function () {
-    console.log('AudioElement::pause()', this.assetData.id);
+    // console.log('AudioElement::pause()', this.assetData.id);
     this.audio.pause();
     this._isPlaying = false;
     this._canPlay = false;
   };
   AudioElement.prototype.resume = function () {
-    console.log('AudioElement::resume()', this.assetData.id);
+    // console.log('AudioElement::resume()', this.assetData.id);
     this._canPlay = true;
   };
   AudioElement.prototype.setRate = function (rateValue) {
@@ -19593,50 +19594,53 @@
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
     var _this = this;
-    console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
-    console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
     var globalData = this.globalData;
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
       three$1 = {};
       this.globalData.renderConfig.renderer = three$1;
-      console.log('** creating new three instance');
+      // console.log('** creating new three instance');
     }
+
     if (!three$1.scene) {
       three$1.scene = new three.Scene();
-      console.log('** creating new three scene');
+      // console.log('** creating new three scene');
     }
+
     if (!three$1.camera) {
       three$1.camera = new three.PerspectiveCamera(25, animData.w / animData.h, 0.1, 20000);
       three$1.camera.fov = 25;
       three$1.camera.focus = 10;
       three$1.camera.updateProjectionMatrix();
-      console.log('** creating new three camera');
+      // console.log('** creating new three camera');
     }
+
     this.globalData.cameraManager.setActiveCamera(three$1.camera);
     if (!three$1.renderer) {
       three$1.renderer = new three.WebGLRenderer();
       three$1.renderer.setPixelRatio(window.devicePixelRatio);
       three$1.renderer.setSize(animData.w, animData.h);
-      console.log('** creating new three renderer');
+      // console.log('** creating new three renderer');
     }
 
     // Define orbit controls as required
     if (three$1.controls === true) {
       three$1.controls = new OrbitControls(three$1.camera, three$1.renderer.domElement);
       three$1.controls.listenToKeyEvents(window); // optional
-      console.log('** creating orbit controller');
+      // console.log('** creating orbit controller');
     }
 
     // Define interaction manager as required
     if (three$1.interaction === true) {
       three$1.interaction = new a(three$1.renderer, three$1.camera, three$1.renderer.domElement);
-      console.log('** creating new interaction manager');
+      // console.log('** creating new interaction manager');
     }
-    console.log('ThreeRendererBase::configAnimation() animData', animData, this.globalData);
+
     // For some reason this texture loader has to be here?!
-    var textureLoader = new three.TextureLoader();
-    textureLoader.load("".concat(this.globalData.renderConfig.assetsPath).concat(animData.assets[0].u).concat(animData.assets[0].p));
+    if (animData.assets && animData.assets.length > 0) {
+      var textureLoader = new three.TextureLoader();
+      textureLoader.load("".concat(this.globalData.renderConfig.assetsPath).concat(animData.assets[0].u).concat(animData.assets[0].p));
+    }
 
     // Position the camera and render the scene
     // TODO: Extract the camera initial position and lookAt
@@ -19918,7 +19922,7 @@
   };
 
   function ThreeRenderer(animationItem, config) {
-    console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
+    // console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -19958,7 +19962,7 @@
   }
   extendPrototype([ThreeRendererBase], ThreeRenderer);
   ThreeRenderer.prototype.createComp = function (data) {
-    console.log('ThreeRenderer::createComp()', data);
+    // console.log('ThreeRenderer::createComp()', data);
     return new THRCompElement(data, this.globalData, this);
   };
   ThreeRenderer.prototype.checkLoaded = function () {

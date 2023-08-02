@@ -5,7 +5,6 @@ import ThreeRendererBase from './ThreeRendererBase';
 import { getExpressionsPlugin } from '../utils/common';
 import AnimationItem from '../animation/AnimationItem';
 import THRCompElement from '../elements/threeElements/THRCompElement';
-import { VERSION } from './version';
 
 function ThreeRenderer(animationItem, config) {
   // console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
