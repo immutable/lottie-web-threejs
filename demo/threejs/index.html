@@ -208,7 +208,7 @@
                     console.log('anim marker play', markerStartTime, markerEndTime);
                     animator = animationTimeline.tweenFromTo(markerStartTime, markerEndTime);
                     animator.then(() => {
-                         anim.pause();
+                         // anim.pause();
                     });
                     return animator;
                } else {
@@ -216,7 +216,7 @@
                     // animation.instance.audioController.play();
                     animator = animationTimeline.play(markerItem.payload.name);
                     animator.then(() => {
-                         animation.instance.pause();
+                         // animation.instance.pause();
                     });
                     return animator;
                }

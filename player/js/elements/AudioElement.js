@@ -44,7 +44,7 @@ AudioElement.prototype.prepareFrame = function (num) {
 extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
 
 AudioElement.prototype.renderFrame = function () {
-  console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
+  // console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
   if (this.isInRange && this._canPlay) {
     if (!this._isPlaying) {
       this.audio.play();
@@ -61,24 +61,24 @@ AudioElement.prototype.renderFrame = function () {
 AudioElement.prototype.show = function () {
   // this.audio.play()
   this._canPlay = true;
-  console.log('AudioElement::show()', this.assetData.id);
+  // console.log('AudioElement::show()', this.assetData.id);
 };
 
 AudioElement.prototype.hide = function () {
-  console.log('AudioElement::hide()', this.assetData.id);
+  // console.log('AudioElement::hide()', this.assetData.id);
   this.audio.pause();
   this._isPlaying = false;
 };
 
 AudioElement.prototype.pause = function () {
-  console.log('AudioElement::pause()', this.assetData.id);
+  // console.log('AudioElement::pause()', this.assetData.id);
   this.audio.pause();
   this._isPlaying = false;
   this._canPlay = false;
 };
 
 AudioElement.prototype.resume = function () {
-  console.log('AudioElement::resume()', this.assetData.id);
+  // console.log('AudioElement::resume()', this.assetData.id);
   this._canPlay = true;
 };
 

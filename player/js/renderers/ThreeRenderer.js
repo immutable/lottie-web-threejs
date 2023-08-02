@@ -8,7 +8,7 @@ import THRCompElement from '../elements/threeElements/THRCompElement';
 import { VERSION } from './version';
 
 function ThreeRenderer(animationItem, config) {
-  console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
+  // console.log('ThreeRenderer::constructor()', VERSION, config, animationItem);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;
@@ -50,7 +50,7 @@ function ThreeRenderer(animationItem, config) {
 extendPrototype([ThreeRendererBase], ThreeRenderer);
 
 ThreeRenderer.prototype.createComp = function (data) {
-  console.log('ThreeRenderer::createComp()', data);
+  // console.log('ThreeRenderer::createComp()', data);
   return new THRCompElement(data, this.globalData, this);
 };
 

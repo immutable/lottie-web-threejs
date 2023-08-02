@@ -67,7 +67,7 @@ const AnimationItem = function () {
 extendPrototype([BaseEvent], AnimationItem);
 
 AnimationItem.prototype.setParams = function (params) {
-  console.log('AnimationItem::setParams()', params);
+  // console.log('AnimationItem::setParams()', params);
   if (params.wrapper || params.container) {
     this.wrapper = params.wrapper || params.container;
   }
@@ -286,7 +286,7 @@ AnimationItem.prototype.imagesLoaded = function () {
 };
 
 AnimationItem.prototype.preloadImages = function () {
-  console.log('AnimationItem::preloadImages()', this.animationData);
+  // console.log('AnimationItem::preloadImages()', this.animationData);
   this.imagePreloader.setAssetsPath(this.assetsPath);
   this.imagePreloader.setPath(this.path);
   this.imagePreloader.loadAssets(this.animationData.assets, this.imagesLoaded.bind(this));
@@ -298,14 +298,14 @@ AnimationItem.prototype.videosLoaded = function () {
 };
 
 AnimationItem.prototype.preloadVideos = function () {
-  console.log('AnimationItem::preloadVideos()', this.animationData);
+  // console.log('AnimationItem::preloadVideos()', this.animationData);
   this.videoPreloader.setAssetsPath(this.assetsPath);
   this.videoPreloader.setPath(this.path);
   this.videoPreloader.loadAssets(this.animationData.assets, this.videosLoaded.bind(this));
 };
 
 AnimationItem.prototype.configAnimation = function (animData) {
-  console.log('AnimationItem::configAnimation()', this.renderer, animData);
+  // console.log('AnimationItem::configAnimation()', this.renderer, animData);
   if (!this.renderer) {
     return;
   }

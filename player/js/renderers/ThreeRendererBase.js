@@ -253,18 +253,16 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 };
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
-  console.log('ThreeRendererBase::configAnimation()', this.globalData, animData);
-  console.log('ThreeRendererBase::configAnimation() use existing', this.globalData.renderConfig.renderer);
   const globalData = this.globalData;
   let three = this.globalData.renderConfig.renderer;
   if (!three) {
     three = {};
     this.globalData.renderConfig.renderer = three;
-    console.log('** creating new three instance');
+    // console.log('** creating new three instance');
   }
   if (!three.scene) {
     three.scene = new Scene();
-    console.log('** creating new three scene');
+    // console.log('** creating new three scene');
   }
 
   if (!three.camera) {
@@ -272,7 +270,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     three.camera.fov = 25;
     three.camera.focus = 10;
     three.camera.updateProjectionMatrix();
-    console.log('** creating new three camera');
+    // console.log('** creating new three camera');
   }
   this.globalData.cameraManager.setActiveCamera(three.camera);
 
@@ -280,14 +278,14 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     three.renderer = new WebGLRenderer();
     three.renderer.setPixelRatio(window.devicePixelRatio);
     three.renderer.setSize(animData.w, animData.h);
-    console.log('** creating new three renderer');
+    // console.log('** creating new three renderer');
   }
 
   // Define orbit controls as required
   if (three.controls === true) {
     three.controls = new OrbitControls(three.camera, three.renderer.domElement);
     three.controls.listenToKeyEvents(window); // optional
-    console.log('** creating orbit controller');
+    // console.log('** creating orbit controller');
   }
 
   // Define interaction manager as required
@@ -297,13 +295,14 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
       three.camera,
       three.renderer.domElement
     );
-    console.log('** creating new interaction manager');
+    // console.log('** creating new interaction manager');
   }
 
-  console.log('ThreeRendererBase::configAnimation() animData', animData, this.globalData);
   // For some reason this texture loader has to be here?!
-  var textureLoader = new TextureLoader();
-  textureLoader.load(`${this.globalData.renderConfig.assetsPath}${animData.assets[0].u}${animData.assets[0].p}`);
+  if (animData.assets && animData.assets.length > 0) {
+    var textureLoader = new TextureLoader();
+    textureLoader.load(`${this.globalData.renderConfig.assetsPath}${animData.assets[0].u}${animData.assets[0].p}`);
+  }
 
   // Position the camera and render the scene
   // TODO: Extract the camera initial position and lookAt
