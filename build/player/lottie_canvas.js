@@ -7165,6 +7165,7 @@
   };
   AudioElement.prototype.show = function () {
     // this.audio.play()
+    this._canPlay = true;
     console.log('AudioElement::show()', this.assetData.id);
   };
   AudioElement.prototype.hide = function () {
