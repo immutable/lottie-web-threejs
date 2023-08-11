@@ -13,7 +13,7 @@ import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 
 function THRImageElement(data, globalData, comp) {
-  console.info('THRImageElement::constructor()', data, comp);
+  console.info('THRImageElement::constructor()', data, 'globalData', globalData, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }
