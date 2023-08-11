@@ -18613,7 +18613,7 @@
   })();
 
   function THRImageElement(data, globalData, comp) {
-    // console.info('THRImageElement::constructor()', data, comp);
+    console.info('THRImageElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
   }
@@ -18631,6 +18631,7 @@
 
     // Use the preloaded image asset from the ImagePreloader
     // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
+    console.log('THRImageElement::createContent()', this.assetData);
     var assetPath = "".concat(this.globalData.renderConfig.assetsPath || '').concat(this.assetData.u).concat(this.assetData.p);
     // const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
     // const dataURI = ImageUtils.getDataURL(loadedAsset);

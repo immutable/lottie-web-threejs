@@ -13,7 +13,7 @@ import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 
 function THRImageElement(data, globalData, comp) {
-  // console.info('THRImageElement::constructor()', data, comp);
+  console.info('THRImageElement::constructor()', data, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
 }
@@ -32,6 +32,7 @@ THRImageElement.prototype.createContent = function () {
 
   // Use the preloaded image asset from the ImagePreloader
   // TODO: Compare with just loading from browser cached image asset via path (means no canvas copying to dataURI)
+  console.log('THRImageElement::createContent()', this.assetData);
   var assetPath = `${this.globalData.renderConfig.assetsPath || ''}${this.assetData.u}${this.assetData.p}`;
   // const loadedAsset = this.globalData.imageLoader.getAsset(this.assetData);
   // const dataURI = ImageUtils.getDataURL(loadedAsset);
