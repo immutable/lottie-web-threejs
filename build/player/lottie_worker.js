@@ -2701,6 +2701,7 @@
     return path;
   };
   AnimationItem.prototype.getAssetData = function (id) {
+    console.log('AnimationItem::getAssetData()', id, this.assets);
     var i = 0;
     var len = this.assets.length;
     while (i < len) {
