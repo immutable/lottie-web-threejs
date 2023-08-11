@@ -13903,10 +13903,9 @@
     };
     three.DefaultLoadingManager.onLoad = function () {
       console.log('Three::Loading Complete! ');
-      // this.globalData.isAssetsLoaded = true;
-      // this.animationItem.checkLoaded();
+      _this.globalData.isAssetsLoaded = true;
+      _this.animationItem.checkLoaded();
     };
-
     three.DefaultLoadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
       console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
     };

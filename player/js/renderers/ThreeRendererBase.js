@@ -458,8 +458,8 @@ ThreeRendererBase.prototype.initPreloader = function () {
 
   DefaultLoadingManager.onLoad = () => {
     console.log('Three::Loading Complete! ');
-    // this.globalData.isAssetsLoaded = true;
-    // this.animationItem.checkLoaded();
+    this.globalData.isAssetsLoaded = true;
+    this.animationItem.checkLoaded();
   };
 
   DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
