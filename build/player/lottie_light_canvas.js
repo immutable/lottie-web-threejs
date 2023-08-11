@@ -1223,7 +1223,7 @@
       return regex.test(filename);
     }
     function loadAssets(assets, cb) {
-      console.log('ImagePreloader::loadAssets()', assets);
+      // console.log('ImagePreloader::loadAssets()', assets);
       this.imagesLoadedCb = cb;
       var i;
       var len = assets.length;
@@ -1240,7 +1240,7 @@
           }
         }
       }
-      console.log('ImagePreloader::loadAssets() found:', this.images);
+      console.log('ImagePreloader::loadAssets() images:', this.images);
     }
     function setPath(path) {
       this.path = path || '';
@@ -1303,12 +1303,15 @@
       createImageData: createImageData,
       imageLoaded: imageLoaded,
       footageLoaded: footageLoaded,
-      setCacheType: setCacheType
+      setCacheType: setCacheType,
+      isValid: isValid
     };
     return ImagePreloaderFactory;
   }();
 
-  // import { isSafari } from './common';
+  function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+  function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+  function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
   var VideoPreloader = function () {
     var proxyVideo = function () {
       var canvas = createTag('canvas');
@@ -1322,14 +1325,37 @@
     function videoLoaded() {
       this.loadedAssets += 1;
       if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
+        console.log('VideoPreloader::Videos Loaded call back now');
+        this._emit('videoLoaded', {
+          loaded: this.loadedAssets
+        });
         if (this.videosLoadedCb) {
           this.videosLoadedCb(null);
         }
       }
     }
-    function videoEvent(event) {
-      console.log('VideoPreloader::videoEvent()', event.type, event);
+    function videoLoadedMetadata(event) {
+      // console.log('VideoPreloader::videoLoadedMetadata()', event.type, event.target, this);
+      if (event.target) {
+        event.target.pause();
+      }
     }
+    function videoEvent(event) {
+      console.log('VideoPreloader::videoEvent()', event.type, event.target, this);
+    }
+    function videoErrorEvent(event) {
+      console.log('VideoPreloader::videoErrorEvent()', event.type, event.target, this);
+      console.log('VideoPreloader::error proxy', proxyVideo);
+      if (event.target) {
+        var videoItem = this.videos.find(function (item) {
+          return item.video === event.target;
+        });
+        console.log('VideoPreloader::finding ob', videoItem);
+      }
+      // ob.video = proxyVideo;
+      // this._videoLoaded();
+    }
+
     function getAssetsPath(assetData, assetsPath, originalPath) {
       var path = '';
       if (assetData.e) {
@@ -1347,29 +1373,13 @@
       }
       return path;
     }
-
-    // function testImageLoaded(img) {
-    //   var _count = 0;
-    //   var intervalId = setInterval(function () {
-    //     var box = img.getBBox();
-    //     if (box.width || _count > 500) {
-    //       this._imageLoaded();
-    //       clearInterval(intervalId);
-    //     }
-    //     _count += 1;
-    //   }.bind(this), 50);
-    // }
-
     function createVideoData(assetData) {
       var path = getAssetsPath(assetData, this.assetsPath, this.path);
-
-      // var img = createTag('img');
       var video = document.createElement('video');
       video.crossOrigin = 'anonymous';
       video.autoplay = 'autoplay';
       video.preload = 'auto';
       video.muted = this.isMuted;
-      // video.muted = 'false';
       video.addEventListener('play', this._videoEvent, false);
       video.addEventListener('playing', this._videoEvent, false);
       video.addEventListener('waiting', this._videoEvent, false);
@@ -1377,30 +1387,17 @@
       video.addEventListener('seeking', this._videoEvent, false);
       video.addEventListener('progress', this._videoEvent, false);
       video.addEventListener('canplaythrough', this._videoLoaded, false);
-      video.addEventListener('canplay', this._videoEvent, false);
+      video.addEventListener('canplay', this._videoLoaded, false);
       video.addEventListener('load', this._videoLoaded, false);
-      video.addEventListener('error', function () {
-        ob.video = proxyVideo;
-        this._videoLoaded();
-      }.bind(this), false);
-      video.addEventListener('loadedmetadata', function () {
-        // Pause the video once it has loaded
-        video.pause();
-      });
+      video.addEventListener('error', this._videoErrorEvent, false);
+      video.addEventListener('loadedmetadata', this._videoLoadedMetadata, false);
       video.src = path;
       video.load();
       video.pause();
-
-      // if (this._elementHelper.append) {
-      //   this._elementHelper.append(img);
-      // } else {
-      //   this._elementHelper.appendChild(img);
-      // }
-      var ob = {
+      return {
         video: video,
         assetData: assetData
       };
-      return ob;
     }
     function isValid(filename) {
       var regex = /\.(mp4|mov|ogg|mpg|webm)$/i;
@@ -1421,9 +1418,8 @@
         }
       }
       this.totalVideos = this.videos.length;
-      // console.log('VideoPreloader::loadAssets() found:', this.videos);
+      console.log('VideoPreloader::loadAssets() videos:', this.videos);
     }
-
     function setPath(path) {
       this.path = path || '';
     }
@@ -1442,8 +1438,28 @@
       return null;
     }
     function destroy() {
+      var _this = this;
       this.pause();
       this.videosLoadedCb = null;
+      this.videos.forEach(function (videoItem) {
+        // videoItem
+        // TODO: Remove event listeners
+        console.log('Remove video item', videoItem);
+        if (videoItem.video) {
+          var video = videoItem.video;
+          video.removeEventListener('play', _this._videoEvent);
+          video.removeEventListener('playing', _this._videoEvent);
+          video.removeEventListener('waiting', _this._videoEvent);
+          video.removeEventListener('seeked', _this._videoEvent);
+          video.removeEventListener('seeking', _this._videoEvent);
+          video.removeEventListener('progress', _this._videoEvent);
+          video.removeEventListener('canplaythrough', _this._videoLoaded);
+          video.removeEventListener('canplay', _this._videoEvent);
+          video.removeEventListener('load', _this._videoLoaded);
+          video.removeEventListener('error', _this._videoErrorEvent);
+          video.removeEventListener('loadedmetadata', _this._videoLoadedMetadata);
+        }
+      });
       this.videos.length = 0;
     }
     function loadedVideos() {
@@ -1455,10 +1471,10 @@
       });
     }
     function setVolume(volume) {
-      var _this = this;
+      var _this2 = this;
       this.isMuted = volume <= 0;
       this.videos.forEach(function (videoItem) {
-        videoItem.video.mute = _this.isMuted;
+        videoItem.video.mute = _this2.isMuted;
       });
     }
     function setCacheType(type, elementHelper) {
@@ -1466,8 +1482,11 @@
       this._createVideoData = createVideoData.bind(this);
     }
     function VideoPreloaderFactory() {
+      this._videoLoadedMetadata = videoLoadedMetadata.bind(this);
       this._videoLoaded = videoLoaded.bind(this);
       this._videoEvent = videoEvent.bind(this);
+      this._videoErrorEvent = videoErrorEvent.bind(this);
+      this._eventListeners = [];
       this.assetsPath = '';
       this.path = '';
       this.totalVideos = 0;
@@ -1486,7 +1505,38 @@
       destroy: destroy,
       getAsset: getAsset,
       videoLoaded: videoLoaded,
-      setCacheType: setCacheType
+      setCacheType: setCacheType,
+      isValid: isValid
+    };
+    VideoPreloaderFactory.prototype.addEventListener = function (event, callback) {
+      if (!this._eventListeners[event]) {
+        this._eventListeners[event] = [];
+      }
+      this._eventListeners[event].push(callback);
+    };
+    VideoPreloaderFactory.prototype.removeEventListener = function (event, callback) {
+      if (this._eventListeners[event]) {
+        var index = this._eventListeners[event].indexOf(callback);
+        if (index !== -1) {
+          this._eventListeners[event].splice(index, 1);
+        }
+      }
+    };
+    VideoPreloaderFactory.prototype._emit = function (event, data) {
+      if (this._eventListeners[event]) {
+        var _iterator = _createForOfIteratorHelper(this._eventListeners[event]),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var callback = _step.value;
+            callback(data);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
     };
     return VideoPreloaderFactory;
   }();

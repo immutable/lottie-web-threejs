@@ -182,7 +182,7 @@
                     },
                     onUpdateParams: [animation],
                     onUpdate: function (targetAnimation) {
-                         console.log('Timeline>>onUpdate()');
+                         // console.log('Timeline>>onUpdate()');
                          // const nextMoment = Math.floor(totalDuration * this['progress']());
                          const nextFrame = Math.floor(targetAnimation.totalFrames * this['progress']());
                          targetAnimation.setCurrentRawFrameValue(nextFrame);

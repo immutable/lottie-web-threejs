@@ -22,6 +22,7 @@ const ImagePreloader = (function () {
       }
     }
   }
+
   function footageLoaded() {
     this.loadedFootagesCount += 1;
     if (this.loadedAssets === this.totalImages && this.loadedFootagesCount === this.totalFootages) {
@@ -124,7 +125,7 @@ const ImagePreloader = (function () {
   }
 
   function loadAssets(assets, cb) {
-    console.log('ImagePreloader::loadAssets()', assets);
+    // console.log('ImagePreloader::loadAssets()', assets);
     this.imagesLoadedCb = cb;
     var i;
     var len = assets.length;
@@ -141,7 +142,7 @@ const ImagePreloader = (function () {
         }
       }
     }
-    console.log('ImagePreloader::loadAssets() found:', this.images);
+    console.log('ImagePreloader::loadAssets() images:', this.images);
   }
 
   function setPath(path) {
@@ -214,6 +215,7 @@ const ImagePreloader = (function () {
     imageLoaded: imageLoaded,
     footageLoaded: footageLoaded,
     setCacheType: setCacheType,
+    isValid,
   };
 
   return ImagePreloaderFactory;
