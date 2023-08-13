@@ -310,23 +310,23 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   // three.camera.position.set(972, 477, 2536);
   // camera.lookAt(new Vector3(977, 540, 0));
 
-  DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-    console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-  };
-
-  DefaultLoadingManager.onLoad = () => {
-    console.log('Loading Complete! ');
-    this.globalData.isAssetsLoaded = true;
-    this.animationItem.checkLoaded();
-  };
-
-  DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-  };
-
-  DefaultLoadingManager.onError = (url) => {
-    console.log('There was an error loading ' + url);
-  };
+  // DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+  //   console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+  // };
+  //
+  // DefaultLoadingManager.onLoad = () => {
+  //   console.log('Loading Complete! ');
+  //   this.globalData.isAssetsLoaded = true;
+  //   this.animationItem.checkLoaded();
+  // };
+  //
+  // DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+  //   console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+  // };
+  //
+  // DefaultLoadingManager.onError = (url) => {
+  //   console.log('There was an error loading ' + url);
+  // };
 
   var resizerElem = new Group();
   resizerElem.name = 'Resizer';
@@ -411,6 +411,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   this.layerElement = this.resizerElem;
   this.build3dContainers();
   this.updateContainerSize();
+  this.initPreloader();
 };
 
 ThreeRendererBase.prototype.destroy = function () {
@@ -429,6 +430,88 @@ ThreeRendererBase.prototype.destroy = function () {
   this.elements.length = 0;
   this.destroyed = true;
   this.animationItem = null;
+};
+
+ThreeRendererBase.prototype.initPreloader = function () {
+  console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, this.animationItem);
+
+  let isLoadingChecked = false;
+  const videoPreloader = this.globalData.videoLoader;
+  const imagePreloader = this.globalData.imageLoader;
+  console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
+  console.log('Animation Item assets found:', this.animationItem.animationData.assets);
+  let imagesFound = 0;
+  let isImagesRequired = false;
+  let isImagesLoaded = false;
+  let videosFound = 0;
+  let isVideoRequired = false;
+  let isVideoLoaded = false;
+  this.animationItem.animationData.assets.forEach((asset) => {
+    console.log('Video asset', asset);
+    if (videoPreloader.isValid(asset.p)) {
+      videosFound += 1;
+    }
+    if (imagePreloader.isValid(asset.p)) {
+      imagesFound += 1;
+    }
+  });
+  // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
+  // Otherwise hook into the video preloader events
+  if (videoPreloader && videosFound > 0) {
+    // ThreeRendererBase::initPreloader() false Object AnimationItem
+    // lottie.js:19509 ThreeRendererBase::Video Preloader total: 0 loaded true
+    isVideoRequired = true;
+    videoPreloader.addEventListener('videoLoaded', () => {
+      isVideoLoaded = true;
+      console.log('ThreeRendererBase::videoLoaded() **** Kick off is assets loaded', isLoadingChecked);
+      if (!isLoadingChecked && ((isImagesRequired && isImagesLoaded) || !isImagesRequired)) {
+        console.log('*** CHECK LOADED vid');
+        isLoadingChecked = true;
+        this.globalData.isAssetsLoaded = true;
+        this.animationItem.checkLoaded();
+      }
+    });
+  }
+  console.log('ThreeRendererBase::Image Preloader total:', imagePreloader.totalImages, 'loaded', imagePreloader.loadedImages());
+  console.log('ThreeRendererBase::Assets images found:', imagesFound, 'videos found:', videosFound);
+  // if (!isVideoPreloading) {
+  //   console.log('ThreeRendererBase::videoLoaded() Kick off is assets loaded - no videos');
+  //   this.globalData.isAssetsLoaded = true;
+  //   this.animationItem.checkLoaded();
+  // }
+  let isImagePreloader = false;
+  if (imagePreloader && imagesFound) {
+    isImagePreloader = true;
+    isImagesRequired = true;
+    console.log('Images preloader && imagesFound', isImagePreloader, imagesFound);
+  }
+
+  DefaultLoadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+    console.log('Three::onStart::', this);
+  };
+
+  DefaultLoadingManager.onLoad = () => {
+    console.log('Three::Loading Complete! ');
+    isImagesLoaded = true;
+    // this.globalData.isAssetsLoaded = true;
+    // this.animationItem.checkLoaded();
+    console.log('Three::onLoad() isImagePreloader', isImagePreloader, 'isLoadingChecked', isLoadingChecked);
+    if (!isLoadingChecked && ((isVideoRequired && isVideoLoaded) || !isVideoRequired)) {
+      console.log('*** CHECK LOADED');
+      isLoadingChecked = true;
+      this.globalData.isAssetsLoaded = true;
+      this.animationItem.checkLoaded();
+    }
+  };
+
+  DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+  };
+
+  DefaultLoadingManager.onError = (url) => {
+    console.log('Three::There was an error loading ' + url, arguments);
+  };
 };
 
 ThreeRendererBase.prototype.updateContainerSize = function () {

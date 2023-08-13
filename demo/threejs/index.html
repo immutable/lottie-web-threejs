@@ -90,9 +90,11 @@
           lightDirect: 10,
           lightAmbient: 10,
           stopAnim: () => {
-               console.log('>>> Stop Pack', anim, bodymovin, animator);
+               // console.log('>>> Stop Pack', anim, bodymovin, animator);
                anim.pause();
-               animator.pause();
+               if (animator) {
+                 animator.pause();
+               }
           },
           selectPack: () => {
                console.log('Reveal Pack', animator);
@@ -392,10 +394,10 @@
         loop: true,
         prerender: true,
         autoplay: false,
-        path: '/demo/threejs/sound/data.json',
+        path: '/demo/threejs/pack/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/sound/',
+             assetsPath: '/demo/threejs/pack/', // sound
              renderer: threeData,
         },
         audioFactory: createAudio,

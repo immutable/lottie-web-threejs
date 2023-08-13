@@ -214,6 +214,7 @@ const ImagePreloader = (function () {
     imageLoaded: imageLoaded,
     footageLoaded: footageLoaded,
     setCacheType: setCacheType,
+    isValid,
   };
 
   return ImagePreloaderFactory;
