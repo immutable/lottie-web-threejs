@@ -1470,6 +1470,12 @@
         videoItem.video.pause();
       });
     }
+    function stop() {
+      this.videos.forEach(function (videoItem) {
+        videoItem.video.currentTime = 0;
+        videoItem.video.pause();
+      });
+    }
     function setVolume(volume) {
       var _this2 = this;
       this.isMuted = volume <= 0;
@@ -1494,6 +1500,7 @@
       this.videosLoadedCb = null;
       this.videos = [];
       this.isMuted = false;
+      this.stop = stop.bind(this);
       this.pause = pause.bind(this);
       this.setVolume = setVolume.bind(this);
     }

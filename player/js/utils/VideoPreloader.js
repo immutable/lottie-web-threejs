@@ -174,6 +174,13 @@ const VideoPreloader = (function () {
     });
   }
 
+  function stop() {
+    this.videos.forEach((videoItem) => {
+      videoItem.video.currentTime = 0;
+      videoItem.video.pause();
+    });
+  }
+
   function setVolume(volume) {
     this.isMuted = volume <= 0;
     this.videos.forEach((videoItem) => {
@@ -199,6 +206,7 @@ const VideoPreloader = (function () {
     this.videosLoadedCb = null;
     this.videos = [];
     this.isMuted = false;
+    this.stop = stop.bind(this);
     this.pause = pause.bind(this);
     this.setVolume = setVolume.bind(this);
   }
