@@ -20,6 +20,7 @@ function THRVideoElement(data, globalData, comp) {
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
   this.video = null;
+  this._isBusy = false;
   this._isPlaying = false;
   this._canPlay = false;
   this.renderedFrame = 0;
@@ -164,18 +165,45 @@ THRVideoElement.prototype.renderFrame = function () {
     if (this.isInRange || !this.animationItem.isPaused) {
       // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
       if (!this._isPlaying) {
-        this.video.play();
-        this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
-        this._isPlaying = true;
+        if (!this._isBusy) {
+          this._isBusy = true;
+          console.log('VideoElement::renderFrame -> play()');
+          this.video.play()
+            .then(() => {
+              this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
+              this._isBusy = false;
+              this._isPlaying = true;
+              console.log('VideoElement::renderFrame -> play() then done');
+            })
+            .catch((error) => {
+              this._isBusy = false;
+              this._isPlaying = false;
+              console.log('VideoElement::renderFrame -> play() catch error', error);
+            });
+        }
+
         // console.log('THRVideoElement:renderFrame() Play', (this.renderedFrame / this.globalData.frameRate));
       } else if (!this.isPlaying()
         && Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime) > 0.2
       ) {
         // console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
         // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
-        this.video.play();
-        this.video.currentTime = (this.renderedFrame / this.globalData.frameRate) + 0.05;
-        this._isPlaying = true;
+        if (!this._isBusy) {
+          this._isBusy = true;
+          console.log('VideoElement::renderFrame -> play()');
+          this.video.play()
+            .then(() => {
+              console.log('VideoElement::renderFrame -> play() then done busy:', this._isBusy);
+              this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
+              this._isBusy = false;
+              this._isPlaying = true;
+            })
+            .catch((error) => {
+              this._isBusy = false;
+              this._isPlaying = false;
+              console.log('VideoElement::renderFrame -> play() catch error', error);
+            });
+        }
       }
     } else if (this._isPlaying) {
       // Reset video
@@ -202,7 +230,21 @@ THRVideoElement.prototype.show = function () {
   // console.log('THRVideoElement::show() ok need to play!');
 
   if (this.isInRange) {
-    if (this.video) this.video.play();
+    if (this.video && !this._isBusy) {
+      this._isBusy = true;
+      this.video.play()
+        .then(() => {
+          console.log('VideoElement::show -> play() then done busy:', this._isBusy);
+          this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
+          this._isBusy = false;
+          this._isPlaying = true;
+        })
+        .catch((error) => {
+          this._isBusy = false;
+          this._isPlaying = false;
+          console.log('VideoElement::show -> play() catch error', error);
+        });
+    }
     if (!this.data.hd) {
       var elem = this.baseElement || this.layerElement;
       elem.visible = true;
@@ -213,7 +255,7 @@ THRVideoElement.prototype.show = function () {
 };
 
 THRVideoElement.prototype.hide = function () {
-  if (this.video) this.video.pause();
+  if (this.video && !this._isBusy) this.video.pause();
   this._isPlaying = false;
 
   // console.log('THRVideoElement::hide() ok need to hide, so we destory??');
@@ -225,7 +267,7 @@ THRVideoElement.prototype.hide = function () {
 };
 
 THRVideoElement.prototype.pause = function () {
-  if (this.video) this.video.pause();
+  if (this.video && !this._isBusy) this.video.pause();
   this._isPlaying = false;
   // this._canPlay = false;
 };

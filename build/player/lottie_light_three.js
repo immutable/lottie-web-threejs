@@ -8244,6 +8244,7 @@
     this.initRenderable();
     this.assetData = globalData.getAssetData(data.refId);
     this.initBaseData(data, globalData, comp);
+    this._isBusy = false;
     this._isPlaying = false;
     this._canPlay = false;
     var assetPath = this.globalData.getAssetsPath(this.assetData);
@@ -8278,30 +8279,44 @@
   };
   extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
   AudioElement.prototype.renderFrame = function () {
+    var _this = this;
     // console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
     if (this.isInRange && this._canPlay) {
       if (!this._isPlaying) {
-        this.audio.play();
-        this.audio.seek(this._currentTime / this.globalData.frameRate);
-        this._isPlaying = true;
+        if (!this._isBusy) {
+          this._isBusy = true;
+          console.log('AudioElement::renderFrame -> play()');
+          this.audio.play().then(function () {
+            _this.audio.seek(_this._currentTime / _this.globalData.frameRate);
+            _this._isBusy = false;
+            _this._isPlaying = true;
+            console.log('AudioElement::renderFrame -> play() then done');
+          })["catch"](function (error) {
+            _this._isBusy = false;
+            _this._isPlaying = false;
+            console.log('AudioElement::renderFrame -> play() catch error', error);
+          });
+        }
       } else if (!this.audio.playing() || Math.abs(this._currentTime / this.globalData.frameRate - this.audio.seek()) > 0.1) {
         this.audio.seek(this._currentTime / this.globalData.frameRate);
       }
     }
   };
   AudioElement.prototype.show = function () {
+    console.log('AudioElement::show()', this.assetData.id, 'busy', this._isBusy);
     // this.audio.play()
     this._canPlay = true;
     // console.log('AudioElement::show()', this.assetData.id);
   };
 
   AudioElement.prototype.hide = function () {
-    // console.log('AudioElement::hide()', this.assetData.id);
+    console.log('AudioElement::hide()', this.assetData.id, 'busy', this._isBusy);
     this.audio.pause();
     this._isPlaying = false;
   };
   AudioElement.prototype.pause = function () {
     // console.log('AudioElement::pause()', this.assetData.id);
+    console.log('AudioElement::pause()', this.assetData.id, 'busy', this._isBusy);
     this.audio.pause();
     this._isPlaying = false;
     this._canPlay = false;
@@ -13301,6 +13316,7 @@
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
     this.video = null;
+    this._isBusy = false;
     this._isPlaying = false;
     this._canPlay = false;
     this.renderedFrame = 0;
@@ -13403,6 +13419,7 @@
     }
   };
   THRVideoElement.prototype.renderFrame = function () {
+    var _this = this;
     // console.log('THRVideoElement::renderFrame() isInRange', this.isInRange);
     // If it is exported as hidden (data.hd === true) no need to render
     // If it is not visible no need to render
@@ -13420,16 +13437,39 @@
       if (this.isInRange || !this.animationItem.isPaused) {
         // console.log('THRVideoElement::renderFrame() time:', (this.renderedFrame / this.globalData.frameRate), 'vid time', this.video.currentTime, 'rate:', this.globalData.frameRate, this);
         if (!this._isPlaying) {
-          this.video.play();
-          this.video.currentTime = this.renderedFrame / this.globalData.frameRate;
-          this._isPlaying = true;
+          if (!this._isBusy) {
+            this._isBusy = true;
+            console.log('VideoElement::renderFrame -> play()');
+            this.video.play().then(function () {
+              _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
+              _this._isBusy = false;
+              _this._isPlaying = true;
+              console.log('VideoElement::renderFrame -> play() then done');
+            })["catch"](function (error) {
+              _this._isBusy = false;
+              _this._isPlaying = false;
+              console.log('VideoElement::renderFrame -> play() catch error', error);
+            });
+          }
+
           // console.log('THRVideoElement:renderFrame() Play', (this.renderedFrame / this.globalData.frameRate));
         } else if (!this.isPlaying() && Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime) > 0.2) {
           // console.log('THRVideoElement::renderFrame() Warning frame diff:', Math.abs(this.renderedFrame / this.globalData.frameRate - this.video.currentTime));
           // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
-          this.video.play();
-          this.video.currentTime = this.renderedFrame / this.globalData.frameRate + 0.05;
-          this._isPlaying = true;
+          if (!this._isBusy) {
+            this._isBusy = true;
+            console.log('VideoElement::renderFrame -> play()');
+            this.video.play().then(function () {
+              console.log('VideoElement::renderFrame -> play() then done busy:', _this._isBusy);
+              _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
+              _this._isBusy = false;
+              _this._isPlaying = true;
+            })["catch"](function (error) {
+              _this._isBusy = false;
+              _this._isPlaying = false;
+              console.log('VideoElement::renderFrame -> play() catch error', error);
+            });
+          }
         }
       } else if (this._isPlaying) {
         // Reset video
@@ -13451,11 +13491,24 @@
     return this.video && !this.video.paused && !this.video.ended && this.video.readyState > 2;
   };
   THRVideoElement.prototype.show = function () {
+    var _this2 = this;
     // this.audio.play()
     // console.log('THRVideoElement::show() ok need to play!');
 
     if (this.isInRange) {
-      if (this.video) this.video.play();
+      if (this.video && !this._isBusy) {
+        this._isBusy = true;
+        this.video.play().then(function () {
+          console.log('VideoElement::show -> play() then done busy:', _this2._isBusy);
+          _this2.video.currentTime = _this2.renderedFrame / _this2.globalData.frameRate;
+          _this2._isBusy = false;
+          _this2._isPlaying = true;
+        })["catch"](function (error) {
+          _this2._isBusy = false;
+          _this2._isPlaying = false;
+          console.log('VideoElement::show -> play() catch error', error);
+        });
+      }
       if (!this.data.hd) {
         var elem = this.baseElement || this.layerElement;
         elem.visible = true;
@@ -13465,7 +13518,7 @@
     }
   };
   THRVideoElement.prototype.hide = function () {
-    if (this.video) this.video.pause();
+    if (this.video && !this._isBusy) this.video.pause();
     this._isPlaying = false;
 
     // console.log('THRVideoElement::hide() ok need to hide, so we destory??');
@@ -13476,7 +13529,7 @@
     }
   };
   THRVideoElement.prototype.pause = function () {
-    if (this.video) this.video.pause();
+    if (this.video && !this._isBusy) this.video.pause();
     this._isPlaying = false;
     // this._canPlay = false;
   };
