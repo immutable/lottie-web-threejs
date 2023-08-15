@@ -7221,26 +7221,24 @@
     }
   };
   AudioElement.prototype.show = function () {
-    console.log('AudioElement::show()', this.assetData.id, 'busy');
+    // console.log('AudioElement::show()', this.assetData.id, 'busy');
     // this.audio.play()
     this._canPlay = true;
-    // console.log('AudioElement::show()', this.assetData.id);
   };
-
   AudioElement.prototype.hide = function () {
-    console.log('AudioElement::hide()', this.assetData.id, 'busy');
+    // console.log('AudioElement::hide()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
   };
   AudioElement.prototype.pause = function () {
     // console.log('AudioElement::pause()', this.assetData.id);
-    console.log('AudioElement::show()', this.assetData.id, 'busy');
+    // console.log('AudioElement::show()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
     this._canPlay = false;
   };
   AudioElement.prototype.resume = function () {
-    console.log('AudioElement::resume()', this.assetData.id);
+    // console.log('AudioElement::resume()', this.assetData.id);
     this._canPlay = true;
   };
   AudioElement.prototype.setRate = function (rateValue) {
@@ -19071,16 +19069,20 @@
         if (!this._isPlaying) {
           if (!this._isBusy) {
             this._isBusy = true;
-            console.log('VideoElement::renderFrame -> play()');
+            // console.log('VideoElement::renderFrame -> play()');
             this.video.play().then(function () {
-              _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
-              _this._isBusy = false;
-              _this._isPlaying = true;
-              console.log('VideoElement::renderFrame -> play() then done');
-            })["catch"](function (error) {
-              _this._isBusy = false;
-              _this._isPlaying = false;
-              console.log('VideoElement::renderFrame -> play() catch error', error);
+              if (_this._isBusy) {
+                _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
+                _this._isBusy = false;
+                _this._isPlaying = true;
+                // console.log('VideoElement::renderFrame -> play() then done', this._isBusy);
+              }
+            })["catch"](function () {
+              if (_this._isBusy) {
+                _this._isBusy = false;
+                _this._isPlaying = false;
+                // console.log('VideoElement::renderFrame -> play() catch error', error, this._isBusy);
+              }
             });
           }
 
@@ -19090,16 +19092,20 @@
           // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
           if (!this._isBusy) {
             this._isBusy = true;
-            console.log('VideoElement::renderFrame -> play()');
+            // console.log('VideoElement::renderFrame -> play()');
             this.video.play().then(function () {
-              console.log('VideoElement::renderFrame -> play() then done busy:', _this._isBusy);
-              _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
-              _this._isBusy = false;
-              _this._isPlaying = true;
-            })["catch"](function (error) {
-              _this._isBusy = false;
-              _this._isPlaying = false;
-              console.log('VideoElement::renderFrame -> play() catch error', error);
+              // console.log('VideoElement::renderFrame -> play() then done busy:', this._isBusy);
+              if (_this._isBusy) {
+                _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
+                _this._isBusy = false;
+                _this._isPlaying = true;
+              }
+            })["catch"](function () {
+              if (_this._isBusy) {
+                _this._isBusy = false;
+                _this._isPlaying = false;
+                // console.log('VideoElement::renderFrame -> play() catch error', error);
+              }
             });
           }
         }
@@ -19108,12 +19114,14 @@
         this.video.pause();
         this.video.currentTime = 0;
         this._isPlaying = false;
+        this._isBusy = false;
         // console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
       }
     } else {
       var asset = this.globalData.videoLoader.getAsset(this.assetData);
       this.video = asset;
       this._isPlaying = false;
+      this._isBusy = false;
       this._canPlay = true;
       // console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
     }
@@ -19131,16 +19139,17 @@
       if (this.video && !this._isBusy) {
         this._isBusy = true;
         this.video.play().then(function () {
-          console.log('VideoElement::show -> play() then done busy:', _this2._isBusy);
+          // console.log('VideoElement::show -> play() then done busy:', this._isBusy);
           _this2.video.currentTime = _this2.renderedFrame / _this2.globalData.frameRate;
           _this2._isBusy = false;
           _this2._isPlaying = true;
-        })["catch"](function (error) {
+        })["catch"](function () {
           _this2._isBusy = false;
           _this2._isPlaying = false;
-          console.log('VideoElement::show -> play() catch error', error);
+          // console.log('VideoElement::show -> play() catch error', error);
         });
       }
+
       if (!this.data.hd) {
         var elem = this.baseElement || this.layerElement;
         elem.visible = true;

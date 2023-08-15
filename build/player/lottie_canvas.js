@@ -7221,26 +7221,24 @@
     }
   };
   AudioElement.prototype.show = function () {
-    console.log('AudioElement::show()', this.assetData.id, 'busy');
+    // console.log('AudioElement::show()', this.assetData.id, 'busy');
     // this.audio.play()
     this._canPlay = true;
-    // console.log('AudioElement::show()', this.assetData.id);
   };
-
   AudioElement.prototype.hide = function () {
-    console.log('AudioElement::hide()', this.assetData.id, 'busy');
+    // console.log('AudioElement::hide()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
   };
   AudioElement.prototype.pause = function () {
     // console.log('AudioElement::pause()', this.assetData.id);
-    console.log('AudioElement::show()', this.assetData.id, 'busy');
+    // console.log('AudioElement::show()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
     this._canPlay = false;
   };
   AudioElement.prototype.resume = function () {
-    console.log('AudioElement::resume()', this.assetData.id);
+    // console.log('AudioElement::resume()', this.assetData.id);
     this._canPlay = true;
   };
   AudioElement.prototype.setRate = function (rateValue) {

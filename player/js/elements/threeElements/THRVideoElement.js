@@ -167,18 +167,22 @@ THRVideoElement.prototype.renderFrame = function () {
       if (!this._isPlaying) {
         if (!this._isBusy) {
           this._isBusy = true;
-          console.log('VideoElement::renderFrame -> play()');
+          // console.log('VideoElement::renderFrame -> play()');
           this.video.play()
             .then(() => {
-              this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
-              this._isBusy = false;
-              this._isPlaying = true;
-              console.log('VideoElement::renderFrame -> play() then done');
+              if (this._isBusy) {
+                this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
+                this._isBusy = false;
+                this._isPlaying = true;
+                // console.log('VideoElement::renderFrame -> play() then done', this._isBusy);
+              }
             })
-            .catch((error) => {
-              this._isBusy = false;
-              this._isPlaying = false;
-              console.log('VideoElement::renderFrame -> play() catch error', error);
+            .catch(() => {
+              if (this._isBusy) {
+                this._isBusy = false;
+                this._isPlaying = false;
+                // console.log('VideoElement::renderFrame -> play() catch error', error, this._isBusy);
+              }
             });
         }
 
@@ -190,18 +194,22 @@ THRVideoElement.prototype.renderFrame = function () {
         // console.log('Send me to new time:', (this.renderedFrame / this.globalData.frameRate));
         if (!this._isBusy) {
           this._isBusy = true;
-          console.log('VideoElement::renderFrame -> play()');
+          // console.log('VideoElement::renderFrame -> play()');
           this.video.play()
             .then(() => {
-              console.log('VideoElement::renderFrame -> play() then done busy:', this._isBusy);
-              this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
-              this._isBusy = false;
-              this._isPlaying = true;
+              // console.log('VideoElement::renderFrame -> play() then done busy:', this._isBusy);
+              if (this._isBusy) {
+                this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
+                this._isBusy = false;
+                this._isPlaying = true;
+              }
             })
-            .catch((error) => {
-              this._isBusy = false;
-              this._isPlaying = false;
-              console.log('VideoElement::renderFrame -> play() catch error', error);
+            .catch(() => {
+              if (this._isBusy) {
+                this._isBusy = false;
+                this._isPlaying = false;
+                // console.log('VideoElement::renderFrame -> play() catch error', error);
+              }
             });
         }
       }
@@ -210,12 +218,14 @@ THRVideoElement.prototype.renderFrame = function () {
       this.video.pause();
       this.video.currentTime = 0;
       this._isPlaying = false;
+      this._isBusy = false;
       // console.log('THRVideoElement::renderFrame() playing so pause the video..', this.isInRange);
     }
   } else {
     const asset = this.globalData.videoLoader.getAsset(this.assetData);
     this.video = asset;
     this._isPlaying = false;
+    this._isBusy = false;
     this._canPlay = true;
     // console.log('THRVideoElement::renderFrame() Missing WIP video', asset);
   }
@@ -234,15 +244,15 @@ THRVideoElement.prototype.show = function () {
       this._isBusy = true;
       this.video.play()
         .then(() => {
-          console.log('VideoElement::show -> play() then done busy:', this._isBusy);
+          // console.log('VideoElement::show -> play() then done busy:', this._isBusy);
           this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
           this._isBusy = false;
           this._isPlaying = true;
         })
-        .catch((error) => {
+        .catch(() => {
           this._isBusy = false;
           this._isPlaying = false;
-          console.log('VideoElement::show -> play() catch error', error);
+          // console.log('VideoElement::show -> play() catch error', error);
         });
     }
     if (!this.data.hd) {
