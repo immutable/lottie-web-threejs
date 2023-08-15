@@ -7471,7 +7471,6 @@
     this.initRenderable();
     this.assetData = globalData.getAssetData(data.refId);
     this.initBaseData(data, globalData, comp);
-    this._isBusy = false;
     this._isPlaying = false;
     this._canPlay = false;
     var assetPath = this.globalData.getAssetsPath(this.assetData);
@@ -7506,50 +7505,38 @@
   };
   extendPrototype([RenderableElement, BaseElement, FrameElement], AudioElement);
   AudioElement.prototype.renderFrame = function () {
-    var _this = this;
     // console.log('AudioElement::renderFrame range:', this.isInRange, 'can', this._canPlay, 'is', this._isPlaying, this.assetData.id);
     if (this.isInRange && this._canPlay) {
       if (!this._isPlaying) {
-        if (!this._isBusy) {
-          this._isBusy = true;
-          console.log('AudioElement::renderFrame -> play()');
-          this.audio.play().then(function () {
-            _this.audio.seek(_this._currentTime / _this.globalData.frameRate);
-            _this._isBusy = false;
-            _this._isPlaying = true;
-            console.log('AudioElement::renderFrame -> play() then done');
-          })["catch"](function (error) {
-            _this._isBusy = false;
-            _this._isPlaying = false;
-            console.log('AudioElement::renderFrame -> play() catch error', error);
-          });
-        }
+        this.audio.play();
+        this.audio.seek(this._currentTime / this.globalData.frameRate);
+        this._isPlaying = true;
       } else if (!this.audio.playing() || Math.abs(this._currentTime / this.globalData.frameRate - this.audio.seek()) > 0.1) {
         this.audio.seek(this._currentTime / this.globalData.frameRate);
       }
     }
   };
   AudioElement.prototype.show = function () {
-    console.log('AudioElement::show()', this.assetData.id, 'busy', this._isBusy);
+    console.log('AudioElement::show()', this.assetData.id, 'busy');
     // this.audio.play()
     this._canPlay = true;
     // console.log('AudioElement::show()', this.assetData.id);
   };
 
   AudioElement.prototype.hide = function () {
-    console.log('AudioElement::hide()', this.assetData.id, 'busy', this._isBusy);
+    console.log('AudioElement::hide()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
   };
   AudioElement.prototype.pause = function () {
     // console.log('AudioElement::pause()', this.assetData.id);
-    console.log('AudioElement::pause()', this.assetData.id, 'busy', this._isBusy);
+    console.log('AudioElement::show()', this.assetData.id, 'busy');
     this.audio.pause();
     this._isPlaying = false;
     this._canPlay = false;
   };
   AudioElement.prototype.resume = function () {
-    // console.log('AudioElement::resume()', this.assetData.id);
+    console.log('AudioElement::resume()', this.assetData.id);
     this._canPlay = true;
   };
   AudioElement.prototype.setRate = function (rateValue) {
