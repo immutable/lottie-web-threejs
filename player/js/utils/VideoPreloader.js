@@ -34,7 +34,7 @@ const VideoPreloader = (function () {
     }
   }
 
-  function videoEvent(event) {
+  function videoEvent() {
     // console.log('VideoPreloader::videoEvent()', event.type, event.target, this);
   }
 

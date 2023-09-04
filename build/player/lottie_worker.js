@@ -1621,7 +1621,7 @@
     function videoLoaded() {
       this.loadedAssets += 1;
       if (this.loadedAssets === this.totalVideos && this.loadedFootagesCount === this.totalFootages) {
-        console.log('VideoPreloader::Videos Loaded call back now');
+        // console.log('VideoPreloader::Videos Loaded call back now');
         this._emit('videoLoaded', {
           loaded: this.loadedAssets
         });
@@ -1636,22 +1636,21 @@
         event.target.pause();
       }
     }
-    function videoEvent(event) {
-      console.log('VideoPreloader::videoEvent()', event.type, event.target, this);
+    function videoEvent() {
+      // console.log('VideoPreloader::videoEvent()', event.type, event.target, this);
     }
     function videoErrorEvent(event) {
-      console.log('VideoPreloader::videoErrorEvent()', event.type, event.target, this);
-      console.log('VideoPreloader::error proxy', proxyVideo);
+      // console.log('VideoPreloader::videoErrorEvent()', event.type, event.target, this);
+      // console.log('VideoPreloader::error proxy', proxyVideo);
       if (event.target) {
         var videoItem = this.videos.find(function (item) {
           return item.video === event.target;
         });
-        console.log('VideoPreloader::finding ob', videoItem);
+        // console.log('VideoPreloader::finding ob', videoItem);
+        videoItem.video = proxyVideo;
+        this._videoLoaded();
       }
-      // ob.video = proxyVideo;
-      // this._videoLoaded();
     }
-
     function getAssetsPath(assetData, assetsPath, originalPath) {
       var path = '';
       if (assetData.e) {
@@ -1676,12 +1675,12 @@
       video.autoplay = 'autoplay';
       video.preload = 'auto';
       video.muted = this.isMuted;
-      video.addEventListener('play', this._videoEvent, false);
-      video.addEventListener('playing', this._videoEvent, false);
-      video.addEventListener('waiting', this._videoEvent, false);
-      video.addEventListener('seeked', this._videoEvent, false);
-      video.addEventListener('seeking', this._videoEvent, false);
-      video.addEventListener('progress', this._videoEvent, false);
+      // video.addEventListener('play', this._videoEvent, false);
+      // video.addEventListener('playing', this._videoEvent, false);
+      // video.addEventListener('waiting', this._videoEvent, false);
+      // video.addEventListener('seeked', this._videoEvent, false);
+      // video.addEventListener('seeking', this._videoEvent, false);
+      // video.addEventListener('progress', this._videoEvent, false);
       video.addEventListener('canplaythrough', this._videoLoaded, false);
       video.addEventListener('canplay', this._videoLoaded, false);
       video.addEventListener('load', this._videoLoaded, false);
@@ -1740,15 +1739,15 @@
       this.videos.forEach(function (videoItem) {
         // videoItem
         // TODO: Remove event listeners
-        console.log('Remove video item', videoItem);
+        // console.log('Remove video item', videoItem);
         if (videoItem.video) {
           var video = videoItem.video;
-          video.removeEventListener('play', _this._videoEvent);
-          video.removeEventListener('playing', _this._videoEvent);
-          video.removeEventListener('waiting', _this._videoEvent);
-          video.removeEventListener('seeked', _this._videoEvent);
-          video.removeEventListener('seeking', _this._videoEvent);
-          video.removeEventListener('progress', _this._videoEvent);
+          // video.removeEventListener('play', this._videoEvent);
+          // video.removeEventListener('playing', this._videoEvent);
+          // video.removeEventListener('waiting', this._videoEvent);
+          // video.removeEventListener('seeked', this._videoEvent);
+          // video.removeEventListener('seeking', this._videoEvent);
+          // video.removeEventListener('progress', this._videoEvent);
           video.removeEventListener('canplaythrough', _this._videoLoaded);
           video.removeEventListener('canplay', _this._videoEvent);
           video.removeEventListener('load', _this._videoLoaded);
@@ -19713,8 +19712,9 @@
       // console.log('** creating new three instance');
     }
 
-    if (!three$1.scene) {
-      three$1.scene = new three.Scene();
+    if (!three$1.renderScene) {
+      three$1.renderScene = new three.Scene();
+      three$1.scene = three$1.renderScene;
       // console.log('** creating new three scene');
     }
 
@@ -19787,7 +19787,7 @@
     // style.width = animData.w + 'px';
     // style.height = animData.h + 'px';
     this.resizerElem = resizerElem;
-    three$1.scene.add(resizerElem);
+    three$1.renderScene.add(resizerElem);
     // styleDiv(resizerElem);
     // style.transformStyle = 'flat';
     // style.mozTransformStyle = 'flat';
@@ -19843,7 +19843,7 @@
         if (globalData.renderConfig.renderer.composer) {
           globalData.renderConfig.renderer.composer.render();
         } else {
-          three$1.renderer.render(three$1.scene, three$1.camera);
+          three$1.renderer.render(three$1.renderScene, three$1.camera);
         }
       }
     }

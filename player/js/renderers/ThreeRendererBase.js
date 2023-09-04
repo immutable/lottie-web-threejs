@@ -260,8 +260,9 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
     this.globalData.renderConfig.renderer = three;
     // console.log('** creating new three instance');
   }
-  if (!three.scene) {
-    three.scene = new Scene();
+  if (!three.renderScene) {
+    three.renderScene = new Scene();
+    three.scene = three.renderScene;
     // console.log('** creating new three scene');
   }
 
@@ -339,7 +340,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   // style.width = animData.w + 'px';
   // style.height = animData.h + 'px';
   this.resizerElem = resizerElem;
-  three.scene.add(resizerElem);
+  three.renderScene.add(resizerElem);
   // styleDiv(resizerElem);
   // style.transformStyle = 'flat';
   // style.mozTransformStyle = 'flat';
@@ -399,7 +400,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
       if (globalData.renderConfig.renderer.composer) {
         globalData.renderConfig.renderer.composer.render();
       } else {
-        three.renderer.render(three.scene, three.camera);
+        three.renderer.render(three.renderScene, three.camera);
       }
     }
   }

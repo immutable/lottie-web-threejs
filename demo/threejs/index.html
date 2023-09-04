@@ -138,28 +138,31 @@
 
                var marker = 'reveal';
                var markerItem = anim.markers.find((animationMarker) => animationMarker.payload.name === marker);
-               markerItem.payload.time = 0;
-               console.log('markerItem', markerItem);
-               if (markerItem.duration) {
-                    const markerStartTime = markerItem.payload.time;
-                    const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
-                    // animation.instance.audioController.play();
+               if (markerItem?.payload) {
+                 markerItem.payload.time = 0;
+                 // console.log('markerItem', markerItem);
+                 if (markerItem.duration) {
+                   const markerStartTime = markerItem.payload.time;
+                   const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
+                   // animation.instance.audioController.play();
 
-                    console.log('anim marker play', markerStartTime);
-                    return animationTimeline.tweenFromTo(markerStartTime, markerEndTime).then(() => {
-                         anim.pause();
-                    });
-               } else {
-                    // animation.instance.play();
-                    // animation.instance.audioController.play();
-                    return animationTimeline.play(markerItem.payload.name).then(() => {
-                         animation.instance.pause();
-                    });
+                   console.log('anim marker play', markerStartTime);
+                   return animationTimeline.tweenFromTo(markerStartTime, markerEndTime)
+                     .then(() => {
+                       anim.pause();
+                     });
+                 } else {
+                   // animation.instance.play();
+                   // animation.instance.audioController.play();
+                   return animationTimeline.play(markerItem.payload.name)
+                     .then(() => {
+                       animation.instance.pause();
+                     });
+                 }
                }
           },
           openPack: () => {
                anim.pause();
-               console.log('Open pack', animator);
                if (animator) {
                     animator.pause();
                     animator.kill();
@@ -200,27 +203,28 @@
 
                var marker = 'open';
                var markerItem = anim.markers.find((animationMarker) => animationMarker.payload.name === marker);
-               console.log('open Pack', markerItem);
-               markerItem.payload.time = Math.round(markerItem.time / anim.frameRate);
-               if (markerItem.duration) {
-                    const markerStartTime = markerItem.payload.time;
-                    const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
-                    // animation.instance.audioController.play();
+               if (markerItem) {
+                 markerItem.payload.time = Math.round(markerItem.time / anim.frameRate);
+                 if (markerItem.duration) {
+                   const markerStartTime = markerItem.payload.time;
+                   const markerEndTime = markerItem.payload.time + (markerItem.duration / anim.frameRate);
+                   // animation.instance.audioController.play();
 
-                    console.log('anim marker play', markerStartTime, markerEndTime);
-                    animator = animationTimeline.tweenFromTo(markerStartTime, markerEndTime);
-                    animator.then(() => {
-                         // anim.pause();
-                    });
-                    return animator;
-               } else {
-                    // animation.instance.play();
-                    // animation.instance.audioController.play();
-                    animator = animationTimeline.play(markerItem.payload.name);
-                    animator.then(() => {
-                         // animation.instance.pause();
-                    });
-                    return animator;
+                   console.log('anim marker play', markerStartTime, markerEndTime);
+                   animator = animationTimeline.tweenFromTo(markerStartTime, markerEndTime);
+                   animator.then(() => {
+                     // anim.pause();
+                   });
+                   return animator;
+                 } else {
+                   // animation.instance.play();
+                   // animation.instance.audioController.play();
+                   animator = animationTimeline.play(markerItem.payload.name);
+                   animator.then(() => {
+                     // animation.instance.pause();
+                   });
+                   return animator;
+                 }
                }
           },
      };
@@ -236,7 +240,7 @@
      editingTargetController.onChange((value) => {
           console.log('Toggle isEditingTarget()', value, myObject.targetItem, myObject.targetName, threeData);
 
-          threeData.scene.children[1].traverse((obj) => {
+          threeData.renderScene.children[1].traverse((obj) => {
                if (obj.name === myObject.targetName) {
                     myObject.targetItem = obj;
                     console.log('Found Item', obj.name, obj);
@@ -394,10 +398,10 @@
         loop: true,
         prerender: true,
         autoplay: false,
-        path: '/demo/threejs/pack/data.json',
+        path: '/demo/threejs/bg/data.json',
         rendererSettings: {
              preserveAspectRatio: 'xMidYMid meet',
-             assetsPath: '/demo/threejs/pack/', // sound
+             assetsPath: '/demo/threejs/bg/', // sound
              renderer: threeData,
         },
         audioFactory: createAudio,
@@ -484,7 +488,7 @@
 
      function initThree(options) {
           const three = {
-               scene: new THREE.Scene(),
+               renderScene: new THREE.Scene(),
                camera: new THREE.PerspectiveCamera(25, (options.width || 1) / (options.height || 1), 0.1, 20000),
                renderer: new THREE.WebGLRenderer({ antialias: true }),
                clock: new THREE.Clock(),
@@ -500,7 +504,7 @@
           three.camera.updateProjectionMatrix();
 
           const helper = new CameraHelper(three.camera);
-          three.scene.add(helper);
+          three.renderScene.add(helper);
 
           THREE.ColorManagement.enabled = false;
           three.renderer.useLegacyLights = false;
@@ -574,7 +578,7 @@
               `,
           });
           const mesh = new THREE.Mesh(geometry, shaderMaterial);
-          three.scene.add(mesh);
+          three.renderScene.add(mesh);
 
           const controls = new OrbitControls(three.camera, three.renderer.domElement);
           three.camera.position.set( 0, 20, 100 );
@@ -633,11 +637,11 @@
 
               // Add axes helper
               const axesHelper = new THREE.AxesHelper(5);
-              threeData.scene.add(axesHelper);
+              threeData.renderScene.add(axesHelper);
               //
               // // Add camera helper (for perspective camera)
               const cameraHelper = new THREE.CameraHelper(threeData.camera);
-              threeData.scene.add(cameraHelper);
+              threeData.renderScene.add(cameraHelper);
 
               // TODO: Load a gltf file..
               // const loader = new GLTFLoader().setPath('/demo/threejs/model/');
