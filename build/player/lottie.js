@@ -19583,6 +19583,7 @@
     var _this = this,
       _arguments = arguments;
     console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, animationItem);
+    console.log('ThreeRendererBase::initPreloader() video:', animationItem.videoLoader);
     var isLoadingChecked = false;
     var videoPreloader = animationItem.videoLoader;
     var imagePreloader = animationItem.imageLoader;
@@ -19603,7 +19604,7 @@
         imagesFound += 1;
       }
     });
-    console.log('Assets found', videosFound, imagesFound);
+    console.log('Assets found', videosFound, imagesFound, 'found video loader', videoPreloader);
     // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
     // Otherwise hook into the video preloader events
     if (videoPreloader && videosFound > 0) {
