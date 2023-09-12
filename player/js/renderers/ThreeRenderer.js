@@ -1,3 +1,4 @@
+import { DefaultLoadingManager } from 'three';
 import {
   extendPrototype,
 } from '../utils/functionExtensions';
@@ -27,6 +28,7 @@ function ThreeRenderer(animationItem, config) {
     assetsPath: config && config.assetsPath,
     renderer: config && config.renderer,
   };
+  this.renderConfig.renderer.loader = DefaultLoadingManager;
   this.globalData = {
     _mdf: false,
     frameNum: -1,

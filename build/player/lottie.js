@@ -19217,13 +19217,13 @@
       assetsPath: config && config.assetsPath,
       renderer: config && config.renderer
     };
+    this.renderConfig.renderer.loader = three.DefaultLoadingManager;
     this.globalData = {
       _mdf: false,
       frameNum: -1,
       renderConfig: this.renderConfig,
       isAssetsLoaded: false,
-      cameraManager: this.animationItem.cameraManager,
-      loader: three.DefaultLoadingManager
+      cameraManager: this.animationItem.cameraManager
     };
     this.pendingElements = [];
     this.elements = [];
@@ -19850,6 +19850,7 @@
       assetsPath: config && config.assetsPath,
       renderer: config && config.renderer
     };
+    this.renderConfig.renderer.loader = three.DefaultLoadingManager;
     this.globalData = {
       _mdf: false,
       frameNum: -1,
