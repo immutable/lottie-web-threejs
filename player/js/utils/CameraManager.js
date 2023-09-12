@@ -37,7 +37,7 @@ const CameraManager = (function () {
    * @param element
    */
   function addCameraElement(layer, element) {
-    console.log('CameraManager::AddCamera()', layer, element);
+    // console.log('CameraManager::AddCamera()', layer, element);
     this.cameras.push({
       layer,
       element,

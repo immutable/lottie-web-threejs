@@ -25,7 +25,7 @@ THRSolidElement.prototype.createContent = function () {
   //   rect.setAttribute('fill', this.data.sc);
   //   this.svgElement.setAttribute('width', this.data.sw);
   //   this.svgElement.setAttribute('height', this.data.sh);
-  console.log('THRSolidElement::createContent()', this.data.sc, this.data.sw, this.data.sh, this.data);
+  // console.log('THRSolidElement::createContent()', this.data.sc, this.data.sw, this.data.sh, this.data);
   const geometry = new PlaneGeometry(this.data.sw, this.data.sh);
   const material = new MeshBasicMaterial({ color: this.data.sc });
   this.material = material;

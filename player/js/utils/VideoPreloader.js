@@ -116,7 +116,7 @@ const VideoPreloader = (function () {
       }
     }
     this.totalVideos = this.videos.length;
-    console.log('VideoPreloader::loadAssets() videos:', this.videos);
+    // console.log('VideoPreloader::loadAssets() videos:', this.videos);
   }
 
   function setPath(path) {

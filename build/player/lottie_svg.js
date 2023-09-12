@@ -1223,7 +1223,7 @@
       return regex.test(filename);
     }
     function loadAssets(assets, cb) {
-      console.log('ImagePreloader::loadAssets()', assets);
+      // console.log('ImagePreloader::loadAssets()', assets);
       this.imagesLoadedCb = cb;
       var i;
       var len = assets.length;
@@ -1240,8 +1240,9 @@
           }
         }
       }
-      console.log('ImagePreloader::loadAssets() found:', this.images);
+      // console.log('ImagePreloader::loadAssets() found:', this.images);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
@@ -1417,8 +1418,9 @@
         }
       }
       this.totalVideos = this.videos.length;
-      console.log('VideoPreloader::loadAssets() videos:', this.videos);
+      // console.log('VideoPreloader::loadAssets() videos:', this.videos);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
@@ -1716,7 +1718,7 @@
      * @param element
      */
     function addCameraElement(layer, element) {
-      console.log('CameraManager::AddCamera()', layer, element);
+      // console.log('CameraManager::AddCamera()', layer, element);
       this.cameras.push({
         layer: layer,
         element: element

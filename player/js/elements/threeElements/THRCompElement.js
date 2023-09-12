@@ -10,7 +10,7 @@ import THRBaseElement from './THRBaseElement';
 import ThreeRendererBase from '../../renderers/ThreeRendererBase';
 
 function THRCompElement(data, globalData, comp) {
-  console.log('THRCompElement', data, globalData, comp);
+  // console.log('THRCompElement', data, globalData, comp);
   this.layers = data.layers;
   this.supports3d = !data.hasMask;
   this.completeLayers = false;

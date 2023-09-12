@@ -174,6 +174,7 @@ THRVideoElement.prototype.renderFrame = function () {
                 this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
                 this._isBusy = false;
                 this._isPlaying = true;
+                this.pivotElement.visible = true;
                 // console.log('VideoElement::renderFrame -> play() then done', this._isBusy);
               }
             })
@@ -202,6 +203,7 @@ THRVideoElement.prototype.renderFrame = function () {
                 this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
                 this._isBusy = false;
                 this._isPlaying = true;
+                this.pivotElement.visible = true;
               }
             })
             .catch(() => {
@@ -248,6 +250,7 @@ THRVideoElement.prototype.show = function () {
           this.video.currentTime = (this.renderedFrame / this.globalData.frameRate);
           this._isBusy = false;
           this._isPlaying = true;
+          this.pivotElement.visible = true;
         })
         .catch(() => {
           this._isBusy = false;

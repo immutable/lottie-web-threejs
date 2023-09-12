@@ -23,11 +23,10 @@ import THRImageElement from '../elements/threeElements/THRImageElement';
 import THRSolidElement from '../elements/threeElements/THRSolidElement';
 import THRCameraElement from '../elements/threeElements/THRCameraElement';
 import THRVideoElement from '../elements/threeElements/THRVideoElement';
-import { VERSION } from './version';
 import THRNullElement from '../elements/threeElements/THRNullElement';
 
 function ThreeRendererBase(animationItem, config) {
-  console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
+  // console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
   this.animationItem = animationItem;
   this.layers = null;
   this.renderedFrame = -1;

@@ -1223,7 +1223,7 @@
       return regex.test(filename);
     }
     function loadAssets(assets, cb) {
-      console.log('ImagePreloader::loadAssets()', assets);
+      // console.log('ImagePreloader::loadAssets()', assets);
       this.imagesLoadedCb = cb;
       var i;
       var len = assets.length;
@@ -1240,8 +1240,9 @@
           }
         }
       }
-      console.log('ImagePreloader::loadAssets() found:', this.images);
+      // console.log('ImagePreloader::loadAssets() found:', this.images);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
@@ -1417,8 +1418,9 @@
         }
       }
       this.totalVideos = this.videos.length;
-      console.log('VideoPreloader::loadAssets() videos:', this.videos);
+      // console.log('VideoPreloader::loadAssets() videos:', this.videos);
     }
+
     function setPath(path) {
       this.path = path || '';
     }
@@ -1716,7 +1718,7 @@
      * @param element
      */
     function addCameraElement(layer, element) {
-      console.log('CameraManager::AddCamera()', layer, element);
+      // console.log('CameraManager::AddCamera()', layer, element);
       this.cameras.push({
         layer: layer,
         element: element
@@ -18543,7 +18545,7 @@
     //   rect.setAttribute('fill', this.data.sc);
     //   this.svgElement.setAttribute('width', this.data.sw);
     //   this.svgElement.setAttribute('height', this.data.sh);
-    console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
+    // console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
     var geometry = new three.PlaneGeometry(this.data.sw, this.data.sh);
     var material = new three.MeshBasicMaterial({
       color: this.data.sc,
@@ -18701,7 +18703,7 @@
     //   rect.setAttribute('fill', this.data.sc);
     //   this.svgElement.setAttribute('width', this.data.sw);
     //   this.svgElement.setAttribute('height', this.data.sh);
-    console.log('THRSolidElement::createContent()', this.data.sc, this.data.sw, this.data.sh, this.data);
+    // console.log('THRSolidElement::createContent()', this.data.sc, this.data.sw, this.data.sh, this.data);
     var geometry = new three.PlaneGeometry(this.data.sw, this.data.sh);
     var material = new three.MeshBasicMaterial({
       color: this.data.sc
@@ -19074,6 +19076,7 @@
                 _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
                 _this._isBusy = false;
                 _this._isPlaying = true;
+                _this.pivotElement.visible = true;
                 // console.log('VideoElement::renderFrame -> play() then done', this._isBusy);
               }
             })["catch"](function () {
@@ -19098,6 +19101,7 @@
                 _this.video.currentTime = _this.renderedFrame / _this.globalData.frameRate;
                 _this._isBusy = false;
                 _this._isPlaying = true;
+                _this.pivotElement.visible = true;
               }
             })["catch"](function () {
               if (_this._isBusy) {
@@ -19142,6 +19146,7 @@
           _this2.video.currentTime = _this2.renderedFrame / _this2.globalData.frameRate;
           _this2._isBusy = false;
           _this2._isPlaying = true;
+          _this2.pivotElement.visible = true;
         })["catch"](function () {
           _this2._isBusy = false;
           _this2._isPlaying = false;
@@ -19178,8 +19183,6 @@
     this._canPlay = true;
   };
 
-  var VERSION = '4.1';
-
   function THRNullElement(data, globalData, comp) {
     console.info('THRNullElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
@@ -19200,7 +19203,7 @@
   };
 
   function ThreeRendererBase(animationItem, config) {
-    console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
+    // console.log('ThreeRendererBase::constructor()', VERSION, config, animationItem);
     this.animationItem = animationItem;
     this.layers = null;
     this.renderedFrame = -1;
@@ -19778,7 +19781,7 @@
   };
 
   function THRCompElement(data, globalData, comp) {
-    console.log('THRCompElement', data, globalData, comp);
+    // console.log('THRCompElement', data, globalData, comp);
     this.layers = data.layers;
     this.supports3d = !data.hasMask;
     this.completeLayers = false;

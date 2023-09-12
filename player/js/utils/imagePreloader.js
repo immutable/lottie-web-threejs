@@ -124,7 +124,7 @@ const ImagePreloader = (function () {
   }
 
   function loadAssets(assets, cb) {
-    console.log('ImagePreloader::loadAssets()', assets);
+    // console.log('ImagePreloader::loadAssets()', assets);
     this.imagesLoadedCb = cb;
     var i;
     var len = assets.length;
@@ -141,7 +141,7 @@ const ImagePreloader = (function () {
         }
       }
     }
-    console.log('ImagePreloader::loadAssets() found:', this.images);
+    // console.log('ImagePreloader::loadAssets() found:', this.images);
   }
 
   function setPath(path) {

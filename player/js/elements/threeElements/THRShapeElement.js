@@ -26,7 +26,7 @@ THRShapeElement.prototype.createContent = function () {
   //   rect.setAttribute('fill', this.data.sc);
   //   this.svgElement.setAttribute('width', this.data.sw);
   //   this.svgElement.setAttribute('height', this.data.sh);
-  console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
+  // console.log('THRShapeElement::createContent()', this.data.sc, this.data.sw, this.data.sh);
   const geometry = new PlaneGeometry(this.data.sw, this.data.sh);
   const material = new MeshBasicMaterial({ color: this.data.sc, side: DoubleSide });
   this.material = material;
