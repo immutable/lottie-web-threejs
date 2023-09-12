@@ -253,6 +253,7 @@ ThreeRendererBase.prototype.addTo3dContainer = function (elem, pos) {
 };
 
 ThreeRendererBase.prototype.configAnimation = function (animData) {
+  console.log('ThreeRendererBase::configAnimation()', animData);
   const globalData = this.globalData;
   let three = this.globalData.renderConfig.renderer;
   if (!three) {
@@ -401,8 +402,8 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
       }
 
       console.log('ThreeRendererBase::render()', globalData);
-      if (globalData.renderConfig.renderer.composer) {
-        globalData.renderConfig.renderer.composer.render();
+      if (globalData.renderConfig.composer) {
+        globalData.renderConfig.composer.render();
       } else {
         three.renderer.render(three.renderScene, three.camera);
       }
@@ -416,7 +417,7 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
   this.layerElement = this.resizerElem;
   this.build3dContainers();
   this.updateContainerSize();
-  this.initPreloader();
+  this.initPreloader(this.animationItem);
 };
 
 ThreeRendererBase.prototype.destroy = function () {
@@ -437,21 +438,21 @@ ThreeRendererBase.prototype.destroy = function () {
   this.animationItem = null;
 };
 
-ThreeRendererBase.prototype.initPreloader = function () {
-  console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, this.animationItem);
+ThreeRendererBase.prototype.initPreloader = function (animationItem) {
+  console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, animationItem);
 
   let isLoadingChecked = false;
   const videoPreloader = this.globalData.videoLoader;
   const imagePreloader = this.globalData.imageLoader;
   console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
-  console.log('Animation Item assets found:', this.animationItem.animationData.assets);
+  console.log('Animation Item assets found:', animationItem.animationData.assets);
   let imagesFound = 0;
   let isImagesRequired = false;
   let isImagesLoaded = false;
   let videosFound = 0;
   let isVideoRequired = false;
   let isVideoLoaded = false;
-  this.animationItem.animationData.assets.forEach((asset) => {
+  animationItem.animationData.assets.forEach((asset) => {
     console.log('Video asset', asset);
     if (videoPreloader.isValid(asset.p)) {
       videosFound += 1;
@@ -469,11 +470,13 @@ ThreeRendererBase.prototype.initPreloader = function () {
     videoPreloader.addEventListener('videoLoaded', () => {
       isVideoLoaded = true;
       console.log('ThreeRendererBase::videoLoaded() **** Kick off is assets loaded', isLoadingChecked);
+      console.log('ThreeRendererBase::videoLoaded() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+      console.log('ThreeRendererBase::videoLoaded() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
       if (!isLoadingChecked && ((isImagesRequired && isImagesLoaded) || !isImagesRequired)) {
         console.log('*** CHECK LOADED vid');
         isLoadingChecked = true;
         this.globalData.isAssetsLoaded = true;
-        this.animationItem.checkLoaded();
+        animationItem.checkLoaded();
       }
     });
   }
@@ -498,6 +501,8 @@ ThreeRendererBase.prototype.initPreloader = function () {
 
   DefaultLoadingManager.onLoad = () => {
     console.log('Three::Loading Complete! ');
+    console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+    console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
     isImagesLoaded = true;
     // this.globalData.isAssetsLoaded = true;
     // this.animationItem.checkLoaded();
@@ -506,7 +511,7 @@ ThreeRendererBase.prototype.initPreloader = function () {
       console.log('*** CHECK LOADED');
       isLoadingChecked = true;
       this.globalData.isAssetsLoaded = true;
-      this.animationItem.checkLoaded();
+      animationItem.checkLoaded();
     }
   };
 

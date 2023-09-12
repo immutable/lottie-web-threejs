@@ -19408,6 +19408,7 @@
     }
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
+    console.log('ThreeRendererBase::configAnimation()', animData);
     var globalData = this.globalData;
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
@@ -19547,8 +19548,8 @@
           three$1.interaction.update();
         }
         console.log('ThreeRendererBase::render()', globalData);
-        if (globalData.renderConfig.renderer.composer) {
-          globalData.renderConfig.renderer.composer.render();
+        if (globalData.renderConfig.composer) {
+          globalData.renderConfig.composer.render();
         } else {
           three$1.renderer.render(three$1.renderScene, three$1.camera);
         }
@@ -19561,7 +19562,7 @@
     this.layerElement = this.resizerElem;
     this.build3dContainers();
     this.updateContainerSize();
-    this.initPreloader();
+    this.initPreloader(this.animationItem);
   };
   ThreeRendererBase.prototype.destroy = function () {
     if (this.animationItem.wrapper) {
@@ -19580,22 +19581,22 @@
     this.destroyed = true;
     this.animationItem = null;
   };
-  ThreeRendererBase.prototype.initPreloader = function () {
+  ThreeRendererBase.prototype.initPreloader = function (animationItem) {
     var _this = this,
       _arguments = arguments;
-    console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, this.animationItem);
+    console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, animationItem);
     var isLoadingChecked = false;
     var videoPreloader = this.globalData.videoLoader;
     var imagePreloader = this.globalData.imageLoader;
     console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
-    console.log('Animation Item assets found:', this.animationItem.animationData.assets);
+    console.log('Animation Item assets found:', animationItem.animationData.assets);
     var imagesFound = 0;
     var isImagesRequired = false;
     var isImagesLoaded = false;
     var videosFound = 0;
     var isVideoRequired = false;
     var isVideoLoaded = false;
-    this.animationItem.animationData.assets.forEach(function (asset) {
+    animationItem.animationData.assets.forEach(function (asset) {
       console.log('Video asset', asset);
       if (videoPreloader.isValid(asset.p)) {
         videosFound += 1;
@@ -19613,11 +19614,13 @@
       videoPreloader.addEventListener('videoLoaded', function () {
         isVideoLoaded = true;
         console.log('ThreeRendererBase::videoLoaded() **** Kick off is assets loaded', isLoadingChecked);
+        console.log('ThreeRendererBase::videoLoaded() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+        console.log('ThreeRendererBase::videoLoaded() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
         if (!isLoadingChecked && (isImagesRequired && isImagesLoaded || !isImagesRequired)) {
           console.log('*** CHECK LOADED vid');
           isLoadingChecked = true;
           _this.globalData.isAssetsLoaded = true;
-          _this.animationItem.checkLoaded();
+          animationItem.checkLoaded();
         }
       });
     }
@@ -19640,6 +19643,8 @@
     };
     three.DefaultLoadingManager.onLoad = function () {
       console.log('Three::Loading Complete! ');
+      console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+      console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
       isImagesLoaded = true;
       // this.globalData.isAssetsLoaded = true;
       // this.animationItem.checkLoaded();
@@ -19648,7 +19653,7 @@
         console.log('*** CHECK LOADED');
         isLoadingChecked = true;
         _this.globalData.isAssetsLoaded = true;
-        _this.animationItem.checkLoaded();
+        animationItem.checkLoaded();
       }
     };
     three.DefaultLoadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
