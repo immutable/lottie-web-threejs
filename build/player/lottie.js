@@ -19637,12 +19637,12 @@
       isImagesRequired = true;
       console.log('Images preloader && imagesFound', isImagePreloader, imagesFound);
     }
-    three.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
+    imagePreloader.onStart = function (url, itemsLoaded, itemsTotal) {
       console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
       console.log('Three::onStart::', _this);
       isLoadingChecked = false;
     };
-    three.DefaultLoadingManager.onLoad = function () {
+    imagePreloader.onLoad = function () {
       console.log('Three::Loading Complete! isLoadingChecked:', isLoadingChecked);
       console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
       console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
@@ -19658,10 +19658,12 @@
         animationItem.checkLoaded();
       }
     };
-    three.DefaultLoadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    imagePreloader.onProgress = function (url, itemsLoaded, itemsTotal) {
       console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
     };
-    three.DefaultLoadingManager.onError = function (url) {
+
+    // DefaultLoadingManager
+    imagePreloader.onError = function (url) {
       console.log('Three::There was an error loading ' + url, _arguments);
     };
   };
