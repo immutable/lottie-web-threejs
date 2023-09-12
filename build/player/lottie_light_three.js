@@ -13889,6 +13889,8 @@
      * Try to keep this as tight as possible for performance.
      */
     function render() {
+      console.log('ThreeRendererBase::render**()', globalData);
+
       // Check for render override
       if (globalData.renderConfig.render) {
         globalData.renderConfig.render();
