@@ -13890,8 +13890,6 @@
      * Try to keep this as tight as possible for performance.
      */
     function render() {
-      console.log('ThreeRendererBase::render**()', globalData);
-
       // Check for render override
       if (globalData.renderConfig.render) {
         globalData.renderConfig.render();
@@ -13902,7 +13900,6 @@
         if (three$1.interaction) {
           three$1.interaction.update();
         }
-        console.log('ThreeRendererBase::render()', globalData);
         if (globalData.renderConfig.composer) {
           globalData.renderConfig.composer.render();
         } else {
@@ -13944,7 +13941,7 @@
     var videoPreloader = this.globalData.videoLoader;
     var imagePreloader = this.globalData.imageLoader;
     console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
-    console.log('Animation Item assets found:', animationItem.animationData.assets);
+    console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
     var imagesFound = 0;
     var isImagesRequired = false;
     var isImagesLoaded = false;
@@ -13952,7 +13949,7 @@
     var isVideoRequired = false;
     var isVideoLoaded = false;
     animationItem.animationData.assets.forEach(function (asset) {
-      console.log('Video asset', asset);
+      console.log('Test asset', asset);
       if (videoPreloader.isValid(asset.p)) {
         videosFound += 1;
       }
@@ -13960,6 +13957,7 @@
         imagesFound += 1;
       }
     });
+    console.log('Assets found', videosFound, imagesFound);
     // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
     // Otherwise hook into the video preloader events
     if (videoPreloader && videosFound > 0) {

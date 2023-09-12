@@ -387,8 +387,6 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
    * Try to keep this as tight as possible for performance.
    */
   function render() {
-    console.log('ThreeRendererBase::render**()', globalData);
-
     // Check for render override
     if (globalData.renderConfig.render) {
       globalData.renderConfig.render();
@@ -401,7 +399,6 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
         three.interaction.update();
       }
 
-      console.log('ThreeRendererBase::render()', globalData);
       if (globalData.renderConfig.composer) {
         globalData.renderConfig.composer.render();
       } else {
@@ -445,7 +442,7 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
   const videoPreloader = this.globalData.videoLoader;
   const imagePreloader = this.globalData.imageLoader;
   console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
-  console.log('Animation Item assets found:', animationItem.animationData.assets);
+  console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
   let imagesFound = 0;
   let isImagesRequired = false;
   let isImagesLoaded = false;
@@ -453,7 +450,7 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
   let isVideoRequired = false;
   let isVideoLoaded = false;
   animationItem.animationData.assets.forEach((asset) => {
-    console.log('Video asset', asset);
+    console.log('Test asset', asset);
     if (videoPreloader.isValid(asset.p)) {
       videosFound += 1;
     }
@@ -461,6 +458,8 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
       imagesFound += 1;
     }
   });
+
+  console.log('Assets found', videosFound, imagesFound);
   // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
   // Otherwise hook into the video preloader events
   if (videoPreloader && videosFound > 0) {
