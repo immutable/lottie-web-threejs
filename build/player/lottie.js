@@ -19640,15 +19640,17 @@
     three.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
       console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
       console.log('Three::onStart::', _this);
+      isLoadingChecked = false;
     };
     three.DefaultLoadingManager.onLoad = function () {
-      console.log('Three::Loading Complete! ');
+      console.log('Three::Loading Complete! isLoadingChecked:', isLoadingChecked);
       console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
       console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
       isImagesLoaded = true;
       // this.globalData.isAssetsLoaded = true;
       // this.animationItem.checkLoaded();
       console.log('Three::onLoad() isImagePreloader', isImagePreloader, 'isLoadingChecked', isLoadingChecked);
+      console.log('Three::onLoad', three.DefaultLoadingManager);
       if (!isLoadingChecked && (isVideoRequired && isVideoLoaded || !isVideoRequired)) {
         console.log('*** CHECK LOADED');
         isLoadingChecked = true;
