@@ -19840,6 +19840,7 @@
         if (three$1.interaction) {
           three$1.interaction.update();
         }
+        console.log('ThreeRendererBase::render()', globalData);
         if (globalData.renderConfig.renderer.composer) {
           globalData.renderConfig.renderer.composer.render();
         } else {

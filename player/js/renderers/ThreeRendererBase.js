@@ -397,6 +397,8 @@ ThreeRendererBase.prototype.configAnimation = function (animData) {
       if (three.interaction) {
         three.interaction.update();
       }
+
+      console.log('ThreeRendererBase::render()', globalData);
       if (globalData.renderConfig.renderer.composer) {
         globalData.renderConfig.renderer.composer.render();
       } else {
