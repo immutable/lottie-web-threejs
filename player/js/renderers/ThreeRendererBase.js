@@ -50,6 +50,7 @@ function ThreeRendererBase(animationItem, config) {
     renderConfig: this.renderConfig,
     isAssetsLoaded: false,
     cameraManager: this.animationItem.cameraManager,
+    loader: DefaultLoadingManager,
   };
   this.pendingElements = [];
   this.elements = [];
@@ -439,8 +440,8 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
   console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, animationItem);
 
   let isLoadingChecked = false;
-  const videoPreloader = this.globalData.videoLoader;
-  const imagePreloader = this.globalData.imageLoader;
+  const videoPreloader = animationItem.videoLoader;
+  const imagePreloader = animationItem.imageLoader;
   console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
   console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
   let imagesFound = 0;
@@ -520,7 +521,6 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
     console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
   };
 
-  // DefaultLoadingManager
   imagePreloader.onError = (url) => {
     console.log('Three::There was an error loading ' + url, arguments);
   };
