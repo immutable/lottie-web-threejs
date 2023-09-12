@@ -13937,11 +13937,11 @@
   ThreeRendererBase.prototype.initPreloader = function (animationItem) {
     var _this = this,
       _arguments = arguments;
-    console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, this.globalData, animationItem);
-    console.log('ThreeRendererBase::initPreloader() video:', animationItem.videoLoader);
+    console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, animationItem);
+    console.log('ThreeRendererBase::initPreloader() video:', animationItem.videoPreloader);
     var isLoadingChecked = false;
-    var videoPreloader = animationItem.videoLoader;
-    var imagePreloader = animationItem.imageLoader;
+    var videoPreloader = animationItem.videoPreloader;
+    var imagePreloader = animationItem.imagePreloader;
     console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
     console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
     var imagesFound = 0;
