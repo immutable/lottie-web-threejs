@@ -9,7 +9,7 @@ import THRBaseElement from './THRBaseElement';
 import RenderableObjectElement from '../helpers/RenderableObjectElement';
 
 function THRNullElement(data, globalData, comp) {
-  console.info('THRNullElement::constructor()', data, comp);
+  // console.info('THRNullElement::constructor()', data, comp);
   this.assetData = globalData.getAssetData(data.refId);
   this.initElement(data, globalData, comp);
   this.initRendererElement();
