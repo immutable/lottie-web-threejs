@@ -487,14 +487,11 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
   //   this.globalData.isAssetsLoaded = true;
   //   this.animationItem.checkLoaded();
   // }
-  let isImagePreloader = false;
   if (imagePreloader && imagesFound) {
-    isImagePreloader = true;
     isImagesRequired = true;
-    // console.log('Images preloader && imagesFound', isImagePreloader, imagesFound);
   }
 
-  imagePreloader.onStart = (url, itemsLoaded, itemsTotal) => {
+  imagePreloader.onStart = () => {
     // console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
     // console.log('Three::onStart::', this);
     isLoadingChecked = false;

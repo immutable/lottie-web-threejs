@@ -19480,7 +19480,7 @@
   };
 
   function THRNullElement(data, globalData, comp) {
-    console.info('THRNullElement::constructor()', data, comp);
+    // console.info('THRNullElement::constructor()', data, comp);
     this.assetData = globalData.getAssetData(data.refId);
     this.initElement(data, globalData, comp);
     this.initRendererElement();
@@ -19580,22 +19580,22 @@
     }
   };
   ThreeRendererBase.prototype.createNull = function (data) {
-    console.log('ThreeRendererBase::createNull()', data);
+    // console.log('ThreeRendererBase::createNull()', data);
     return new THRNullElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createShape = function (data) {
-    console.log('ThreeRendererBase::createShape()', data);
+    // console.log('ThreeRendererBase::createShape()', data);
     return new THRShapeElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createText = function (data) {
-    console.log('ThreeRendererBase::createText()', data);
+    // console.log('ThreeRendererBase::createText()', data);
     if (!this.supports3d) {
       return new SVGTextLottieElement(data, this.globalData, this);
     }
     return new HTextElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createCamera = function (data) {
-    console.log('ThreeRendererBase::createCamera()', data);
+    // console.log('ThreeRendererBase::createCamera()', data);
     var newCamera = new THRCameraElement(data, this.globalData, this);
     this.globalData.cameraManager.addCameraElement(data, newCamera);
     if (!this.camera) {
@@ -19604,15 +19604,15 @@
     return newCamera;
   };
   ThreeRendererBase.prototype.createVideo = function (data) {
-    console.log('ThreeRendererBase::createVideo()', data);
+    // console.log('ThreeRendererBase::createVideo()', data);
     return new THRVideoElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createImage = function (data) {
-    console.log('ThreeRendererBase::createImage()', data);
+    // console.log('ThreeRendererBase::createImage()', data);
     return new THRImageElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.createSolid = function (data) {
-    console.log('ThreeRendererBase::createSolid()', data);
+    // console.log('ThreeRendererBase::createSolid()', data);
     return new THRSolidElement(data, this.globalData, this);
   };
   ThreeRendererBase.prototype.getThreeDContainerByPos = function (pos) {
@@ -19708,7 +19708,7 @@
     }
   };
   ThreeRendererBase.prototype.configAnimation = function (animData) {
-    console.log('ThreeRendererBase::configAnimation()', animData);
+    // console.log('ThreeRendererBase::configAnimation()', animData);
     var globalData = this.globalData;
     var three$1 = this.globalData.renderConfig.renderer;
     if (!three$1) {
@@ -19879,15 +19879,15 @@
     this.animationItem = null;
   };
   ThreeRendererBase.prototype.initPreloader = function (animationItem) {
-    var _this = this,
-      _arguments = arguments;
-    console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, animationItem);
-    console.log('ThreeRendererBase::initPreloader() video:', animationItem.videoPreloader);
+    var _this = this;
+    // console.log('ThreeRendererBase::initPreloader() loaded:', this.globalData.isAssetsLoaded, animationItem);
+    // console.log('ThreeRendererBase::initPreloader() video:', animationItem.videoPreloader);
+
     var isLoadingChecked = false;
     var videoPreloader = animationItem.videoPreloader;
     var imagePreloader = animationItem.imagePreloader;
-    console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
-    console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
+    // console.log('ThreeRendererBase::Video Preloader total:', videoPreloader.totalVideos, 'loaded', videoPreloader.loadedVideos());
+    // console.log('Animation Item assets found:', animationItem.animationData.assets, imagePreloader);
     var imagesFound = 0;
     var isImagesRequired = false;
     var isImagesLoaded = false;
@@ -19912,58 +19912,58 @@
       isVideoRequired = true;
       videoPreloader.addEventListener('videoLoaded', function () {
         isVideoLoaded = true;
-        console.log('ThreeRendererBase::videoLoaded() **** Kick off is assets loaded', isLoadingChecked);
-        console.log('ThreeRendererBase::videoLoaded() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
-        console.log('ThreeRendererBase::videoLoaded() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
+        // console.log('ThreeRendererBase::videoLoaded() **** Kick off is assets loaded', isLoadingChecked);
+        // console.log('ThreeRendererBase::videoLoaded() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+        // console.log('ThreeRendererBase::videoLoaded() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
         if (!isLoadingChecked && (isImagesRequired && isImagesLoaded || !isImagesRequired)) {
-          console.log('*** CHECK LOADED vid');
+          // console.log('*** CHECK LOADED vid');
           isLoadingChecked = true;
           _this.globalData.isAssetsLoaded = true;
           animationItem.checkLoaded();
         }
       });
     }
-    console.log('ThreeRendererBase::Image Preloader total:', imagePreloader.totalImages, 'loaded', imagePreloader.loadedImages());
-    console.log('ThreeRendererBase::Assets images found:', imagesFound, 'videos found:', videosFound);
+    // console.log('ThreeRendererBase::Image Preloader total:', imagePreloader.totalImages, 'loaded', imagePreloader.loadedImages());
+    // console.log('ThreeRendererBase::Assets images found:', imagesFound, 'videos found:', videosFound);
     // if (!isVideoPreloading) {
     //   console.log('ThreeRendererBase::videoLoaded() Kick off is assets loaded - no videos');
     //   this.globalData.isAssetsLoaded = true;
     //   this.animationItem.checkLoaded();
     // }
-    var isImagePreloader = false;
     if (imagePreloader && imagesFound) {
-      isImagePreloader = true;
       isImagesRequired = true;
-      console.log('Images preloader && imagesFound', isImagePreloader, imagesFound);
     }
-    imagePreloader.onStart = function (url, itemsLoaded, itemsTotal) {
-      console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-      console.log('Three::onStart::', _this);
+    imagePreloader.onStart = function () {
+      // console.log('Three::Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+      // console.log('Three::onStart::', this);
       isLoadingChecked = false;
     };
     imagePreloader.onLoad = function () {
-      console.log('Three::Loading Complete! isLoadingChecked:', isLoadingChecked);
-      console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
-      console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
+      // console.log('Three::Loading Complete! isLoadingChecked:', isLoadingChecked);
+      // console.log('Three::onLoad() isVideoRequired', isVideoRequired, 'isVideoLoaded', isVideoLoaded);
+      // console.log('Three::onLoad() isImagesRequired', isImagesRequired, 'isImagesLoaded', isImagesLoaded);
       isImagesLoaded = true;
       // this.globalData.isAssetsLoaded = true;
       // this.animationItem.checkLoaded();
-      console.log('Three::onLoad() isImagePreloader', isImagePreloader, 'isLoadingChecked', isLoadingChecked);
-      console.log('Three::onLoad', three.DefaultLoadingManager);
+      // console.log('Three::onLoad() isImagePreloader', isImagePreloader, 'isLoadingChecked', isLoadingChecked);
+      // console.log('Three::onLoad', DefaultLoadingManager);
       if (!isLoadingChecked && (isVideoRequired && isVideoLoaded || !isVideoRequired)) {
-        console.log('*** CHECK LOADED');
+        // console.log('*** CHECK LOADED');
         isLoadingChecked = true;
         _this.globalData.isAssetsLoaded = true;
         animationItem.checkLoaded();
       }
     };
-    imagePreloader.onProgress = function (url, itemsLoaded, itemsTotal) {
-      console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-    };
-    imagePreloader.onError = function (url) {
-      console.log('Three::There was an error loading ' + url, _arguments);
-    };
+
+    // imagePreloader.onProgress = (url, itemsLoaded, itemsTotal) => {
+    //   // console.log('Three::Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+    // };
+    //
+    // imagePreloader.onError = (url) => {
+    //   console.log('Three::There was an error loading ' + url, arguments);
+    // };
   };
+
   ThreeRendererBase.prototype.updateContainerSize = function () {
     // console.log('updateContainerSize()', this.globalData, this.animationItem);
     if (!this.globalData.compSize || !this.resizerElem) {
@@ -20033,7 +20033,7 @@
   ThreeRendererBase.prototype.videosLoaded = function () {
     // this.trigger('loaded_images');
     // this.checkLoaded();
-    console.log('ThreeRendererBase::Videos loaded!!');
+    // console.log('ThreeRendererBase::Videos loaded!!');
   };
   ThreeRendererBase.prototype.initItems = function () {
     // console.log('ThreeRendererBase::initItems!!', this);
