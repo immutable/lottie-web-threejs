@@ -13142,9 +13142,36 @@
     if (this.globalData) {
       var cameraManager = this.globalData.cameraManager;
       if (cameraManager && cameraManager.isTracking(this)) {
-        cameraManager.updateCameraAspect(window.innerWidth / window.innerHeight);
+        // 1. Define the min and max dimensions
+        var viewportWidth = this.globalData.renderConfig.renderer.viewport.width || window.innerWidth;
+        var viewportHeight = this.globalData.renderConfig.renderer.viewport.height || window.innerHeight;
+        var MIN_WIDTH = this.globalData.renderConfig.renderer.viewport.minWidth || viewportWidth;
+        var MAX_WIDTH = this.globalData.renderConfig.renderer.viewport.maxWidth || viewportWidth;
+        var MIN_HEIGHT = this.globalData.renderConfig.renderer.viewport.minHeight || viewportHeight;
+        var MAX_HEIGHT = this.globalData.renderConfig.renderer.viewport.maxHeight || viewportHeight;
+
+        // Apply bounds
+        viewportWidth = Math.max(MIN_WIDTH, Math.min(viewportWidth, MAX_WIDTH));
+        viewportHeight = Math.max(MIN_HEIGHT, Math.min(viewportHeight, MAX_HEIGHT));
+        var aspectRatio = viewportWidth / viewportHeight;
+        if (viewportWidth / aspectRatio > MAX_HEIGHT) {
+          viewportWidth = MAX_HEIGHT * aspectRatio;
+        } else if (viewportWidth / aspectRatio > MAX_WIDTH) {
+          viewportHeight = MAX_WIDTH / aspectRatio;
+        }
+
+        // Adjust bounds based on desired aspect ratio adjustments
+        if (viewportHeight < MIN_HEIGHT) {
+          viewportHeight = MIN_HEIGHT;
+          viewportWidth = viewportHeight * aspectRatio;
+        }
+        if (viewportWidth < MIN_WIDTH) {
+          viewportWidth = MIN_WIDTH;
+          viewportHeight = viewportWidth * aspectRatio;
+        }
+        cameraManager.updateCameraAspect(aspectRatio);
         var renderer = this.globalData.renderConfig.renderer.renderer;
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(viewportWidth, viewportHeight);
 
         // Reset previous transform matrix
         if (this._prevMat) {
@@ -13954,7 +13981,6 @@
     var isVideoRequired = false;
     var isVideoLoaded = false;
     animationItem.animationData.assets.forEach(function (asset) {
-      console.log('Test asset', asset);
       if (videoPreloader.isValid(asset.p)) {
         videosFound += 1;
       }
@@ -13962,7 +13988,8 @@
         imagesFound += 1;
       }
     });
-    console.log('Assets found', videosFound, imagesFound, 'found video loader', videoPreloader);
+
+    // console.log('Assets found', videosFound, imagesFound, 'found video loader', videoPreloader);
     // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
     // Otherwise hook into the video preloader events
     if (videoPreloader && videosFound > 0) {

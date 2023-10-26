@@ -451,7 +451,6 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
   let isVideoRequired = false;
   let isVideoLoaded = false;
   animationItem.animationData.assets.forEach((asset) => {
-    console.log('Test asset', asset);
     if (videoPreloader.isValid(asset.p)) {
       videosFound += 1;
     }
@@ -460,7 +459,7 @@ ThreeRendererBase.prototype.initPreloader = function (animationItem) {
     }
   });
 
-  console.log('Assets found', videosFound, imagesFound, 'found video loader', videoPreloader);
+  // console.log('Assets found', videosFound, imagesFound, 'found video loader', videoPreloader);
   // TODO: check videoPreloader.totalVideos matches the number of videos in the assets / AnimationItem
   // Otherwise hook into the video preloader events
   if (videoPreloader && videosFound > 0) {

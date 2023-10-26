@@ -480,11 +480,11 @@
 
      var initPack = false;
      var theta;
-    var windowW, windowH, dist;
-    var mouseCoords = {
-         x:0,
-         y:0
-    }
+     var windowW, windowH, dist;
+     var mouseCoords = {
+       x:0,
+       y:0
+     }
 
      function initThree(options) {
           const three = {
@@ -497,6 +497,10 @@
                interaction: true,
                debug: true,
                scale: options.scale,
+               viewport: {
+                 width: options.viewportWidth || window.innerWidth,
+                 height: options.viewportHeight || window.innerHeight
+               }
           };
 
           three.camera.fov = 25;
@@ -593,8 +597,8 @@
      }
 
     function calculateSize(){
-         windowW = window.innerWidth;
-         windowH = window.innerHeight;
+         windowW = threeData.viewport.width || window.innerWidth;
+         windowH = threeData.viewport.height || window.innerHeight;
     }
 
     calculateSize();
@@ -780,6 +784,13 @@
               //
               // });
          }
+    });
+
+    window.addEventListener('resize', () => {
+      calculateSize();
+      threeData.viewport.width = window.innerWidth;
+      threeData.viewport.height = window.innerHeight;
+      console.log('resize viewport', threeData.viewport);
     });
 
     window.addEventListener('mousemove', function(ev){
