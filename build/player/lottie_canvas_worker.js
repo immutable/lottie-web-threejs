@@ -19102,10 +19102,10 @@
         }
 
         // Adjust bounds based on desired aspect ratio adjustments
-        if (viewportHeight < MIN_HEIGHT) {
+        if (viewportHeight <= MIN_HEIGHT) {
           viewportHeight = MIN_HEIGHT;
           viewportWidth = viewportHeight * aspectRatio;
-        } else if (viewportWidth < MIN_WIDTH) {
+        } else if (viewportWidth <= MIN_WIDTH) {
           viewportWidth = MIN_WIDTH;
           viewportHeight = viewportWidth / aspectRatio;
         }
