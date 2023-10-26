@@ -113,7 +113,7 @@ THRCameraElement.prototype.refresh = function () {
 
       if (viewportWidth < MIN_WIDTH) {
         viewportWidth = MIN_WIDTH;
-        viewportHeight = viewportWidth * aspectRatio;
+        viewportHeight = viewportWidth / aspectRatio;
       }
 
       cameraManager.updateCameraAspect(aspectRatio);

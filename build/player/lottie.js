@@ -18812,7 +18812,7 @@
         }
         if (viewportWidth < MIN_WIDTH) {
           viewportWidth = MIN_WIDTH;
-          viewportHeight = viewportWidth * aspectRatio;
+          viewportHeight = viewportWidth / aspectRatio;
         }
         cameraManager.updateCameraAspect(aspectRatio);
         var renderer = this.globalData.renderConfig.renderer.renderer;
