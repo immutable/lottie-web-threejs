@@ -19105,8 +19105,7 @@
         if (viewportHeight < MIN_HEIGHT) {
           viewportHeight = MIN_HEIGHT;
           viewportWidth = viewportHeight * aspectRatio;
-        }
-        if (viewportWidth < MIN_WIDTH) {
+        } else if (viewportWidth < MIN_WIDTH) {
           viewportWidth = MIN_WIDTH;
           viewportHeight = viewportWidth / aspectRatio;
         }
